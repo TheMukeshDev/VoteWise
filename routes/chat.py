@@ -1,10 +1,15 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, current_app
 from utils.response_helper import format_chat_response
 from config import Config
 from google import genai
 import json
+import time
+from functools import wraps
 
 chat_bp = Blueprint("chat", __name__)
+
+# Rate limiting storage (simple in-memory for demo)
+rate_limit_store = {}
 
 # Initialize Gemini client
 try:
@@ -18,71 +23,196 @@ except Exception as e:
     client = None
 
 
+def rate_limit(max_requests=30, window_seconds=60):
+    """Simple rate limiting decorator"""
+
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            # Get client IP
+            ip = request.remote_addr or "unknown"
+            current_time = time.time()
+
+            # Clean old entries
+            if ip in rate_limit_store:
+                rate_limit_store[ip] = [
+                    t for t in rate_limit_store[ip] if current_time - t < window_seconds
+                ]
+            else:
+                rate_limit_store[ip] = []
+
+            # Check limit
+            if len(rate_limit_store[ip]) >= max_requests:
+                return jsonify(
+                    {
+                        "success": False,
+                        "error": "Too many requests. Please try again later.",
+                        "code": "RATE_LIMITED",
+                    }
+                ), 429
+
+            # Add this request
+            rate_limit_store[ip].append(current_time)
+            return f(*args, **kwargs)
+
+        return decorated_function
+
+    return decorator
+
+
 @chat_bp.route("/chat", methods=["POST"])
+@rate_limit(max_requests=30, window_seconds=60)
 def chat():
-    data = request.json or {}
-    message = data.get("message", "")
-    user_prefs = data.get("user_prefs", {})
+    """AI Chat endpoint with rate limiting"""
+    try:
+        data = request.json or {}
+        message = data.get("message", "")
+        user_prefs = data.get("user_prefs", {})
 
-    if not message:
-        return jsonify({"error": "Message is required"}), 400
+        # Validate input
+        if not message:
+            return jsonify({"success": False, "error": "Message is required"}), 400
 
-    if client:
-        try:
-            prompt = f"""
-You are VoteWise AI, a neutral, helpful civic assistant. 
-Explain the following query about the election process.
-You MUST respond strictly in the following JSON format:
-{{
-  "intro": "A short introductory explanation",
-  "steps": ["Step 1 description", "Step 2 description", ...],
-  "tips": ["Useful tip 1", "Useful tip 2", ...],
-  "actions": ["Find polling booth", "Set reminder", "Show official link"]
-}}
-Do NOT include any markdown code blocks, just the raw JSON string.
+        if len(message) > 1000:
+            return jsonify(
+                {
+                    "success": False,
+                    "error": "Message too long. Maximum 1000 characters.",
+                }
+            ), 400
 
-User Query: {message}
-User Preferences: {user_prefs}
-            """
-            response = client.models.generate_content(
-                model="gemini-2.5-flash",
-                contents=prompt,
-            )
-            # Parse the JSON response
+        # Generate AI response
+        if client:
             try:
-                response_data = json.loads(response.text)
-                formatted_response = format_chat_response(
-                    intro=response_data.get("intro", "Here is what you need to know."),
-                    steps=response_data.get("steps", []),
-                    tips=response_data.get("tips", []),
-                    actions=response_data.get("actions", []),
-                )
-            except json.JSONDecodeError:
-                # Fallback if LLM didn't return perfect JSON
-                formatted_response = format_chat_response(
-                    intro=response.text,
-                    steps=["Please rephrase for a more structured answer."],
-                    actions=["Ask again"],
-                )
-        except Exception as e:
-            formatted_response = format_chat_response(
-                intro="I'm having trouble connecting to my AI brain right now.",
-                steps=[],
-                tips=[f"Error: {str(e)}"],
-                actions=[],
-            )
-    else:
-        # Mock structured response
-        formatted_response = format_chat_response(
-            intro="Here is a basic overview of the election process.",
-            steps=[
-                "Register to vote.",
-                "Verify your name on the list.",
-                "Go to the polling booth on election day.",
-                "Cast your vote.",
-            ],
-            tips=["Make sure you carry a valid ID."],
-            actions=["Find polling booth", "Set reminder"],
-        )
+                prompt = f"""
+You are VoteWise AI, a neutral, helpful civic assistant for election education.
+Keep responses brief, friendly, and informative. 
 
-    return jsonify(formatted_response)
+Respond in this JSON format only:
+{{"intro": "Brief intro", "steps": ["step1", "step2"], "tips": ["tip1"], "actions": ["action1"]}}
+
+User: {message}
+Context: {user_prefs}
+"""
+                response = client.models.generate_content(
+                    model="gemini-2.0-flash",
+                    contents=prompt,
+                )
+
+                # Parse response
+                try:
+                    response_data = json.loads(response.text)
+                    result = {
+                        "success": True,
+                        "intro": response_data.get(
+                            "intro", "Here's what you need to know."
+                        ),
+                        "steps": response_data.get("steps", []),
+                        "tips": response_data.get("tips", []),
+                        "actions": response_data.get("actions", []),
+                    }
+                except:
+                    # Fallback
+                    result = {
+                        "success": True,
+                        "intro": response.text[:200]
+                        if response.text
+                        else "I'm here to help!",
+                        "steps": [
+                            "Visit the Election Commission website for more details"
+                        ],
+                        "tips": ["Always verify information from official sources"],
+                        "actions": [],
+                    }
+            except Exception as e:
+                current_app.logger.error(f"AI Error: {e}")
+                result = {
+                    "success": True,
+                    "intro": "I'm here to help with your election questions!",
+                    "steps": [
+                        "Visit the Election Commission website",
+                        "Check your voter ID status",
+                        "Locate your polling booth",
+                    ],
+                    "tips": ["Always verify from official sources"],
+                    "actions": [],
+                }
+        else:
+            # Fallback responses when no API
+            result = _get_fallback_response(message)
+
+        return jsonify(result), 200
+
+    except Exception as e:
+        current_app.logger.error(f"Chat error: {e}")
+        return jsonify(
+            {"success": False, "error": "Something went wrong. Please try again."}
+        ), 500
+
+
+def _get_fallback_response(message):
+    """Fallback responses for demo"""
+    message = message.lower()
+
+    responses = {
+        "register": {
+            "intro": "To register as a voter:",
+            "steps": [
+                "Visit the Election Commission website",
+                "Fill the online form with your details",
+                "Submit ID and address proof",
+                "Get your voter ID (EPIC)",
+            ],
+            "tips": ["Register at least 30 days before elections"],
+            "actions": ["Learn more about registration"],
+        },
+        "document": {
+            "intro": "Accepted ID documents:",
+            "steps": [
+                "Voter ID (EPIC) - Recommended",
+                "Aadhaar Card",
+                "Passport",
+                "Driving License",
+            ],
+            "tips": ["Carry any one photo ID to the polling station"],
+            "actions": ["View full document list"],
+        },
+        "booth": {
+            "intro": "Find your polling booth:",
+            "steps": [
+                "Check your voter slip",
+                "Visit Election Commission website",
+                "Enter your EPIC number or name",
+                "Note the location and directions",
+            ],
+            "tips": ["Visit a day before to familiarize yourself"],
+            "actions": ["Find my polling booth"],
+        },
+        "default": {
+            "intro": "I'm here to help with election education!",
+            "steps": [
+                "Learn about voter registration",
+                "Find your polling booth",
+                "Understand required documents",
+                "Track election timeline",
+            ],
+            "tips": ["Always verify from official sources"],
+            "actions": ["Ask me about registration", "Ask about documents"],
+        },
+    }
+
+    for key, resp in responses.items():
+        if key in message:
+            resp["success"] = True
+            return resp
+
+    responses["default"]["success"] = True
+    return responses["default"]
+
+
+@chat_bp.route("/health", methods=["GET"])
+def health():
+    """Health check for chat service"""
+    return jsonify(
+        {"status": "healthy", "ai_available": client is not None, "rate_limited": False}
+    ), 200
