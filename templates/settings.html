@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - VoteWise AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+                            800: '#3730a3', 900: '#312e81', 950: '#1e1b4b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #020617; }
+    </style>
+</head>
+<body class="text-slate-100 antialiased min-h-screen p-6 lg:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- Back -->
+        <a href="/dashboard" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors group">
+            <i class="fa-solid fa-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
+            <span class="text-sm">Back to Dashboard</span>
+        </a>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Sidebar -->
+            <div class="lg:col-span-1">
+                <div class="glass-card rounded-2xl p-3 space-y-1">
+                    <a href="/dashboard" class="sidebar-nav-item">
+                        <i class="fa-solid fa-house nav-icon"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="/profile" class="sidebar-nav-item">
+                        <i class="fa-solid fa-user nav-icon"></i>
+                        <span>Profile</span>
+                    </a>
+                    <a href="/settings" class="sidebar-nav-item active">
+                        <i class="fa-solid fa-gear nav-icon text-brand-400"></i>
+                        <span>Settings</span>
+                    </a>
+                    <button onclick="logout()" class="sidebar-nav-item w-full text-left text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                        <i class="fa-solid fa-arrow-right-from-bracket nav-icon"></i>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Settings -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Language -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-globe text-brand-400"></i>
+                        Language & Region
+                    </h3>
+                    <div class="space-y-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <p class="text-white font-medium">Interface Language</p>
+                                <p class="text-slate-400 text-sm">Change the language for the entire platform</p>
+                            </div>
+                            <select id="language" class="input w-full sm:w-40">
+                                <option value="en">English</option>
+                                <option value="hi">Hindi</option>
+                                <option value="ta">Tamil</option>
+                                <option value="te">Telugu</option>
+                                <option value="kn">Kannada</option>
+                                <option value="mr">Marathi</option>
+                                <option value="bn">Bengali</option>
+                            </select>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <p class="text-white font-medium">State/Constituency</p>
+                                <p class="text-slate-400 text-sm">Set your electoral constituency</p>
+                            </div>
+                            <select class="input w-full sm:w-40">
+                                <option>Delhi</option>
+                                <option>Maharashtra</option>
+                                <option>Karnataka</option>
+                                <option>Tamil Nadu</option>
+                                <option>West Bengal</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-bell text-amber-400"></i>
+                        Notifications
+                    </h3>
+                    <div class="space-y-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <p class="text-white font-medium">Email Reminders</p>
+                                <p class="text-slate-400 text-sm">Receive email for important dates</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <p class="text-white font-medium">Announcements</p>
+                                <p class="text-slate-400 text-sm">Updates from election commission</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <p class="text-white font-medium">AI Suggestions</p>
+                                <p class="text-slate-400 text-sm">Helpful tips from VoteWise AI</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Privacy -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-6 flex items-center gap-2">
+                        <i class="fa-solid fa-shield-halved text-emerald-400"></i>
+                        Privacy & Data
+                    </h3>
+                    <div class="space-y-5">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div>
+                                <p class="text-white font-medium">Activity History</p>
+                                <p class="text-slate-400 text-sm">Save your chat and search history</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-brand-500"></div>
+                            </label>
+                        </div>
+                        <div class="pt-5 border-t border-white/[0.06]">
+                            <button class="btn btn-ghost text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                                <i class="fa-solid fa-trash mr-2"></i>
+                                Clear All Data
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Save Button -->
+                <button class="btn btn-primary w-full">
+                    <i class="fa-solid fa-check mr-2"></i>
+                    Save Changes
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {{ firebase_config | tojson }};
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = '/';
+            });
+        }
+    </script>
+</body>
+</html>

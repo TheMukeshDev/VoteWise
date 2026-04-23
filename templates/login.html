@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - VoteWise AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+                            800: '#3730a3', 900: '#312e81', 950: '#1e1b4b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #020617; }
+    </style>
+</head>
+<body class="text-slate-100 antialiased min-h-screen flex items-center justify-center p-4">
+
+    <!-- Background Glow -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute w-[500px] h-[500px] bg-brand-500/10 rounded-full blur-[150px] -top-40 -right-40"></div>
+        <div class="absolute w-[400px] h-[400px] bg-purple-500/10 rounded-full blur-[120px] -bottom-40 -left-40"></div>
+    </div>
+
+    <div class="w-full max-w-md relative">
+        <!-- Back to Home -->
+        <a href="/" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors group">
+            <i class="fa-solid fa-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
+            <span class="text-sm">Back to Home</span>
+        </a>
+
+        <!-- Logo -->
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/25">
+                <i class="fa-solid fa-bolt text-white text-xl"></i>
+            </div>
+            <span class="text-2xl font-bold">VoteWise<span class="text-brand-400">AI</span></span>
+        </div>
+
+        <!-- Login Card -->
+        <div class="glass-card rounded-2xl p-8">
+            <div class="mb-8">
+                <h1 class="text-2xl font-bold text-white mb-2">Welcome back</h1>
+                <p class="text-slate-400 text-sm">Sign in to access your voter dashboard</p>
+            </div>
+
+            <!-- Email/Password Form -->
+            <form id="login-form" class="space-y-5">
+                <div class="input-group">
+                    <label class="input-label">Email</label>
+                    <input type="email" id="email" required class="input" placeholder="you@example.com">
+                </div>
+                <div class="input-group">
+                    <label class="input-label">Password</label>
+                    <input type="password" id="password" required class="input" placeholder="Enter your password">
+                </div>
+                <button type="submit" id="submit-btn" class="btn btn-primary w-full">
+                    <i class="fa-solid fa-right-to-bracket"></i>
+                    Sign In
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-white/[0.06]"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-slate-950 text-slate-500">Or continue with</span>
+                </div>
+            </div>
+
+            <!-- Google Auth -->
+            <button id="google-btn" type="button" class="btn btn-secondary w-full">
+                <img src="https://www.gstatic.com/images/branding/product/2x/googleg_2024q4.svg" alt="Google" class="w-5 h-5">
+                Continue with Google
+            </button>
+
+            <!-- Error Message -->
+            <div id="error-msg" class="hidden mt-5 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm flex items-center gap-2">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span></span>
+            </div>
+        </div>
+
+        <!-- Sign Up Link -->
+        <p class="text-center text-slate-400 text-sm mt-6">
+            Don't have an account?
+            <a href="/signup" class="text-brand-400 hover:text-brand-300 font-medium transition-colors">Sign up</a>
+        </p>
+    </div>
+
+    <script>
+        const firebaseConfig = {{ firebase_config | tojson }};
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const googleProvider = new firebase.auth.GoogleAuthProvider();
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('submit-btn');
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('error-msg');
+
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i> Signing in...';
+            btn.disabled = true;
+            errorDiv.classList.add('hidden');
+
+            try {
+                await auth.signInWithEmailAndPassword(email, password);
+                window.location.href = '/dashboard';
+            } catch (error) {
+                errorDiv.querySelector('span').textContent = error.message;
+                errorDiv.classList.remove('hidden');
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> Sign In';
+                btn.disabled = false;
+            }
+        });
+
+        document.getElementById('google-btn').addEventListener('click', async () => {
+            const btn = document.getElementById('google-btn');
+            btn.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin"></i>';
+            btn.disabled = true;
+
+            try {
+                await auth.signInWithPopup(googleProvider);
+                window.location.href = '/dashboard';
+            } catch (error) {
+                document.getElementById('error-msg').querySelector('span').textContent = error.message;
+                document.getElementById('error-msg').classList.remove('hidden');
+                btn.innerHTML = '<img src="https://www.gstatic.com/images/branding/product/2x/googleg_2024q4.svg" alt="Google" class="w-5 h-5"> Continue with Google';
+                btn.disabled = false;
+            }
+        });
+    </script>
+</body>
+</html>

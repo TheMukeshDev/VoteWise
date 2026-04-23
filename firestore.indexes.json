@@ -1,0 +1,87 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "faqs",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "category",
+          "order": "ASC"
+        },
+        {
+          "fieldPath": "language",
+          "order": "ASC"
+        },
+        {
+          "fieldPath": "is_published",
+          "order": "DESC"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "timelines",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "election_type",
+          "order": "ASC"
+        },
+        {
+          "fieldPath": "region",
+          "order": "ASC"
+        },
+        {
+          "fieldPath": "polling_date",
+          "order": "ASC"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "announcements",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "is_active",
+          "order": "DESC"
+        },
+        {
+          "fieldPath": "priority",
+          "order": "DESC"
+        },
+        {
+          "fieldPath": "published_at",
+          "order": "DESC"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "election_process",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "language",
+          "order": "ASC"
+        },
+        {
+          "fieldPath": "is_active",
+          "order": "DESC"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "polling_guidance",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "region",
+          "order": "ASC"
+        },
+        {
+          "fieldPath": "is_active",
+          "order": "DESC"
+        }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

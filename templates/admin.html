@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - VoteWise AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+                            800: '#3730a3', 900: '#312e81', 950: '#1e1b4b',
+                        }
+                    },
+                    animation: {
+                        'slide-up': 'slideUp 0.4s ease-out',
+                        'fade-in': 'fadeIn 0.3s ease-out',
+                    },
+                    keyframes: {
+                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
+                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #020617; }
+    </style>
+</head>
+<body class="text-slate-100 antialiased min-h-screen flex">
+
+    <!-- ==================== PREMIUM SIDEBAR ==================== -->
+    <aside id="admin-sidebar" class="w-72 bg-gradient-to-b from-slate-900 to-slate-950 border-r border-white/[0.06] flex flex-col fixed lg:relative inset-y-0 left-0 z-20 transition-transform duration-300 -translate-x-full lg:translate-x-0">
+        <!-- Logo -->
+        <div class="p-6 border-b border-white/[0.06]">
+            <a href="/" class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/25">
+                    <i class="fa-solid fa-bolt text-white text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-lg font-bold text-white">VoteWise</span><span class="text-brand-400">AI</span>
+                    <p class="text-xs text-slate-500 mt-0.5">Admin Panel</p>
+                </div>
+            </a>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto custom-scroll">
+            <button onclick="switchAdminTab('overview')" id="admin-nav-overview" class="sidebar-nav-item active w-full">
+                <i class="fa-solid fa-chart-line nav-icon text-brand-400"></i>
+                <span>Overview</span>
+            </button>
+            <button onclick="switchAdminTab('content')" id="admin-nav-content" class="sidebar-nav-item w-full">
+                <i class="fa-solid fa-file-lines nav-icon"></i>
+                <span>Content</span>
+            </button>
+            <button onclick="switchAdminTab('timeline')" id="admin-nav-timeline" class="sidebar-nav-item w-full">
+                <i class="fa-solid fa-calendar-days nav-icon"></i>
+                <span>Timeline</span>
+            </button>
+            <button onclick="switchAdminTab('faqs')" id="admin-nav-faqs" class="sidebar-nav-item w-full">
+                <i class="fa-solid fa-circle-question nav-icon"></i>
+                <span>FAQs</span>
+            </button>
+            <button onclick="switchAdminTab('announcements')" id="admin-nav-announcements" class="sidebar-nav-item w-full">
+                <i class="fa-solid fa-bullhorn nav-icon"></i>
+                <span>Announcements</span>
+            </button>
+            <button onclick="switchAdminTab('polling')" id="admin-nav-polling" class="sidebar-nav-item w-full">
+                <i class="fa-solid fa-map-location-dot nav-icon"></i>
+                <span>Polling Guidance</span>
+            </button>
+            <button onclick="switchAdminTab('users')" id="admin-nav-users" class="sidebar-nav-item w-full">
+                <i class="fa-solid fa-users nav-icon"></i>
+                <span>Users</span>
+            </button>
+            <button onclick="switchAdminTab('analytics')" id="admin-nav-analytics" class="sidebar-nav-item w-full">
+                <i class="fa-solid fa-chart-pie nav-icon"></i>
+                <span>Analytics</span>
+            </button>
+            <button onclick="switchAdminTab('settings')" id="admin-nav-settings" class="sidebar-nav-item w-full">
+                <i class="fa-solid fa-gear nav-icon"></i>
+                <span>Settings</span>
+            </button>
+        </nav>
+
+        <!-- Bottom -->
+        <div class="p-4 border-t border-white/[0.06]">
+            <a href="/" class="sidebar-nav-item w-full">
+                <i class="fa-solid fa-arrow-left nav-icon"></i>
+                <span>Back to Site</span>
+            </a>
+        </div>
+    </aside>
+
+    <!-- Sidebar Overlay (Mobile) -->
+    <div id="admin-sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-10 hidden lg:hidden" onclick="toggleAdminSidebar()"></div>
+
+    <!-- ==================== MAIN CONTENT ==================== -->
+    <main class="flex-1 flex flex-col overflow-hidden lg:ml-0">
+        <!-- Header -->
+        <header class="h-[72px] bg-[rgba(2,6,23,0.85)] backdrop-blur-xl border-b border-white/[0.06] flex items-center justify-between px-6 lg:px-8">
+            <div>
+                <h1 class="text-xl font-semibold text-white" id="admin-title">Dashboard Overview</h1>
+                <p class="text-sm text-slate-500">Platform management & statistics</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button class="w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 hover:text-white transition-colors border border-white/[0.06]">
+                    <i class="fa-solid fa-bell"></i>
+                </button>
+                <button onclick="toggleAdminSidebar()" class="lg:hidden w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 border border-white/[0.06]">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+        </header>
+
+        <div class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-8 space-y-6">
+            <!-- ==================== OVERVIEW PANEL ==================== -->
+            <div id="admin-overview" class="admin-panel space-y-6 animate-fade-in">
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="glass-card p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm font-medium text-slate-400">Total Users</span>
+                            <div class="w-11 h-11 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center">
+                                <i class="fa-solid fa-users"></i>
+                            </div>
+                        </div>
+                        <div class="text-3xl font-bold text-white mb-1">12,847</div>
+                        <div class="flex items-center gap-1 text-emerald-400 text-sm">
+                            <i class="fa-solid fa-arrow-up text-xs"></i>
+                            <span>+12% from last month</span>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm font-medium text-slate-400">AI Queries</span>
+                            <div class="w-11 h-11 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                                <i class="fa-solid fa-robot"></i>
+                            </div>
+                        </div>
+                        <div class="text-3xl font-bold text-white mb-1">45,231</div>
+                        <div class="flex items-center gap-1 text-emerald-400 text-sm">
+                            <i class="fa-solid fa-arrow-up text-xs"></i>
+                            <span>+8% from last month</span>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm font-medium text-slate-400">Reminders Set</span>
+                            <div class="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                                <i class="fa-solid fa-bell"></i>
+                            </div>
+                        </div>
+                        <div class="text-3xl font-bold text-white mb-1">8,392</div>
+                        <div class="flex items-center gap-1 text-emerald-400 text-sm">
+                            <i class="fa-solid fa-arrow-up text-xs"></i>
+                            <span>+24% from last month</span>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="text-sm font-medium text-slate-400">Avg Session</span>
+                            <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                                <i class="fa-solid fa-clock"></i>
+                            </div>
+                        </div>
+                        <div class="text-3xl font-bold text-white mb-1">4.2 min</div>
+                        <div class="text-slate-500 text-sm">Per user session</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <div class="glass-card p-6">
+                        <h3 class="text-lg font-semibold text-white mb-6">Daily User Activity</h3>
+                        <canvas id="activityChart" height="200"></canvas>
+                    </div>
+                    <div class="glass-card p-6">
+                        <h3 class="text-lg font-semibold text-white mb-6">Query Categories</h3>
+                        <canvas id="queryChart" height="200"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== CONTENT PANEL ==================== -->
+            <div id="admin-content" class="admin-panel hidden space-y-6 animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-white">Election Guides</h3>
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-plus"></i>
+                        Add Guide
+                    </button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Last Updated</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-white font-medium">How to Register to Vote</td>
+                                <td>Registration</td>
+                                <td><span class="badge badge-success">Published</span></td>
+                                <td>Jan 15, 2026</td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                            <i class="fa-solid fa-edit text-sm"></i>
+                                        </button>
+                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                            <i class="fa-solid fa-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-white font-medium">Documents Required for Voting</td>
+                                <td>Documents</td>
+                                <td><span class="badge badge-success">Published</span></td>
+                                <td>Jan 20, 2026</td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                            <i class="fa-solid fa-edit text-sm"></i>
+                                        </button>
+                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                            <i class="fa-solid fa-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="text-white font-medium">Polling Booth Locator Guide</td>
+                                <td>Polling</td>
+                                <td><span class="badge badge-success">Published</span></td>
+                                <td>Feb 1, 2026</td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                            <i class="fa-solid fa-edit text-sm"></i>
+                                        </button>
+                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                            <i class="fa-solid fa-trash text-sm"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ==================== FAQs PANEL ==================== -->
+            <div id="admin-faqs" class="admin-panel hidden space-y-6 animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-white">Frequently Asked Questions</h3>
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-plus"></i>
+                        Add FAQ
+                    </button>
+                </div>
+                <div class="glass-card p-6 space-y-4">
+                    <div class="flex items-start gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
+                        <div class="flex-1">
+                            <p class="text-white font-medium mb-1">Who is eligible to vote?</p>
+                            <p class="text-slate-400 text-sm">Any citizen aged 18 years or above is eligible to vote.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                <i class="fa-solid fa-edit text-sm"></i>
+                            </button>
+                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                <i class="fa-solid fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
+                        <div class="flex-1">
+                            <p class="text-white font-medium mb-1">What ID proofs are accepted?</p>
+                            <p class="text-slate-400 text-sm">Voter ID, Aadhar card, Passport, Driving License, etc.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                <i class="fa-solid fa-edit text-sm"></i>
+                            </button>
+                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                <i class="fa-solid fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="flex items-start gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
+                        <div class="flex-1">
+                            <p class="text-white font-medium mb-1">How do I check my voter status?</p>
+                            <p class="text-slate-400 text-sm">Use the voter status checker in your dashboard.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                <i class="fa-solid fa-edit text-sm"></i>
+                            </button>
+                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                <i class="fa-solid fa-trash text-sm"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== TIMELINE PANEL ==================== -->
+            <div id="admin-timeline" class="admin-panel hidden space-y-6 animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-white">Election Timeline</h3>
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-plus"></i>
+                        Add Event
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div class="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-5">
+                            <div class="w-16 h-16 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-sm border border-brand-500/30 flex-shrink-0">
+                                <div class="text-center">
+                                    <div class="text-xs uppercase tracking-wider">Mar</div>
+                                    <div class="text-lg">15</div>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-white font-semibold">Voter Registration Deadline</p>
+                                <p class="text-slate-400 text-sm">Final date to register for upcoming elections</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-5">
+                            <div class="w-16 h-16 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/30 flex-shrink-0">
+                                <div class="text-center">
+                                    <div class="text-xs uppercase tracking-wider">Apr</div>
+                                    <div class="text-lg">20</div>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-white font-semibold">Voting Day</p>
+                                <p class="text-slate-400 text-sm">Main election day - Cast your vote</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-5">
+                            <div class="w-16 h-16 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/30 flex-shrink-0">
+                                <div class="text-center">
+                                    <div class="text-xs uppercase tracking-wider">May</div>
+                                    <div class="text-lg">02</div>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-white font-semibold">Results Declaration</p>
+                                <p class="text-slate-400 text-sm">Official results will be announced</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                <i class="fa-solid fa-edit"></i>
+                            </button>
+                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== ANNOUNCEMENTS PANEL ==================== -->
+            <div id="admin-announcements" class="admin-panel hidden space-y-6 animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-white">Announcements</h3>
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-plus"></i>
+                        New Announcement
+                    </button>
+                </div>
+                <div class="space-y-4">
+                    <div class="glass-card p-6 border-l-4 border-brand-500">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="badge badge-primary">Active</span>
+                            <span class="text-slate-500 text-sm">Feb 24, 2026</span>
+                        </div>
+                        <h4 class="text-white font-semibold text-lg mb-2">Election Schedule Announced!</h4>
+                        <p class="text-slate-400 text-sm leading-relaxed">The election commission has announced the dates for the upcoming general elections. Make sure to check your voter registration status.</p>
+                    </div>
+                    <div class="glass-card p-6 border-l-4 border-slate-600">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="badge badge-neutral">Archived</span>
+                            <span class="text-slate-500 text-sm">Jan 10, 2026</span>
+                        </div>
+                        <h4 class="text-white font-semibold text-lg mb-2">New AI Features Released</h4>
+                        <p class="text-slate-400 text-sm leading-relaxed">We've added multilingual support and voice input capabilities to better serve all voters.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== USERS PANEL ==================== -->
+            <div id="admin-users" class="admin-panel hidden space-y-6 animate-fade-in">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <h3 class="text-xl font-semibold text-white">User Management</h3>
+                    <div class="flex items-center gap-3">
+                        <div class="input-group">
+                            <input type="text" placeholder="Search users..." class="input py-2">
+                        </div>
+                    </div>
+                </div>
+                <div class="table-wrapper">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>User</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td class="text-white font-medium">John Doe</td>
+                                <td>Voter</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td>Jan 15, 2026</td>
+                            </tr>
+                            <tr>
+                                <td class="text-white font-medium">Jane Smith</td>
+                                <td>Admin</td>
+                                <td><span class="badge badge-success">Active</span></td>
+                                <td>Dec 10, 2025</td>
+                            </tr>
+                            <tr>
+                                <td class="text-white font-medium">Raj Patel</td>
+                                <td>Voter</td>
+                                <td><span class="badge badge-warning">Pending</span></td>
+                                <td>Feb 1, 2026</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- ==================== POLLING PANEL ==================== -->
+            <div id="admin-polling" class="admin-panel hidden space-y-6 animate-fade-in">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-xl font-semibold text-white">Polling Booth Guidance</h3>
+                    <button class="btn btn-primary btn-sm">
+                        <i class="fa-solid fa-plus"></i>
+                        Add Guidance
+                    </button>
+                </div>
+                <div class="grid md:grid-cols-2 gap-5">
+                    <div class="glass-card-hover p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-white">Delhi</h4>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-5">General voting guidelines for Delhi constituency voters.</p>
+                        <div class="flex items-center gap-3">
+                            <button class="btn btn-secondary btn-sm">
+                                <i class="fa-solid fa-edit"></i>
+                                Edit
+                            </button>
+                            <button class="btn btn-ghost btn-sm text-red-400 hover:text-red-300">
+                                <i class="fa-solid fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                    <div class="glass-card-hover p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-white">Maharashtra</h4>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-5">Polling booth locations and voting procedures for Maharashtra.</p>
+                        <div class="flex items-center gap-3">
+                            <button class="btn btn-secondary btn-sm">
+                                <i class="fa-solid fa-edit"></i>
+                                Edit
+                            </button>
+                            <button class="btn btn-ghost btn-sm text-red-400 hover:text-red-300">
+                                <i class="fa-solid fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                    <div class="glass-card-hover p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-white">Karnataka</h4>
+                            <span class="badge badge-success">Active</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-5">Voting guidelines and booth information for Karnataka.</p>
+                        <div class="flex items-center gap-3">
+                            <button class="btn btn-secondary btn-sm">
+                                <i class="fa-solid fa-edit"></i>
+                                Edit
+                            </button>
+                            <button class="btn btn-ghost btn-sm text-red-400 hover:text-red-300">
+                                <i class="fa-solid fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                    <div class="glass-card-hover p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-semibold text-white">Tamil Nadu</h4>
+                            <span class="badge" style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2);">Draft</span>
+                        </div>
+                        <p class="text-slate-400 text-sm mb-5">Polling booth guidance for Tamil Nadu (under review).</p>
+                        <div class="flex items-center gap-3">
+                            <button class="btn btn-secondary btn-sm">
+                                <i class="fa-solid fa-edit"></i>
+                                Edit
+                            </button>
+                            <button class="btn btn-ghost btn-sm text-red-400 hover:text-red-300">
+                                <i class="fa-solid fa-trash"></i>
+                                Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== ANALYTICS PANEL ==================== -->
+            <div id="admin-analytics" class="admin-panel hidden space-y-6 animate-fade-in">
+                <h3 class="text-xl font-semibold text-white">Platform Analytics</h3>
+                
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
+                    <div class="glass-card p-5 text-center">
+                        <div class="text-2xl lg:text-3xl font-bold text-white mb-1">12,847</div>
+                        <div class="text-xs text-slate-500">Total Users</div>
+                    </div>
+                    <div class="glass-card p-5 text-center">
+                        <div class="text-2xl lg:text-3xl font-bold text-white mb-1">8,234</div>
+                        <div class="text-xs text-slate-500">First-Time Voters</div>
+                    </div>
+                    <div class="glass-card p-5 text-center">
+                        <div class="text-2xl lg:text-3xl font-bold text-white mb-1">45,231</div>
+                        <div class="text-xs text-slate-500">AI Queries</div>
+                    </div>
+                    <div class="glass-card p-5 text-center">
+                        <div class="text-2xl lg:text-3xl font-bold text-white mb-1">3,847</div>
+                        <div class="text-xs text-slate-500">Reminders Set</div>
+                    </div>
+                </div>
+
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <div class="glass-card p-6">
+                        <h4 class="text-lg font-semibold text-white mb-5">Top Query Topics</h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-300">Voter Registration</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-brand-500 rounded-full" style="width: 35%"></div>
+                                    </div>
+                                    <span class="text-brand-400 font-medium text-sm w-10">35%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-300">Required Documents</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-purple-500 rounded-full" style="width: 25%"></div>
+                                    </div>
+                                    <span class="text-purple-400 font-medium text-sm w-10">25%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-300">Polling Booth Location</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-emerald-500 rounded-full" style="width: 20%"></div>
+                                    </div>
+                                    <span class="text-emerald-400 font-medium text-sm w-10">20%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-300">Election Timeline</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-amber-500 rounded-full" style="width: 15%"></div>
+                                    </div>
+                                    <span class="text-amber-400 font-medium text-sm w-10">15%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <h4 class="text-lg font-semibold text-white mb-5">Language Distribution</h4>
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-300">English</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-cyan-500 rounded-full" style="width: 45%"></div>
+                                    </div>
+                                    <span class="text-cyan-400 font-medium text-sm w-10">45%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-300">Hindi</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-cyan-500 rounded-full" style="width: 40%"></div>
+                                    </div>
+                                    <span class="text-cyan-400 font-medium text-sm w-10">40%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-300">Tamil</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-cyan-500 rounded-full" style="width: 8%"></div>
+                                    </div>
+                                    <span class="text-cyan-400 font-medium text-sm w-10">8%</span>
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between">
+                                <span class="text-slate-300">Others</span>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-24 h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full bg-cyan-500 rounded-full" style="width: 7%"></div>
+                                    </div>
+                                    <span class="text-cyan-400 font-medium text-sm w-10">7%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== SETTINGS PANEL ==================== -->
+            <div id="admin-settings" class="admin-panel hidden space-y-6 animate-fade-in">
+                <h3 class="text-xl font-semibold text-white">Admin Settings</h3>
+                
+                <div class="grid lg:grid-cols-2 gap-6">
+                    <div class="glass-card p-6">
+                        <h4 class="text-lg font-semibold text-white mb-5">Profile Settings</h4>
+                        <div class="space-y-4">
+                            <div class="input-group">
+                                <label class="input-label">Admin Name</label>
+                                <input type="text" value="Jane Smith" class="input">
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Email</label>
+                                <input type="email" value="admin@votewise.ai" class="input">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card p-6">
+                        <h4 class="text-lg font-semibold text-white mb-5">Platform Settings</h4>
+                        <div class="space-y-4">
+                            <div class="input-group">
+                                <label class="input-label">Default Language</label>
+                                <select class="input">
+                                    <option>English</option>
+                                    <option>Hindi</option>
+                                </select>
+                            </div>
+                            <div class="input-group">
+                                <label class="input-label">Timezone</label>
+                                <select class="input">
+                                    <option>IST (UTC+5:30)</option>
+                                    <option>UTC</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="glass-card p-6">
+                    <h4 class="text-lg font-semibold text-white mb-5">API Integration Status</h4>
+                    <div class="grid sm:grid-cols-3 gap-4">
+                        <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                            <span class="text-slate-300">Firestore</span>
+                            <span class="badge badge-success">Connected</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                            <span class="text-slate-300">Google Maps</span>
+                            <span class="badge badge-success">Connected</span>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                            <span class="text-slate-300">Gemini AI</span>
+                            <span class="badge badge-success">Connected</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const token = localStorage.getItem('access_token');
+        const userRole = localStorage.getItem('user_role');
+        
+        if (!token || userRole !== 'admin') {
+            window.location.href = '/login';
+            throw new Error('Access denied');
+        }
+        
+        const adminTitles = {
+            'overview': 'Dashboard Overview',
+            'content': 'Content Management',
+            'timeline': 'Election Timeline',
+            'faqs': 'Manage FAQs',
+            'announcements': 'Announcements',
+            'polling': 'Polling Guidance',
+            'users': 'User Management',
+            'analytics': 'Platform Analytics',
+            'settings': 'Admin Settings'
+        };
+
+        function switchAdminTab(tabName) {
+            document.getElementById('admin-title').textContent = adminTitles[tabName];
+
+            document.querySelectorAll('[id^="admin-nav-"]').forEach(btn => {
+                if(btn.id === `admin-nav-${tabName}`) {
+                    btn.className = 'sidebar-nav-item active w-full';
+                } else {
+                    btn.className = 'sidebar-nav-item w-full';
+                }
+            });
+
+            document.querySelectorAll('.admin-panel').forEach(panel => {
+                panel.classList.add('hidden');
+            });
+            document.getElementById(`admin-${tabName}`).classList.remove('hidden');
+
+            if(tabName === 'overview') {
+                initCharts();
+            }
+
+            if (window.innerWidth < 1024) {
+                document.getElementById('admin-sidebar').classList.add('-translate-x-full');
+                document.getElementById('admin-sidebar-overlay').classList.add('hidden');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function toggleAdminSidebar() {
+            const sidebar = document.getElementById('admin-sidebar');
+            const overlay = document.getElementById('admin-sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full');
+            overlay.classList.toggle('hidden');
+            document.body.style.overflow = sidebar.classList.contains('-translate-x-full') ? '' : 'hidden';
+        }
+
+        let chartsInitialized = false;
+        function initCharts() {
+            if(chartsInitialized) return;
+            chartsInitialized = true;
+
+            new Chart(document.getElementById('activityChart'), {
+                type: 'line',
+                data: {
+                    labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+                    datasets: [{
+                        label: 'Users',
+                        data: [1200, 1900, 1500, 2200, 1800, 2800, 3200],
+                        borderColor: '#6366f1',
+                        backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } },
+                        y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#64748b' } }
+                    }
+                }
+            });
+
+            new Chart(document.getElementById('queryChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Registration', 'Documents', 'Polling', 'Timeline', 'General'],
+                    datasets: [{
+                        data: [35, 25, 20, 15, 5],
+                        backgroundColor: ['#6366f1', '#8b5cf6', '#10b981', '#f59e0b', '#6b7280']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: { legend: { position: 'bottom', labels: { color: '#94a3b8' } } }
+                }
+            });
+        }
+
+        switchAdminTab('overview');
+    </script>
+</body>
+</html>

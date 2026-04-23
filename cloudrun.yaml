@@ -1,0 +1,69 @@
+# VoteWise AI - Google Cloud Run Service Configuration
+
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: votewise-ai
+  namespace: default
+  annotations:
+    run.googleapis.com/description: "VoteWise AI - Election Education Platform"
+    run.googleapis.com/minScale: "0"
+    run.googleapis.com/maxScale: "10"
+    run.googleapis.com/cpu-throttling: "true"
+spec:
+  template:
+    metadata:
+      annotations:
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/vpc-access-connector: ""
+    spec:
+      containerConcurrency: 80
+      timeoutSeconds: 300
+      containers:
+        - image: gcr.io/PROJECT_ID/votewise-ai
+          ports:
+            - containerPort: 8080
+          env:
+            - name: PORT
+              value: "8080"
+            - name: FLASK_ENV
+              value: "production"
+            - name: FLASK_APP
+              value: "app.py"
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: votewise-secret-key
+                  key: SECRET_KEY
+            - name: FIREBASE_CREDENTIALS_PATH
+              value: "/app/firebase-credentials.json"
+            - name: GOOGLE_MAPS_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: votewise-api-keys
+                  key: GOOGLE_MAPS_API_KEY
+            - name: GEMINI_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: votewise-api-keys
+                  key: GEMINI_API_KEY
+            - name: GOOGLE_CLOUD_PROJECT
+              value: "PROJECT_ID"
+          resources:
+            limits:
+              cpu: "1000m"
+              memory: "512Mi"
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      serviceAccountName: votewise-runner

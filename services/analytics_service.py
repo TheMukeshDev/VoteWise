@@ -1,0 +1,210 @@
+"""
+Analytics Service for VoteWise AI
+
+Provides analytics tracking using Firebase Analytics.
+"""
+
+from typing import Dict, Any, Optional
+from datetime import datetime, timedelta
+import uuid
+
+
+class AnalyticsService:
+    """Firebase Analytics integration."""
+
+    def __init__(self):
+        self.measurement_id = None
+        self._init_analytics()
+
+    def _init_analytics(self):
+        """Initialize Firebase Analytics."""
+        try:
+            from firebase_analytics import analytics as firebase_analytics
+            from config import Config
+
+            if Config.FIREBASE_MEASUREMENT_ID:
+                self.measurement_id = Config.FIREBASE_MEASUREMENT_ID
+                self.client = firebase_analytics
+            else:
+                self.client = None
+        except ImportError:
+            self.client = None
+
+    def log_event(self, event_name: str, params: Optional[Dict] = None) -> bool:
+        """
+        Log custom event.
+
+        Args:
+            event_name: Event name
+            params: Event parameters
+
+        Returns:
+            True if logged
+        """
+        if self.client:
+            try:
+                self.client.log_event(event_name, params or {})
+                return True
+            except Exception:
+                pass
+
+        return self._log_to_firestore(event_name, params)
+
+    def log_page_view(self, page_name: str, user_id: Optional[str] = None) -> bool:
+        """Log page view."""
+        return self.log_event(
+            "page_view", {"page_name": page_name, "user_id": user_id or "anonymous"}
+        )
+
+    def log_feature_use(self, feature_name: str, user_id: str) -> bool:
+        """Log feature usage."""
+        return self.log_event(
+            "feature_use", {"feature_name": feature_name, "user_id": user_id}
+        )
+
+    def log_language_change(self, language: str, user_id: str) -> bool:
+        """Log language preference change."""
+        return self.log_event(
+            "language_change", {"language": language, "user_id": user_id}
+        )
+
+    def log_reminder_create(self, reminder_type: str, user_id: str) -> bool:
+        """Log reminder creation."""
+        return self.log_event(
+            "reminder_create", {"reminder_type": reminder_type, "user_id": user_id}
+        )
+
+    def log_calendar_sync(self, success: bool, user_id: str) -> bool:
+        """Log calendar sync attempt."""
+        return self.log_event("calendar_sync", {"success": success, "user_id": user_id})
+
+    def log_polling_booth_search(self, user_id: str) -> bool:
+        """Log polling booth search."""
+        return self.log_event("polling_booth_search", {"user_id": user_id})
+
+    def log_voice_input(self, success: bool, user_id: str) -> bool:
+        """Log voice input usage."""
+        return self.log_event("voice_input", {"success": success, "user_id": user_id})
+
+    def log_audio_playback(self, content_type: str, user_id: str) -> bool:
+        """Log audio playback."""
+        return self.log_event(
+            "audio_playback", {"content_type": content_type, "user_id": user_id}
+        )
+
+    def log_ai_chat(self, query: str, user_id: str) -> bool:
+        """Log AI chat interaction."""
+        return self.log_event(
+            "ai_chat", {"query_preview": query[:50], "user_id": user_id}
+        )
+
+    def log_signup(self, method: str, user_id: str) -> bool:
+        """Log user signup."""
+        return self.log_event("signup", {"method": method, "user_id": user_id})
+
+    def log_login(self, method: str, user_id: str) -> bool:
+        """Log user login."""
+        return self.log_event("login", {"method": method, "user_id": user_id})
+
+    def _log_to_firestore(self, event_name: str, params: Optional[Dict]) -> bool:
+        """Fallback logging to Firestore."""
+        try:
+            from services.data_access_layer import firestore_db
+            from datetime import datetime
+
+            doc_id = f"{event_name}_{datetime.now().timestamp()}"
+            data = {
+                "event_name": event_name,
+                "params": params or {},
+                "timestamp": datetime.now().isoformat(),
+            }
+            firestore_db.create_analytics(doc_id, data)
+            return True
+        except Exception:
+            return False
+
+    def get_user_stats(self, user_id: str) -> Dict[str, Any]:
+        """Get user statistics."""
+        return {
+            "user_id": user_id,
+            "session_count": 0,
+            "feature_usage": {},
+            "language": "en",
+        }
+
+
+class LoggingService:
+    """Cloud Logging integration."""
+
+    def __init__(self):
+        self._initialized = False
+        self._init_logging()
+
+    def _init_logging(self):
+        """Initialize Cloud Logging."""
+        try:
+            from google.cloud import logging as cloud_logging
+            import os
+            from config import Config
+
+            if Config.FIREBASE_CREDENTIALS_PATH and os.path.exists(
+                Config.FIREBASE_CREDENTIALS_PATH
+            ):
+                self.client = cloud_logging.Client()
+                self.logger = self.client.logger("votewise-ai")
+                self._initialized = True
+            else:
+                self.client = None
+                self.logger = None
+        except ImportError:
+            self.client = None
+            self.logger = None
+
+    def log_info(self, message: str, **kwargs) -> None:
+        """Log info message."""
+        if self.logger:
+            try:
+                self.logger.log({"message": message, **kwargs}, severity="INFO")
+            except Exception:
+                pass
+        print(f"INFO: {message}")
+
+    def log_warning(self, message: str, **kwargs) -> None:
+        """Log warning message."""
+        if self.logger:
+            try:
+                self.logger.log({"message": message, **kwargs}, severity="WARNING")
+            except Exception:
+                pass
+        print(f"WARNING: {message}")
+
+    def log_error(self, message: str, **kwargs) -> None:
+        """Log error message."""
+        if self.logger:
+            try:
+                self.logger.log({"message": message, **kwargs}, severity="ERROR")
+            except Exception:
+                pass
+        print(f"ERROR: {message}")
+
+    def log_http_request(
+        self, method: str, path: str, status: int, latency: float
+    ) -> None:
+        """Log HTTP request."""
+        if self.logger:
+            try:
+                self.logger.log(
+                    {
+                        "method": method,
+                        "path": path,
+                        "status": status,
+                        "latency_ms": latency * 1000,
+                    },
+                    severity="INFO",
+                )
+            except Exception:
+                pass
+
+
+analytics_service = AnalyticsService()
+logging_service = LoggingService()

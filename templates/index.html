@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VoteWise AI - Your Smart Guide to Elections</title>
+    <meta name="description" content="Premium civic-tech platform helping voters understand elections, timelines, polling booths, and reminders with AI-powered guidance.">
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+                            800: '#3730a3', 900: '#312e81', 950: '#1e1b4b',
+                        }
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                        'pulse-slow': 'pulse 3s ease-in-out infinite',
+                        'slide-up': 'slideUp 0.5s ease-out',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-15px)' },
+                        },
+                        slideUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        body { background-color: #020617; color: #f8fafc; font-family: 'Inter', sans-serif; }
+        .text-gradient { background: linear-gradient(135deg, #818cf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .glow-orb { position: absolute; border-radius: 50%; filter: blur(80px); pointer-events: none; }
+        .feature-icon { width: 56px; height: 56px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; }
+    </style>
+</head>
+<body class="antialiased overflow-x-hidden">
+
+    <!-- ==================== PREMIUM NAVBAR ==================== -->
+    <nav class="fixed top-0 left-0 right-0 z-50 h-[72px] bg-[rgba(2,6,23,0.85)] backdrop-blur-xl border-b border-white/[0.06]">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8 h-full flex items-center justify-between">
+            <!-- Logo -->
+            <a href="/" class="flex items-center gap-3 group">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/30 group-hover:scale-105 transition-transform duration-300">
+                    <i class="fa-solid fa-bolt text-white text-lg"></i>
+                </div>
+                <div>
+                    <span class="text-xl font-bold tracking-tight">VoteWise<span class="text-brand-400">AI</span></span>
+                </div>
+            </a>
+
+            <!-- Desktop Navigation -->
+            <div class="hidden lg:flex items-center gap-2">
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#how-it-works" class="nav-link">How It Works</a>
+                <a href="#faq" class="nav-link">FAQ</a>
+                <a href="#about" class="nav-link">About</a>
+            </div>
+
+            <!-- Right Actions -->
+            <div class="flex items-center gap-3">
+                <a href="/login" class="hidden lg:inline-flex btn btn-ghost btn-sm">Log In</a>
+                <a href="/dashboard" class="btn btn-primary btn-sm">
+                    <i class="fa-solid fa-rocket"></i>
+                    <span>Get Started</span>
+                </a>
+                
+                <!-- Mobile Menu Toggle -->
+                <button onclick="toggleMobileMenu()" class="lg:hidden w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-white hover:bg-white/5 transition-colors">
+                    <i class="fa-solid fa-bars text-lg"></i>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="hidden fixed inset-0 z-50 lg:hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="toggleMobileMenu()"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-72 bg-slate-950 border-l border-white/10 p-6 space-y-4 animate-slideIn">
+            <button onclick="toggleMobileMenu()" class="absolute top-4 right-4 w-10 h-10 rounded-lg flex items-center justify-center text-slate-400 hover:text-white">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="mt-12 space-y-2">
+                <a href="#features" class="block px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Features</a>
+                <a href="#how-it-works" class="block px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors">How It Works</a>
+                <a href="#faq" class="block px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors">FAQ</a>
+                <a href="#about" class="block px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors">About</a>
+            </div>
+            <div class="pt-4 border-t border-white/10 space-y-3">
+                <a href="/login" class="block w-full text-center px-4 py-3 rounded-xl text-slate-300 hover:text-white hover:bg-white/5 transition-colors">Log In</a>
+                <a href="/dashboard" class="block w-full text-center btn btn-primary">Get Started</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== HERO SECTION ==================== -->
+    <section class="relative min-h-screen pt-32 pb-20 lg:pt-44 lg:pb-32 overflow-hidden flex items-center">
+        <!-- Ambient Background -->
+        <div class="absolute inset-0 bg-gradient-to-b from-brand-950/40 via-slate-950 to-slate-950"></div>
+        <div class="glow-orb w-[600px] h-[600px] bg-brand-500/20 -top-20 -right-40"></div>
+        <div class="glow-orb w-[500px] h-[500px] bg-purple-500/15 bottom-20 -left-40"></div>
+        <div class="glow-orb w-[400px] h-[400px] bg-brand-600/10 top-1/2 left-1/2 -translate-x-1/2"></div>
+
+        <div class="relative max-w-7xl mx-auto px-6 lg:px-8 w-full">
+            <div class="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+                <!-- Left Content -->
+                <div class="max-w-2xl animate-slide-up">
+                    <!-- Premium Badge -->
+                    <div class="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-brand-500/10 border border-brand-500/20 text-brand-300 text-sm font-medium mb-8">
+                        <span class="relative flex h-2.5 w-2.5">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-brand-500"></span>
+                        </span>
+                        <span>Your Smart Guide to Elections</span>
+                    </div>
+
+                    <!-- Headline -->
+                    <h1 class="text-4xl sm:text-5xl lg:text-[3.5rem] xl:text-5xl font-extrabold tracking-tight mb-8 leading-[1.1]">
+                        Navigate Elections<br>
+                        <span class="text-gradient">With Confidence</span>
+                    </h1>
+
+                    <!-- Subheadline -->
+                    <p class="text-lg lg:text-xl text-slate-400 mb-10 max-w-lg leading-relaxed">
+                        AI-powered platform that helps you learn election processes, track timelines, find polling guidance, and get multilingual support.
+                    </p>
+
+                    <!-- CTA Buttons -->
+                    <div class="flex flex-col sm:flex-row gap-4 mb-12">
+                        <a href="/dashboard" class="btn btn-primary btn-lg">
+                            <i class="fa-solid fa-rocket"></i>
+                            Explore as Voter
+                        </a>
+                        <a href="/admin" class="btn btn-secondary btn-lg">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            Open Admin Panel
+                        </a>
+                    </div>
+
+                    <!-- Trust Indicators -->
+                    <div class="flex flex-wrap items-center gap-6 lg:gap-8">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
+                                <i class="fa-solid fa-shield-halved text-emerald-400 text-sm"></i>
+                            </div>
+                            <span class="text-sm text-slate-400">Secure & Private</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-brand-500/10 flex items-center justify-center">
+                                <i class="fa-solid fa-globe text-brand-400 text-sm"></i>
+                            </div>
+                            <span class="text-sm text-slate-400">Multi-language</span>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center">
+                                <i class="fa-solid fa-bolt text-amber-400 text-sm"></i>
+                            </div>
+                            <span class="text-sm text-slate-400">Instant Help</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Content - Dashboard Preview -->
+                <div class="relative hidden lg:flex justify-center animate-float">
+                    <div class="relative rounded-2xl p-1.5 bg-gradient-to-br from-brand-500/20 to-purple-600/20 shadow-2xl">
+                        <div class="bg-slate-900/90 rounded-xl overflow-hidden backdrop-blur-sm">
+                            <!-- Window Chrome -->
+                            <div class="flex items-center gap-2 px-4 py-3 bg-slate-800/50 border-b border-white/5">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                <div class="flex-1 flex justify-center">
+                                    <div class="w-32 h-3 bg-slate-700 rounded"></div>
+                                </div>
+                            </div>
+                            
+                            <!-- Dashboard Content -->
+                            <div class="p-5 space-y-4">
+                                <!-- Sidebar + Main -->
+                                <div class="flex gap-4">
+                                    <div class="w-16 h-40 rounded-lg bg-slate-800/80 flex flex-col gap-2 p-2">
+                                        <div class="w-full h-8 rounded bg-brand-500/20"></div>
+                                        <div class="w-full h-6 rounded bg-slate-700/50"></div>
+                                        <div class="w-full h-6 rounded bg-slate-700/50"></div>
+                                        <div class="w-full h-6 rounded bg-slate-700/50"></div>
+                                        <div class="w-full h-6 rounded bg-slate-700/50"></div>
+                                    </div>
+                                    <div class="flex-1 space-y-4">
+                                        <div class="h-12 bg-slate-800/80 rounded-lg flex items-center px-4">
+                                            <div class="w-32 h-3 bg-brand-500/40 rounded"></div>
+                                        </div>
+                                        <div class="grid grid-cols-3 gap-3">
+                                            <div class="h-16 bg-brand-500/10 rounded-lg border border-brand-500/20 flex items-center justify-center">
+                                                <i class="fa-solid fa-robot text-brand-400"></i>
+                                            </div>
+                                            <div class="h-16 bg-purple-500/10 rounded-lg border border-purple-500/20 flex items-center justify-center">
+                                                <i class="fa-solid fa-calendar-days text-purple-400"></i>
+                                            </div>
+                                            <div class="h-16 bg-emerald-500/10 rounded-lg border border-emerald-500/20 flex items-center justify-center">
+                                                <i class="fa-solid fa-map-location-dot text-emerald-400"></i>
+                                            </div>
+                                        </div>
+                                        <div class="h-24 bg-slate-800/80 rounded-lg"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Floating Notification Card -->
+                        <div class="absolute -right-6 -bottom-8 w-56 glass-card p-4 shadow-xl border border-brand-500/20">
+                            <div class="flex items-start gap-3">
+                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white flex-shrink-0">
+                                    <i class="fa-solid fa-check text-sm"></i>
+                                </div>
+                                <div>
+                                    <p class="text-white text-sm font-semibold">Registration Open!</p>
+                                    <p class="text-slate-400 text-xs mt-0.5">Deadline: Mar 15, 2026</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== STATS STRIP ==================== -->
+    <section class="py-16 border-y border-white/[0.05] bg-slate-950/50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-8 lg:gap-12">
+                <div class="text-center">
+                    <div class="text-3xl lg:text-4xl font-bold text-white mb-2">500K+</div>
+                    <div class="text-sm text-slate-500">Voters Assisted</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl lg:text-4xl font-bold text-white mb-2">50+</div>
+                    <div class="text-sm text-slate-500">Election Guides</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl lg:text-4xl font-bold text-white mb-2">10K+</div>
+                    <div class="text-sm text-slate-500">Daily Queries</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-3xl lg:text-4xl font-bold text-white mb-2">99.9%</div>
+                    <div class="text-sm text-slate-500">Uptime</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== PROBLEM / SOLUTION ==================== -->
+    <section id="about" class="py-24 lg:py-32">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">Making Elections Accessible</h2>
+                <p class="text-slate-400 text-lg">We bridge the gap between complex election processes and everyday voters with intelligent guidance.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-2 gap-6 lg:gap-8">
+                <!-- Challenge Card -->
+                <div class="glass-card rounded-2xl p-8 border-red-500/10">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="feature-icon bg-red-500/10 text-red-400">
+                            <i class="fa-solid fa-triangle-exclamation"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">The Challenge</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3 text-slate-300">
+                            <i class="fa-solid fa-xmark text-red-400 mt-1 flex-shrink-0"></i>
+                            <span>Voters struggle to understand registration processes</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-slate-300">
+                            <i class="fa-solid fa-xmark text-red-400 mt-1 flex-shrink-0"></i>
+                            <span>Polling booth locations are hard to find</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-slate-300">
+                            <i class="fa-solid fa-xmark text-red-400 mt-1 flex-shrink-0"></i>
+                            <span>Important election deadlines get missed</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-slate-300">
+                            <i class="fa-solid fa-xmark text-red-400 mt-1 flex-shrink-0"></i>
+                            <span>First-time voters feel lost and confused</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Solution Card -->
+                <div class="glass-card rounded-2xl p-8 border-emerald-500/10">
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="feature-icon bg-emerald-500/10 text-emerald-400">
+                            <i class="fa-solid fa-lightbulb"></i>
+                        </div>
+                        <h3 class="text-xl font-bold text-white">Our Solution</h3>
+                    </div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start gap-3 text-slate-300">
+                            <i class="fa-solid fa-check text-emerald-400 mt-1 flex-shrink-0"></i>
+                            <span>AI explains election process in simple language</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-slate-300">
+                            <i class="fa-solid fa-check text-emerald-400 mt-1 flex-shrink-0"></i>
+                            <span>Google Maps integration for polling locations</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-slate-300">
+                            <i class="fa-solid fa-check text-emerald-400 mt-1 flex-shrink-0"></i>
+                            <span>Smart reminders sync to your calendar</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-slate-300">
+                            <i class="fa-solid fa-check text-emerald-400 mt-1 flex-shrink-0"></i>
+                            <span>Step-by-step guidance for first-time voters</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FEATURES SECTION ==================== -->
+    <section id="features" class="py-24 lg:py-32 bg-slate-950/50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">Platform Features</h2>
+                <p class="text-slate-400 text-lg">Everything you need to navigate the election process with confidence.</p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div class="glass-card-hover p-6 lg:p-8">
+                    <div class="feature-icon bg-brand-500/10 text-brand-400 mb-5">
+                        <i class="fa-solid fa-robot"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-3">AI Election Assistant</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Ask any question about elections and get instant, clear answers powered by Google Gemini AI.</p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-card-hover p-6 lg:p-8">
+                    <div class="feature-icon bg-purple-500/10 text-purple-400 mb-5">
+                        <i class="fa-solid fa-calendar-days"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-3">Timeline & Reminders</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">View important dates and sync events directly to your Google Calendar.</p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-card-hover p-6 lg:p-8">
+                    <div class="feature-icon bg-emerald-500/10 text-emerald-400 mb-5">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-3">Polling Booth Finder</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Locate your nearest polling booth with Google Maps integration.</p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="glass-card-hover p-6 lg:p-8">
+                    <div class="feature-icon bg-amber-500/10 text-amber-400 mb-5">
+                        <i class="fa-solid fa-user-plus"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-3">First-Time Voter Help</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Step-by-step guidance tailored specifically for new voters.</p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="glass-card-hover p-6 lg:p-8">
+                    <div class="feature-icon bg-cyan-500/10 text-cyan-400 mb-5">
+                        <i class="fa-solid fa-globe"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-3">Multilingual Support</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Get help in Hindi, English, and other regional languages.</p>
+                </div>
+
+                <!-- Feature 6 -->
+                <div class="glass-card-hover p-6 lg:p-8">
+                    <div class="feature-icon bg-rose-500/10 text-rose-400 mb-5">
+                        <i class="fa-solid fa-bell"></i>
+                    </div>
+                    <h3 class="text-lg font-semibold text-white mb-3">Smart Notifications</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">Receive reminders for registration deadlines and election day.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== HOW IT WORKS ==================== -->
+    <section id="how-it-works" class="py-24 lg:py-32">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl lg:text-4xl font-bold text-white mb-6">How It Works</h2>
+                <p class="text-slate-400 text-lg">Get started in minutes. Your journey to informed voting starts here.</p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 lg:grid-cols-5 gap-8">
+                <!-- Step 1 -->
+                <div class="text-center group">
+                    <div class="w-16 h-16 mx-auto rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-2xl font-bold mb-5 border-2 border-brand-500/20 group-hover:border-brand-500/40 group-hover:bg-brand-500/15 transition-all">
+                        <span>1</span>
+                    </div>
+                    <h4 class="text-base font-semibold text-white mb-2">Sign Up</h4>
+                    <p class="text-sm text-slate-500">Create your account</p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="text-center group">
+                    <div class="w-16 h-16 mx-auto rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-2xl font-bold mb-5 border-2 border-brand-500/20 group-hover:border-brand-500/40 group-hover:bg-brand-500/15 transition-all">
+                        <span>2</span>
+                    </div>
+                    <h4 class="text-base font-semibold text-white mb-2">Ask Questions</h4>
+                    <p class="text-sm text-slate-500">Chat with AI</p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="text-center group">
+                    <div class="w-16 h-16 mx-auto rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-2xl font-bold mb-5 border-2 border-brand-500/20 group-hover:border-brand-500/40 group-hover:bg-brand-500/15 transition-all">
+                        <span>3</span>
+                    </div>
+                    <h4 class="text-base font-semibold text-white mb-2">Get Guidance</h4>
+                    <p class="text-sm text-slate-500">Personalized steps</p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="text-center group">
+                    <div class="w-16 h-16 mx-auto rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-2xl font-bold mb-5 border-2 border-brand-500/20 group-hover:border-brand-500/40 group-hover:bg-brand-500/15 transition-all">
+                        <span>4</span>
+                    </div>
+                    <h4 class="text-base font-semibold text-white mb-2">Set Reminders</h4>
+                    <p class="text-sm text-slate-500">Never miss deadlines</p>
+                </div>
+
+                <!-- Step 5 -->
+                <div class="text-center group">
+                    <div class="w-16 h-16 mx-auto rounded-2xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-2xl font-bold mb-5 border-2 border-brand-500/20 group-hover:border-brand-500/40 group-hover:bg-brand-500/15 transition-all">
+                        <span>5</span>
+                    </div>
+                    <h4 class="text-base font-semibold text-white mb-2">Vote Confidently</h4>
+                    <p class="text-sm text-slate-500">Be prepared</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== DASHBOARD PREVIEWS ==================== -->
+    <section class="py-24 lg:py-32">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <!-- Voter Dashboard Preview -->
+            <div class="glass-card rounded-3xl p-1.5 border-brand-500/10 mb-8 overflow-hidden">
+                <div class="bg-slate-950 rounded-[22px] p-8 lg:p-12">
+                    <div class="flex flex-col lg:flex-row items-center gap-10">
+                        <div class="flex-1">
+                            <span class="badge badge-primary mb-4">
+                                <i class="fa-solid fa-house-user"></i>
+                                Voter Dashboard
+                            </span>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-4">For Voters</h3>
+                            <p class="text-slate-400 mb-6 leading-relaxed">
+                                Your personalized voter workspace. Chat with AI assistant, view election timelines, find your polling booth, set reminders, and access all election resources in one place.
+                            </p>
+                            <a href="/dashboard" class="btn btn-primary">
+                                Launch Voter Dashboard
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <div class="glass rounded-xl p-4 border border-slate-700/50">
+                                <div class="flex gap-3">
+                                    <div class="w-12 h-28 rounded-lg bg-slate-800/80"></div>
+                                    <div class="flex-1 space-y-3">
+                                        <div class="h-10 bg-slate-800/80 rounded-lg flex items-center px-3">
+                                            <div class="w-28 h-2.5 bg-brand-500/50 rounded"></div>
+                                        </div>
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <div class="h-20 bg-brand-500/10 rounded-lg border border-brand-500/20 flex items-center justify-center">
+                                                <i class="fa-solid fa-robot text-brand-400 text-xl"></i>
+                                            </div>
+                                            <div class="h-20 bg-purple-500/10 rounded-lg border border-purple-500/20 flex items-center justify-center">
+                                                <i class="fa-solid fa-calendar-days text-purple-400 text-xl"></i>
+                                            </div>
+                                        </div>
+                                        <div class="h-14 bg-slate-800/80 rounded-lg"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Admin Dashboard Preview -->
+            <div class="glass-card rounded-3xl p-1.5 border-purple-500/10 overflow-hidden">
+                <div class="bg-slate-950 rounded-[22px] p-8 lg:p-12">
+                    <div class="flex flex-col lg:flex-row-reverse items-center gap-10">
+                        <div class="flex-1">
+                            <span class="badge" style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2);">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                Admin Panel
+                            </span>
+                            <h3 class="text-2xl lg:text-3xl font-bold text-white mb-4">For Admins</h3>
+                            <p class="text-slate-400 mb-6 leading-relaxed">
+                                Manage election content, FAQs, timelines, and announcements. Monitor platform usage and keep your community informed with real-time updates.
+                            </p>
+                            <a href="/admin" class="btn" style="background: linear-gradient(135deg, #8b5cf6, #7c3aed); color: white; box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);">
+                                Access Admin Panel
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                        <div class="flex-1 w-full">
+                            <div class="glass rounded-xl p-4 border border-slate-700/50">
+                                <div class="w-full h-8 rounded bg-slate-800/80 mb-3 flex items-center justify-between px-3">
+                                    <div class="w-16 h-2.5 bg-slate-600 rounded"></div>
+                                    <div class="w-6 h-6 rounded-full bg-purple-500/50"></div>
+                                </div>
+                                <div class="flex gap-2 h-24 items-end px-3 border-b border-l border-slate-700 pb-2">
+                                    <div class="flex-1 bg-brand-500/30 rounded-t transition-all hover:bg-brand-500/50" style="height: 40%"></div>
+                                    <div class="flex-1 bg-brand-500/50 rounded-t transition-all hover:bg-brand-500/70" style="height: 70%"></div>
+                                    <div class="flex-1 bg-brand-500/70 rounded-t transition-all hover:bg-brand-500" style="height: 55%"></div>
+                                    <div class="flex-1 bg-brand-500 rounded-t transition-all hover:bg-brand-400" style="height: 90%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== INTEGRATIONS ==================== -->
+    <section class="py-20 lg:py-28 bg-slate-950/50">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-12">
+                <h2 class="text-2xl lg:text-3xl font-bold text-white mb-4">Powered by Google Cloud</h2>
+                <p class="text-slate-400 text-lg">Enterprise-grade infrastructure for reliability and scale.</p>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+                <div class="glass-card p-5 text-center group cursor-default">
+                    <i class="fa-solid fa-database text-2xl text-orange-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h4 class="font-semibold text-white text-sm">Firestore</h4>
+                    <p class="text-xs text-slate-500 mt-1">Database</p>
+                </div>
+                <div class="glass-card p-5 text-center group cursor-default">
+                    <i class="fa-solid fa-map text-2xl text-green-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h4 class="font-semibold text-white text-sm">Maps API</h4>
+                    <p class="text-xs text-slate-500 mt-1">Locations</p>
+                </div>
+                <div class="glass-card p-5 text-center group cursor-default">
+                    <i class="fa-solid fa-calendar text-2xl text-blue-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h4 class="font-semibold text-white text-sm">Calendar</h4>
+                    <p class="text-xs text-slate-500 mt-1">Reminders</p>
+                </div>
+                <div class="glass-card p-5 text-center group cursor-default">
+                    <i class="fa-solid fa-language text-2xl text-indigo-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h4 class="font-semibold text-white text-sm">Translate</h4>
+                    <p class="text-xs text-slate-500 mt-1">Languages</p>
+                </div>
+                <div class="glass-card p-5 text-center group cursor-default">
+                    <i class="fa-solid fa-microphone text-2xl text-red-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h4 class="font-semibold text-white text-sm">Speech</h4>
+                    <p class="text-xs text-slate-500 mt-1">Voice Input</p>
+                </div>
+                <div class="glass-card p-5 text-center group cursor-default">
+                    <i class="fa-solid fa-server text-2xl text-cyan-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                    <h4 class="font-semibold text-white text-sm">Cloud Run</h4>
+                    <p class="text-xs text-slate-500 mt-1">Deployment</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FAQ SECTION ==================== -->
+    <section id="faq" class="py-20 lg:py-28">
+        <div class="max-w-3xl mx-auto px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <h2 class="text-2xl lg:text-3xl font-bold text-white mb-4">Frequently Asked Questions</h2>
+                <p class="text-slate-400 text-lg">Got questions? We've got answers.</p>
+            </div>
+
+            <div class="space-y-4">
+                <details class="glass-card rounded-xl p-5 group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <h4 class="text-base font-semibold text-white pr-4">How does VoteWise AI help voters?</h4>
+                        <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-slate-400 text-sm mt-4 leading-relaxed">VoteWise AI provides instant answers to election-related questions, helps find polling booths, and guides first-time voters through the entire process with multilingual support.</p>
+                </details>
+
+                <details class="glass-card rounded-xl p-5 group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <h4 class="text-base font-semibold text-white pr-4">Can first-time voters use this platform?</h4>
+                        <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-slate-400 text-sm mt-4 leading-relaxed">Absolutely! VoteWise AI is specifically designed for first-time voters with step-by-step guidance and easy-to-understand explanations in multiple languages.</p>
+                </details>
+
+                <details class="glass-card rounded-xl p-5 group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <h4 class="text-base font-semibold text-white pr-4">Does it support Hindi and other languages?</h4>
+                        <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-slate-400 text-sm mt-4 leading-relaxed">Yes! We support multiple languages including Hindi, English, Tamil, Telugu, and more through Google Translate integration.</p>
+                </details>
+
+                <details class="glass-card rounded-xl p-5 group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <h4 class="text-base font-semibold text-white pr-4">Can I set election reminders?</h4>
+                        <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-slate-400 text-sm mt-4 leading-relaxed">Yes! You can set reminders for registration deadlines and election day, which sync directly to your Google Calendar for timely notifications.</p>
+                </details>
+
+                <details class="glass-card rounded-xl p-5 group">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <h4 class="text-base font-semibold text-white pr-4">Is this an official election site?</h4>
+                        <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-slate-400 text-sm mt-4 leading-relaxed">No, VoteWise AI is an independent civic education platform and is NOT affiliated with any government election commission.</p>
+                </details>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FINAL CTA ==================== -->
+    <section class="py-20 lg:py-28">
+        <div class="max-w-4xl mx-auto px-6 lg:px-8">
+            <div class="glass-card rounded-3xl p-10 lg:p-14 border border-brand-500/10 relative overflow-hidden">
+                <div class="glow-orb w-64 h-64 bg-brand-500/10 top-0 right-0"></div>
+                
+                <div class="relative z-10 text-center">
+                    <h2 class="text-2xl lg:text-3xl font-bold text-white mb-4">Ready to Make Elections Simple?</h2>
+                    <p class="text-slate-400 text-lg mb-8 max-w-xl mx-auto">Join thousands of informed voters who trust VoteWise AI for their election guidance.</p>
+                    
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                        <a href="/dashboard" class="btn btn-primary btn-lg">
+                            <i class="fa-solid fa-rocket"></i>
+                            Start as Voter
+                        </a>
+                        <a href="/admin" class="btn btn-secondary btn-lg">
+                            <i class="fa-solid fa-shield-halved"></i>
+                            Explore Platform
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== FOOTER ==================== -->
+    <footer class="border-t border-white/[0.06] bg-slate-950 pt-16 pb-8">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-10 lg:gap-12 mb-12">
+                <!-- Brand -->
+                <div class="md:col-span-1">
+                    <a href="/" class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center">
+                            <i class="fa-solid fa-bolt text-white text-lg"></i>
+                        </div>
+                        <span class="text-xl font-bold tracking-tight">VoteWise<span class="text-brand-400">AI</span></span>
+                    </a>
+                    <p class="text-slate-500 text-sm leading-relaxed mb-4">
+                        Your smart guide to elections. Empowering voters with knowledge, guidance, and confidence.
+                    </p>
+                    <div class="inline-flex items-center gap-2 text-xs text-slate-600 bg-slate-900 px-3 py-1.5 rounded-lg border border-slate-800 font-mono">
+                        <i class="fa-solid fa-code"></i> Flask + Google Cloud
+                    </div>
+                </div>
+
+                <!-- Platform -->
+                <div>
+                    <h4 class="font-semibold text-white mb-4">Platform</h4>
+                    <ul class="space-y-3 text-sm text-slate-500">
+                        <li><a href="/dashboard" class="hover:text-brand-400 transition-colors">Voter Dashboard</a></li>
+                        <li><a href="/admin" class="hover:text-brand-400 transition-colors">Admin Panel</a></li>
+                        <li><a href="#features" class="hover:text-brand-400 transition-colors">Features</a></li>
+                        <li><a href="#how-it-works" class="hover:text-brand-400 transition-colors">How It Works</a></li>
+                    </ul>
+                </div>
+
+                <!-- Resources -->
+                <div>
+                    <h4 class="font-semibold text-white mb-4">Resources</h4>
+                    <ul class="space-y-3 text-sm text-slate-500">
+                        <li><a href="/dashboard#faq" class="hover:text-brand-400 transition-colors">FAQs</a></li>
+                        <li><a href="/dashboard" class="hover:text-brand-400 transition-colors">Voter Dashboard</a></li>
+                        <li><a href="/login" class="hover:text-brand-400 transition-colors">Help Center</a></li>
+                    </ul>
+                </div>
+
+                <!-- Legal -->
+                <div>
+                    <h4 class="font-semibold text-white mb-4">Legal</h4>
+                    <ul class="space-y-3 text-sm text-slate-500">
+                        <li><span class="text-slate-600">Privacy Policy</span></li>
+                        <li><span class="text-slate-600">Terms of Service</span></li>
+                        <li><span class="text-slate-600">Cookie Policy</span></li>
+                        <li><span class="text-slate-600">Disclaimer</span></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Bottom Bar -->
+            <div class="pt-8 border-t border-white/[0.06] flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p class="text-slate-600 text-sm">&copy; 2026 VoteWise AI. All rights reserved.</p>
+                <div class="flex items-center gap-2">
+                    <span class="w-9 h-9 rounded-lg bg-white/[0.03] flex items-center justify-center text-slate-600 border border-white/[0.06] cursor-not-allowed">
+                        <i class="fa-brands fa-github text-sm"></i>
+                    </span>
+                    <span class="w-9 h-9 rounded-lg bg-white/[0.03] flex items-center justify-center text-slate-600 border border-white/[0.06] cursor-not-allowed">
+                        <i class="fa-brands fa-twitter text-sm"></i>
+                    </span>
+                    <span class="w-9 h-9 rounded-lg bg-white/[0.03] flex items-center justify-center text-slate-600 border border-white/[0.06] cursor-not-allowed">
+                        <i class="fa-brands fa-linkedin text-sm"></i>
+                    </span>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="mt-8 p-4 bg-brand-500/5 rounded-xl border border-brand-500/10">
+                <p class="text-slate-500 text-xs leading-relaxed">
+                    <strong class="text-brand-400">Disclaimer:</strong> VoteWise AI is an independent civic education platform and is NOT affiliated with any government election commission. 
+                    This platform does not facilitate actual voting, vote counting, or election management. All information provided is for educational purposes only. 
+                    Please verify all election-related information through official government sources.
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobile-menu');
+            menu.classList.toggle('hidden');
+            document.body.style.overflow = menu.classList.contains('hidden') ? '' : 'hidden';
+        }
+        
+        document.querySelectorAll('#mobile-menu a').forEach(link => {
+            link.addEventListener('click', () => toggleMobileMenu());
+        });
+    </script>
+</body>
+</html>

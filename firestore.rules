@@ -1,0 +1,152 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is authenticated
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+    
+    // Helper function to check if user is voter
+    function isVoter() {
+      return isAuthenticated() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'voter';
+    }
+    
+    // Helper function to check ownership
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+    
+    // Helper function to check if data is public (no auth required)
+    function isPublic() {
+      return resource.data.is_active == true || 
+        resource.data.is_published == true;
+    }
+    
+    // ============================================
+    // USERS COLLECTION
+    // ============================================
+    match /users/{userId} {
+      // Users can read their own profile
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Users can only update their own profile (restricted fields)
+      allow update: if isOwner(userId) && 
+        request.resource.data.keys().hasAll(['updated_at']) &&
+        !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role', 'uid']);
+      
+      // Only admins can create new users with roles
+      allow create: if isAuthenticated() && 
+        request.resource.data.uid == request.auth.uid;
+    }
+    
+    // ============================================
+    // ELECTION_PROCESS COLLECTION
+    // ============================================
+    match /election_process/{processId} {
+      // Anyone can read active election process content
+      allow read: if true;
+      
+      // Only admins can create/update/delete election process content
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // TIMELINES COLLECTION
+    // ============================================
+    match /timelines/{timelineId} {
+      // Anyone can read timelines
+      allow read: if true;
+      
+      // Only admins can manage timelines
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // FAQS COLLECTION
+    // ============================================
+    match /faqs/{faqId} {
+      // Anyone can read published FAQs
+      allow read: if resource.data.is_published == true;
+      
+      // Only admins can manage FAQs
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // REMINDERS COLLECTION (User-specific)
+    // ============================================
+    match /users/{userId}/reminders/{reminderId} {
+      // Users can only access their own reminders
+      allow read, create, update, delete: if isOwner(userId);
+    }
+    
+    // ============================================
+    // ANNOUNCEMENTS COLLECTION
+    // ============================================
+    match /announcements/{announcementId} {
+      // Anyone can read active announcements
+      allow read: if resource.data.is_active == true;
+      
+      // Only admins can manage announcements
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // BOOKMARKS COLLECTION (User-specific)
+    // ============================================
+    match /users/{userId}/bookmarks/{bookmarkId} {
+      // Users can only access their own bookmarks
+      allow read, create, delete: if isOwner(userId);
+    }
+    
+    // ============================================
+    // ANALYTICS COLLECTION
+    // ============================================
+    match /analytics/{analyticsId} {
+      // Only admins can read analytics
+      allow read: if isAdmin();
+      
+      // Only admins can write analytics (from backend)
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // POLLING_GUIDANCE COLLECTION
+    // ============================================
+    match /polling_guidance/{guidanceId} {
+      // Anyone can read active polling guidance
+      allow read: if resource.data.is_active == true;
+      
+      // Only admins can manage polling guidance
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // SETTINGS COLLECTION
+    // ============================================
+    match /settings/{settingId} {
+      // Anyone can read settings
+      allow read: if true;
+      
+      // Only admins can update settings
+      allow write: if isAdmin();
+    }
+    
+    // ============================================
+    // VOTER_PREFERENCES SUB_COLLECTION
+    // ============================================
+    match /users/{userId}/preferences/{prefId} {
+      // Users can only access their own preferences
+      allow read, create, update, delete: if isOwner(userId);
+    }
+  }
+}

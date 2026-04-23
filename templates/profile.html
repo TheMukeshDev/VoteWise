@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - VoteWise AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: {
+                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
+                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
+                            800: '#3730a3', 900: '#312e81', 950: '#1e1b4b',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        body { font-family: 'Inter', sans-serif; background-color: #020617; }
+    </style>
+</head>
+<body class="text-slate-100 antialiased min-h-screen p-6 lg:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <!-- Back -->
+        <a href="/dashboard" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors group">
+            <i class="fa-solid fa-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
+            <span class="text-sm">Back to Dashboard</span>
+        </a>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Profile Card -->
+            <div class="lg:col-span-1">
+                <div class="glass-card rounded-2xl p-6 text-center">
+                    <div class="w-24 h-24 rounded-2xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold mx-auto mb-4 shadow-lg shadow-brand-500/20">
+                        <i class="fa-solid fa-user"></i>
+                    </div>
+                    <h2 class="text-xl font-bold text-white mb-1">John Doe</h2>
+                    <p class="text-slate-400 text-sm mb-4">john@example.com</p>
+                    <span class="badge badge-success inline-flex">
+                        <i class="fa-solid fa-check mr-1.5"></i>
+                        Verified Voter
+                    </span>
+                </div>
+
+                <!-- Quick Links -->
+                <div class="glass-card rounded-2xl p-3 mt-6 space-y-1">
+                    <a href="/dashboard" class="sidebar-nav-item">
+                        <i class="fa-solid fa-house nav-icon"></i>
+                        <span>Dashboard</span>
+                    </a>
+                    <a href="/profile" class="sidebar-nav-item active">
+                        <i class="fa-solid fa-user nav-icon text-brand-400"></i>
+                        <span>Profile</span>
+                    </a>
+                    <a href="/settings" class="sidebar-nav-item">
+                        <i class="fa-solid fa-gear nav-icon"></i>
+                        <span>Settings</span>
+                    </a>
+                    <button onclick="logout()" class="sidebar-nav-item w-full text-left text-red-400 hover:text-red-300 hover:bg-red-500/10">
+                        <i class="fa-solid fa-arrow-right-from-bracket nav-icon"></i>
+                        <span>Sign Out</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Voter Info -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-6">Voter Information</h3>
+                    <div class="grid sm:grid-cols-2 gap-4">
+                        <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                            <p class="text-slate-500 text-xs mb-1 uppercase tracking-wider">Voter ID</p>
+                            <p class="text-white font-medium">DL/2024/123456</p>
+                        </div>
+                        <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                            <p class="text-slate-500 text-xs mb-1 uppercase tracking-wider">Status</p>
+                            <p class="text-emerald-400 font-medium flex items-center gap-2">
+                                <i class="fa-solid fa-circle text-[6px]"></i>
+                                Registered
+                            </p>
+                        </div>
+                        <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                            <p class="text-slate-500 text-xs mb-1 uppercase tracking-wider">Constituency</p>
+                            <p class="text-white font-medium">Central Delhi</p>
+                        </div>
+                        <div class="p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                            <p class="text-slate-500 text-xs mb-1 uppercase tracking-wider">Age Group</p>
+                            <p class="text-white font-medium">25-35</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Activity -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-6">Recent Activity</h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
+                            <div class="w-10 h-10 rounded-xl bg-brand-500/20 flex items-center justify-center text-brand-400 flex-shrink-0">
+                                <i class="fa-solid fa-comments"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-white text-sm">Asked about voter registration</p>
+                                <p class="text-slate-500 text-xs">Feb 20, 2026</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
+                            <div class="w-10 h-10 rounded-xl bg-purple-500/20 flex items-center justify-center text-purple-400 flex-shrink-0">
+                                <i class="fa-solid fa-bell"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-white text-sm">Set reminder for Election Day</p>
+                                <p class="text-slate-500 text-xs">Feb 18, 2026</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
+                            <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+                                <i class="fa-solid fa-map-marker"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-white text-sm">Searched polling booth</p>
+                                <p class="text-slate-500 text-xs">Feb 15, 2026</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Saved Resources -->
+                <div class="glass-card rounded-2xl p-6">
+                    <h3 class="text-lg font-semibold text-white mb-6">Saved Resources</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 hover:bg-slate-900/80 transition-all cursor-pointer group">
+                            <div class="flex items-center gap-3">
+                                <i class="fa-solid fa-bookmark text-brand-400"></i>
+                                <span class="text-sm text-slate-300">Voter Registration Guide</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-slate-400 transition-colors"></i>
+                        </div>
+                        <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 hover:bg-slate-900/80 transition-all cursor-pointer group">
+                            <div class="flex items-center gap-3">
+                                <i class="fa-solid fa-bookmark text-brand-400"></i>
+                                <span class="text-sm text-slate-300">Documents Required List</span>
+                            </div>
+                            <i class="fa-solid fa-chevron-right text-slate-500 group-hover:text-slate-400 transition-colors"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const firebaseConfig = {{ firebase_config | tojson }};
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        function logout() {
+            auth.signOut().then(() => {
+                window.location.href = '/';
+            });
+        }
+    </script>
+</body>
+</html>
