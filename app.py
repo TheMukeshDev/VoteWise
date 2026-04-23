@@ -135,6 +135,18 @@ def _register_frontend_routes(app):
 
         return render_template("signup.html", firebase_config=firebase_config)
 
+    @app.route("/admin-login")
+    def admin_login_page():
+        from flask import render_template
+
+        return render_template("admin-login.html")
+
+    @app.route("/results")
+    def results_page():
+        from flask import render_template
+
+        return render_template("results.html")
+
     @app.route("/admin")
     def admin_page():
         from flask import render_template

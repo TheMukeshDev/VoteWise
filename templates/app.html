@@ -652,6 +652,87 @@
     </main>
 
     <script>
+        // Load data on page init
+        document.addEventListener('DOMContentLoaded', function() {
+            loadTimeline();
+            loadFAQs();
+            loadUserData();
+        });
+
+        async function loadTimeline() {
+            try {
+                const res = await fetch('/api/timeline');
+                const data = await res.json();
+                if (data.success && data.data) {
+                    renderTimeline(data.data);
+                }
+            } catch(e) { console.log('Timeline loading...'); }
+        }
+
+        function renderTimeline(events) {
+            const container = document.getElementById('upcoming-events');
+            if (!container || !events || events.length === 0) return;
+            container.innerHTML = events.slice(0, 3).map(event => `
+                <div class="flex items-center gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
+                    <div class="w-14 h-14 rounded-xl bg-brand-500/10 text-brand-400 flex flex-col items-center justify-center text-sm font-bold flex-shrink-0 border border-brand-500/20">
+                        <span class="text-[10px] uppercase">${new Date(event.date).toLocaleString('en-US', { month: 'short' })}</span>
+                        <span class="text-lg">${new Date(event.date).getDate()}</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <h3 class="font-semibold text-white truncate">${event.title}</h3>
+                        <p class="text-sm text-slate-500">${event.description || 'Upcoming election event'}</p>
+                    </div>
+                    <button class="px-3 py-2 bg-brand-500/10 text-brand-400 rounded-lg text-xs font-medium hover:bg-brand-500 hover:text-white transition-all flex-shrink-0">
+                        <i class="fa-solid fa-bell mr-1.5"></i> Remind
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        async function loadFAQs() {
+            try {
+                const res = await fetch('/api/faqs');
+                const data = await res.json();
+                if (data.success && data.data) {
+                    renderFAQs(data.data);
+                }
+            } catch(e) { console.log('FAQ loading...'); }
+        }
+
+        function renderFAQs(faqs) {
+            const container = document.getElementById('faq-list');
+            if (!container || !faqs || faqs.length === 0) return;
+            container.innerHTML = faqs.slice(0, 4).map(faq => `
+                <details class="group p-5 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                    <summary class="flex items-center justify-between cursor-pointer list-none">
+                        <h3 class="font-semibold text-white pr-4">${faq.question}</h3>
+                        <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
+                    </summary>
+                    <p class="text-slate-400 text-sm mt-4 leading-relaxed">${faq.answer}</p>
+                </details>
+            `).join('');
+        }
+
+        async function loadUserData() {
+            const token = localStorage.getItem('access_token');
+            if (token) {
+                try {
+                    const res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.success && data.data) {
+                            const nameEl = document.getElementById('profile-name');
+                            const emailEl = document.getElementById('profile-email');
+                            const initialEl = document.getElementById('profile-initial');
+                            if (nameEl && data.data.full_name) nameEl.textContent = data.data.full_name;
+                            if (emailEl && data.data.email) emailEl.textContent = data.data.email;
+                            if (initialEl && data.data.full_name) initialEl.textContent = data.data.full_name.charAt(0).toUpperCase();
+                        }
+                    }
+                } catch(e) { console.log('User data loading...'); }
+            }
+        }
+
         let currentLang = 'en';
         function toggleLanguage() {
             currentLang = currentLang === 'en' ? 'hi' : 'en';
@@ -684,29 +765,60 @@
             input.value = '';
             container.scrollTop = container.scrollHeight;
             
-            setTimeout(() => {
+            // Show loading indicator
+            const loadingMsg = document.createElement('div');
+            loadingMsg.className = 'chat-message';
+            loadingMsg.id = 'chat-loading';
+            loadingMsg.innerHTML = `
+                <div class="chat-avatar ai"><i class="fa-solid fa-robot text-white text-sm"></i></div>
+                <div class="chat-bubble"><p class="text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Thinking...</p></div>
+            `;
+            container.appendChild(loadingMsg);
+            container.scrollTop = container.scrollHeight;
+            
+            // Call real API
+            fetch('/api/chat/chat', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: message })
+            })
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('chat-loading')?.remove();
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'chat-message';
+                let responseText = data.intro || data.error || 'I\'m ready to help!';
+                aiMsg.innerHTML = `
+                    <div class="chat-avatar ai"><i class="fa-solid fa-robot text-white text-sm"></i></div>
+                    <div class="chat-bubble">
+                        <p class="text-white mb-3">${responseText}</p>
+                        ${data.steps && data.steps.length > 0 ? `
+                            <div class="mt-3 space-y-2">
+                                ${data.steps.map((step, i) => `<div class="flex items-start gap-2 text-sm"><span class="text-brand-400 font-medium">${i+1}.</span><span class="text-slate-300">${step}</span></div>`).join('')}
+                            </div>
+                        ` : ''}
+                        ${data.tips && data.tips.length > 0 ? `
+                            <div class="mt-3 pt-3 border-t border-white/10">
+                                <p class="text-xs text-slate-500 mb-2">💡 Tips:</p>
+                                ${data.tips.map(tip => `<span class="inline-block px-2 py-1 bg-amber-500/10 text-amber-400 rounded text-xs mr-1 mb-1">${tip}</span>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+                container.appendChild(aiMsg);
+                container.scrollTop = container.scrollHeight;
+            })
+            .catch(err => {
+                document.getElementById('chat-loading')?.remove();
                 const aiMsg = document.createElement('div');
                 aiMsg.className = 'chat-message';
                 aiMsg.innerHTML = `
                     <div class="chat-avatar ai"><i class="fa-solid fa-robot text-white text-sm"></i></div>
-                    <div class="chat-bubble"><p class="text-white">${getAIResponse(message)}</p></div>
+                    <div class="chat-bubble"><p class="text-red-400">Sorry, I'm having trouble connecting. Please try again.</p></div>
                 `;
                 container.appendChild(aiMsg);
                 container.scrollTop = container.scrollHeight;
-            }, 1000);
-        }
-
-        function getAIResponse(message) {
-            const lower = message.toLowerCase();
-            if (lower.includes('register')) {
-                return 'To register to vote, visit the Election Commission website or your local electoral office. You need: Photo ID, Address proof, and Age proof. The process takes about 10-15 minutes online!';
-            } else if (lower.includes('document') || lower.includes('id')) {
-                return 'Accepted documents: Voter ID (EPIC), Aadhaar Card, Passport, Driving License, or any government-issued photo ID. One of these is mandatory at the polling station.';
-            } else if (lower.includes('polling') || lower.includes('booth')) {
-                return 'Your polling booth is mentioned on your voter slip. You can also find it on the Election Commission website using your EPIC number or name.';
-            } else {
-                return 'I\'d be happy to help with that! For more detailed information, you can ask me about registration, documents, polling booths, or election timelines.';
-            }
+            });
         }
 
         function handleEnter(e) {

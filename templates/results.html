@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Election Results - VoteWise AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Inter', 'sans-serif'] },
+                    colors: {
+                        brand: { 50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc', 400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca', 800: '#3730a3', 900: '#312e81', 950: '#1e1b4b' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>body { font-family: 'Inter', sans-serif; background-color: #020617; }</style>
+</head>
+<body class="text-slate-100 antialiased min-h-screen p-6 lg:p-8">
+
+    <div class="max-w-5xl mx-auto">
+        <a href="/dashboard" class="inline-flex items-center gap-2 text-slate-400 hover:text-white mb-8 transition-colors group">
+            <i class="fa-solid fa-arrow-left text-sm group-hover:-translate-x-1 transition-transform"></i>
+            <span class="text-sm">Back to Dashboard</span>
+        </a>
+
+        <div class="glass-card rounded-2xl p-8">
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-14 h-14 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-2xl">
+                    <i class="fa-solid fa-chart-bar"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-bold text-white">Election Results Day Guide</h1>
+                    <p class="text-slate-400">What to do after voting</p>
+                </div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 mb-8">
+                <div class="p-6 bg-slate-900/60 rounded-xl border border-emerald-500/20">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                            <i class="fa-solid fa-check"></i>
+                        </div>
+                        <h3 class="font-semibold text-white">Before Results</h3>
+                    </div>
+                    <ul class="space-y-3 text-slate-400 text-sm">
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-1"></i> Wait patiently at home</li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-1"></i> Avoid spreading unverified info</li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-circle-check text-emerald-400 mt-1"></i> Check official sources only</li>
+                    </ul>
+                </div>
+
+                <div class="p-6 bg-slate-900/60 rounded-xl border border-brand-500/20">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center">
+                            <i class="fa-solid fa-globe"></i>
+                        </div>
+                        <h3 class="font-semibold text-white">Official Sources</h3>
+                    </div>
+                    <ul class="space-y-3 text-slate-400 text-sm">
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-globe text-brand-400 mt-1"></i> Election Commission Website</li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-tv text-brand-400 mt-1"></i> Doordarshan/PTI Live</li>
+                        <li class="flex items-start gap-2"><i class="fa-solid fa-newspaper text-brand-400 mt-1"></i> Trusted News Channels</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="p-6 bg-brand-500/5 rounded-xl border border-brand-500/10">
+                <div class="flex items-center gap-3 mb-4">
+                    <i class="fa-solid fa-triangle-exclamation text-amber-400"></i>
+                    <h3 class="font-semibold text-white">Important Disclaimer</h3>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed">
+                    <strong class="text-amber-400">VoteWise AI is an independent civic education platform.</strong> 
+                    We do NOT promote any candidate, party, or ideology. All information provided is for educational purposes only. 
+                    Please verify all election-related information through official government sources. 
+                    Your vote is confidential - never share your voting choice publicly.
+                </p>
+            </div>
+
+            <div class="mt-8 pt-6 border-t border-white/[0.06]">
+                <h3 class="font-semibold text-white mb-4">Need Help?</h3>
+                <div class="flex flex-wrap gap-3">
+                    <a href="/dashboard" class="btn btn-secondary">
+                        <i class="fa-solid fa-house"></i> Go to Dashboard
+                    </a>
+                    <a href="/dashboard#chat" class="btn btn-primary">
+                        <i class="fa-solid fa-robot"></i> Ask AI Helper
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
