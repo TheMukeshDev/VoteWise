@@ -40,22 +40,10 @@ def _ensure_firebase_initialized():
         return True
 
     if not firebase_admin._apps:
-        private_key = Config.FIREBASE_PRIVATE_KEY
-        if private_key:
-            private_key = private_key.replace("\\n", "\n")
-
-        creds_dict = {
-            "type": "service_account",
-            "project_id": Config.FIREBASE_PROJECT_ID,
-            "private_key_id": Config.FIREBASE_PRIVATE_KEY_ID,
-            "private_key": private_key,
-            "client_email": Config.FIREBASE_CLIENT_EMAIL,
-            "token_uri": "https://oauth2.googleapis.com/token",
-        }
-
-        if creds_dict.get("private_key"):
+        firebase_json = Config.FIREBASE_ADMIN_JSON
+        if firebase_json:
             try:
-                cred = credentials.Certificate(creds_dict)
+                cred = credentials.Certificate(firebase_json)
                 firebase_admin.initialize_app(
                     cred, {"projectId": Config.FIREBASE_PROJECT_ID}
                 )

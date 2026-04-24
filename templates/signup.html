@@ -123,7 +123,8 @@
     </div>
 
     <script>
-        const firebaseConfig = {{ firebase_config | tojson }};
+        const firebaseConfigStr = '{{ firebase_config | tojson | safe }}';
+        const firebaseConfig = JSON.parse(firebaseConfigStr);
 
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
