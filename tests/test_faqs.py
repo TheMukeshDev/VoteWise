@@ -12,24 +12,28 @@ class TestFAQRoutes:
 
     def test_get_faqs(self, client):
         """Test getting all FAQs."""
-        with patch("services.faq_service.FAQService.get_all") as mock_get_all:
-            mock_get_all.return_value = [
-                {"id": "1", "question": "Q1", "answer": "A1"},
-                {"id": "2", "question": "Q2", "answer": "A2"},
-            ]
+        with patch("services.faq_service.FAQService.get_all_paginated") as mock_get_all:
+            mock_get_all.return_value = (
+                [
+                    {"id": "1", "question": "Q1", "answer": "A1"},
+                    {"id": "2", "question": "Q2", "answer": "A2"},
+                ],
+                2
+            )
 
             response = client.get("/api/faqs")
             assert response.status_code == 200
             data = json.loads(response.data)
             assert data["success"] is True
-            assert len(data["data"]) == 2
+            assert len(data["data"]["faqs"]) == 2
 
     def test_get_faqs_by_category(self, client):
         """Test getting FAQs filtered by category."""
-        with patch("services.faq_service.FAQService.get_all") as mock_get_all:
-            mock_get_all.return_value = [
-                {"id": "1", "question": "Q1", "answer": "A1", "category": "eligibility"}
-            ]
+        with patch("services.faq_service.FAQService.get_all_paginated") as mock_get_all:
+            mock_get_all.return_value = (
+                [{"id": "1", "question": "Q1", "answer": "A1", "category": "eligibility"}],
+                1
+            )
 
             response = client.get("/api/faqs?category=eligibility")
             assert response.status_code == 200
@@ -38,12 +42,12 @@ class TestFAQRoutes:
 
     def test_get_faqs_by_language(self, client):
         """Test getting FAQs filtered by language."""
-        with patch("services.faq_service.FAQService.get_all") as mock_get_all:
-            mock_get_all.return_value = []
+        with patch("services.faq_service.FAQService.get_all_paginated") as mock_get_all:
+            mock_get_all.return_value = ([], 0)
 
             response = client.get("/api/faqs?language=hi")
             assert response.status_code == 200
-            mock_get_all.assert_called_with(category=None, language="hi")
+            mock_get_all.assert_called_with(category=None, language="hi", page=1, limit=20)
 
     def test_get_single_faq(self, client):
         """Test getting a single FAQ by ID."""
@@ -89,8 +93,11 @@ class TestFAQRoutes:
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
             patch("services.faq_service.FAQService.create") as mock_create,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
+            mock_profile.return_value = {"email": ""}
             mock_create.return_value = {
                 "id": "new-faq",
                 "question": "Q1",
@@ -129,8 +136,11 @@ class TestFAQRoutes:
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
             patch("services.faq_service.FAQService.update") as mock_update,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
+            mock_profile.return_value = {"email": ""}
             mock_update.return_value = {
                 "id": "faq-1",
                 "question": "Updated",
@@ -152,8 +162,11 @@ class TestFAQRoutes:
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
             patch("services.faq_service.FAQService.delete") as mock_delete,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
+            mock_profile.return_value = {"email": ""}
             mock_delete.return_value = True
 
             response = client.delete("/api/faqs/faq-1", headers=auth_headers)
@@ -166,8 +179,11 @@ class TestFAQRoutes:
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
             patch("services.faq_service.FAQService.delete") as mock_delete,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
+            mock_profile.return_value = {"email": ""}
             mock_delete.return_value = False
 
             response = client.delete("/api/faqs/nonexistent", headers=auth_headers)

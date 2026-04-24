@@ -98,7 +98,7 @@ def sample_faq_data():
 def sample_reminder_data():
     """Sample reminder data for tests."""
     return {
-        "event_name": "Voter Registration Deadline",
-        "event_date": "2026-03-15",
+        "title": "Voter Registration Deadline",
+        "reminder_date": "2026-03-15",
         "description": "Last date to register for elections",
     }
