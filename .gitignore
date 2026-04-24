@@ -26,23 +26,10 @@ secrets/
 
 # Python
 __pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-.Python
-venv/
-env/
-.venv/
-ENV/
-pip-wheel-metadata/
-.pytest_cache/
-.coverage
-htmlcov/
-.mypy_cache/
-.ruff_cache/
 
-# Tests
-tests/
+# Tests (but keep test files in git)
+.pytest_cache/
+coverage/
 
 # Flask
 instance/
