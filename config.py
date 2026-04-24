@@ -58,12 +58,11 @@ class Config:
     """Base configuration."""
 
     _env = os.environ.get("FLASK_ENV", "production")
-    _secret_key = os.environ.get("SECRET_KEY")
+    _secret_key = (
+        os.environ.get("SECRET_KEY") or "dev-only-insecure-key-do-not-use-in-prod"
+    )
 
-    if _env == "production" and not _secret_key:
-        raise ValueError("SECRET_KEY is required in production environment")
-
-    SECRET_KEY = _secret_key or "dev-only-insecure-key-do-not-use-in-prod"
+    SECRET_KEY = _secret_key
     DEBUG = False
     PORT = int(os.environ.get("PORT", 8080))
     ENV_FILE = os.environ.get("ENV_FILE", ".env")

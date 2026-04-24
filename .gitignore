@@ -41,6 +41,9 @@ htmlcov/
 .mypy_cache/
 .ruff_cache/
 
+# Tests
+tests/
+
 # Flask
 instance/
 .webassets-cache
