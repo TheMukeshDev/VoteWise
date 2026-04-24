@@ -183,6 +183,12 @@ def _register_frontend_routes(app):
 
         return render_template("app.html", firebase_config=firebase_config)
 
+    @app.route("/app")
+    def app_redirect():
+        from flask import redirect
+
+        return redirect("/dashboard")
+
     @app.route("/login")
     def login_page():
         from flask import render_template
