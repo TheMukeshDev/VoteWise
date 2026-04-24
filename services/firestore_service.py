@@ -2,45 +2,31 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from config import Config
 import os
+import logging
 
-
-def _get_firebase_credentials():
-    """Get Firebase credentials from env variables."""
-    private_key = Config.FIREBASE_PRIVATE_KEY
-    if private_key:
-        private_key = private_key.replace("\\n", "\n")
-
-    return {
-        "type": "service_account",
-        "project_id": Config.FIREBASE_PROJECT_ID,
-        "private_key_id": Config.FIREBASE_PRIVATE_KEY_ID,
-        "private_key": private_key,
-        "client_email": Config.FIREBASE_CLIENT_EMAIL,
-        "token_uri": "https://oauth2.googleapis.com/token",
-    }
+logger = logging.getLogger(__name__)
 
 
 def init_firebase():
-    """Initialize Firebase App using env credentials."""
+    """Initialize Firebase App using FIREBASE_ADMIN_JSON from Secret Manager."""
     if not firebase_admin._apps:
         try:
-            creds_dict = _get_firebase_credentials()
-            if creds_dict.get("private_key"):
-                cred = credentials.Certificate(creds_dict)
+            firebase_json = Config.FIREBASE_ADMIN_JSON
+            if firebase_json:
+                cred = credentials.Certificate(firebase_json)
                 firebase_admin.initialize_app(
                     cred, {"projectId": Config.FIREBASE_PROJECT_ID}
                 )
+                logger.info("Firebase initialized from FIREBASE_ADMIN_JSON")
             else:
-                raise ValueError("FIREBASE_PRIVATE_KEY not found in environment")
+                raise ValueError("FIREBASE_ADMIN_JSON environment variable not set")
         except Exception as e:
-            print(f"Warning: Firebase initialization failed: {e}")
-            try:
-                firebase_admin.initialize_app()
-            except Exception as e:
-                print(f"Failed to initialize Firebase: {e}")
+            logger.error(
+                "Firebase initialization failed: missing or invalid credentials"
+            )
+            raise RuntimeError("Firebase Admin credentials not configured") from e
 
 
-# Attempt initialization on import
 init_firebase()
 
 

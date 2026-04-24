@@ -243,16 +243,70 @@ Admin access is assigned manually and cannot be self-provisioned through the app
    ```env
    SECRET_KEY=your-secure-random-key
    FLASK_ENV=development
-   FIREBASE_CREDENTIALS_PATH=/path/to/service-account.json
    GOOGLE_CLOUD_PROJECT=your-project-id
    GEMINI_API_KEY=your-gemini-key
    GOOGLE_MAPS_API_KEY=your-maps-key
    ```
 
-5. Run the development server:
+5. For local development with Firebase Admin, download your service account key and set environment variable:
+   ```bash
+   export FIREBASE_ADMIN_JSON='{"type": "service_account", ...}'  # Linux/macOS
+   # Windows: set FIREBASE_ADMIN_JSON={"type": "service_account", ...}
+   ```
+
+6. Run the development server:
    ```bash
    python app.py
    ```
+
+### Cloud Run Deployment
+
+#### 1. Download Firebase Admin Service Account
+
+1. Go to Firebase Console > Project Settings > Service Accounts
+2. Click "Generate new private key"
+3. Save as `firebase-admin-key.json` (do NOT commit this file)
+
+#### 2. Create Secret in Google Secret Manager
+
+```bash
+gcloud secrets create firebase-admin-key --data-file=firebase-admin-key.json
+```
+
+#### 3. Deploy to Cloud Run
+
+```bash
+gcloud run deploy votewise \
+  --source . \
+  --region asia-south1 \
+  --allow-unauthenticated \
+  --set-secrets=FIREBASE_ADMIN_JSON=firebase-admin-key:latest \
+  --set-env-vars=PORT=8080,FLASK_ENV=production,GOOGLE_CLOUD_PROJECT=your-project-id
+```
+
+#### 4. Set Additional Environment Variables (if needed)
+
+```bash
+gcloud run services update votewise \
+  --region asia-south1 \
+  --set-env-vars="FIREBASE_API_KEY=your-api-key" \
+  --set-env-vars="FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com" \
+  --set-env-vars="FIREBASE_PROJECT_ID=your-project-id" \
+  --set-env-vars="FIREBASE_STORAGE_BUCKET=your-project.appspot.com" \
+  --set-env-vars="FIREBASE_MESSAGING_SENDER_ID=your-sender-id" \
+  --set-env-vars="FIREBASE_APP_ID=your-app-id" \
+  --set-env-vars="GEMINI_API_KEY=your-gemini-key" \
+  --set-env-vars="GOOGLE_MAPS_API_KEY=your-maps-key"
+```
+
+#### 5. Remove Secret from Git Tracking (if previously committed)
+
+```bash
+# If firebase-admin-key.json or firebase.json was already committed:
+git rm --cached firebase-admin-key.json firebase.json
+git commit -m "Remove sensitive Firebase credentials from tracking"
+git push
+```
 
 ### Frontend Setup
 
@@ -407,6 +461,8 @@ Error responses:
 - **Secure error messages** — Internal details never exposed to clients
 - **User data isolation** — Users can only access their own reminders and profile
 - **CORS configuration** — Configurable origin restrictions
+- **Secret Manager** — Firebase Admin credentials stored in Google Secret Manager (never in code)
+- **No API keys in code** — All secrets via environment variables
 
 ### What We Don't Do
 
@@ -415,6 +471,8 @@ Error responses:
 - We don't allow role self-assignment
 - We don't log sensitive user data
 - We don't connect to government systems
+- We don't commit Firebase service account JSON files
+- We don't log private keys or secret values
 
 ---
 

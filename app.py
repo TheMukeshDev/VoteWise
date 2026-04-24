@@ -6,6 +6,7 @@ providing election education, voter guidance, and admin management.
 """
 
 import logging
+import os
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from dotenv import load_dotenv
@@ -78,7 +79,10 @@ def create_app(config_class=None):
                 "service": "VoteWise AI",
                 "version": app.config.get("VERSION", "1.0.0"),
                 "environment": app.config.get("ENV", "production"),
-                "timestamp": __import__("datetime").datetime.now(__import__("datetime").UTC).isoformat().replace("+00:00", "Z"),
+                "timestamp": __import__("datetime")
+                .datetime.now(__import__("datetime").UTC)
+                .isoformat()
+                .replace("+00:00", "Z"),
             }
         )
 
@@ -207,6 +211,6 @@ def _register_request_logging(app):
 app = create_app()
 
 if __name__ == "__main__":
-    port = app.config.get("PORT", 5000)
+    port = int(os.environ.get("PORT", 8080))
     debug = app.config.get("DEBUG", False)
     app.run(host="0.0.0.0", port=port, debug=debug)

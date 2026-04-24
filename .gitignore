@@ -3,7 +3,9 @@
 .env.*
 !.env.example
 
-# Firebase / Google service account keys
+# Firebase / Google service account keys (CRITICAL - never commit these)
+firebase.json
+firebase-admin-key.json
 *service-account*.json
 *firebase-adminsdk*.json
 google-credentials.json
@@ -12,6 +14,13 @@ client_secret*.json
 *.pem
 *.key
 firebase-adminsdk.json
+admin-credentials.json
+service-account-*.json
+
+# Secret Manager secrets (local copies)
+secrets/
+*.secret
+.env.secrets
 
 # Python
 __pycache__/
