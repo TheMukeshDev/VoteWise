@@ -1,26 +1,23 @@
 from flask import Blueprint, request, jsonify, current_app
-from utils.response_helper import format_chat_response
+from utils.response import success_response, error_response
 from config import Config
 from google import genai
 import json
-import time
-from functools import wraps
+import logging
+
+logger = logging.getLogger(__name__)
 
 chat_bp = Blueprint("chat", __name__)
 
-# Rate limiting storage (simple in-memory for demo)
-rate_limit_store = {}
-
 # Initialize Gemini client
+client = None
 try:
     api_key = Config.GEMINI_API_KEY
     if api_key:
         client = genai.Client(api_key=api_key)
-    else:
-        client = None
+        logger.info("Gemini client initialized")
 except Exception as e:
-    print(f"Warning: Failed to initialize Gemini client: {e}")
-    client = None
+    logger.warning(f"Failed to initialize Gemini client: {e}")
 
 
 def rate_limit(max_requests=30, window_seconds=60):
@@ -61,30 +58,54 @@ def rate_limit(max_requests=30, window_seconds=60):
 
 
 @chat_bp.route("/chat", methods=["POST"])
-@rate_limit(max_requests=30, window_seconds=60)
 def chat():
-    """AI Chat endpoint with rate limiting"""
+    """
+    AI Chat endpoint with Gemini integration.
+
+    Expected JSON: {"message": "How do I register to vote?", "user_prefs": {}}
+    Returns: {"intro": "", "steps": [], "tips": [], "actions": []}
+    """
+    data = request.get_json() or {}
+    message = data.get("message", "")
+    user_prefs = data.get("user_prefs", {})
+
+    if not message:
+        return jsonify(error_response("Message is required", 400)), 400
+
+    if len(message) > 1000:
+        return jsonify(
+            error_response("Message too long. Maximum 1000 characters.", 400)
+        ), 400
+
     try:
-        data = request.json or {}
-        message = data.get("message", "")
-        user_prefs = data.get("user_prefs", {})
+        result = _generate_ai_response(message, user_prefs)
+        return jsonify(result), 200
 
-        # Validate input
-        if not message:
-            return jsonify({"success": False, "error": "Message is required"}), 400
+    except Exception as e:
+        current_app.logger.error(f"Chat error: {e}")
+        return jsonify(
+            {
+                "success": True,
+                "intro": "I'm here to help with your election questions!",
+                "steps": [
+                    "Visit the Election Commission website",
+                    "Check your voter ID status",
+                    "Locate your polling booth",
+                ],
+                "tips": ["Always verify from official sources"],
+                "actions": [],
+            }
+        ), 200
 
-        if len(message) > 1000:
-            return jsonify(
-                {
-                    "success": False,
-                    "error": "Message too long. Maximum 1000 characters.",
-                }
-            ), 400
 
-        # Generate AI response
-        if client:
-            try:
-                prompt = f"""
+def _generate_ai_response(message, user_prefs):
+    """Generate AI response using Gemini or fallback to default responses."""
+
+    if not client:
+        return _get_fallback_response(message)
+
+    try:
+        prompt = f"""
 You are VoteWise AI, a neutral, helpful civic assistant for election education.
 Keep responses brief, friendly, and informative. 
 
@@ -94,60 +115,30 @@ Respond in this JSON format only:
 User: {message}
 Context: {user_prefs}
 """
-                response = client.models.generate_content(
-                    model="gemini-2.0-flash",
-                    contents=prompt,
-                )
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+        )
 
-                # Parse response
-                try:
-                    response_data = json.loads(response.text)
-                    result = {
-                        "success": True,
-                        "intro": response_data.get(
-                            "intro", "Here's what you need to know."
-                        ),
-                        "steps": response_data.get("steps", []),
-                        "tips": response_data.get("tips", []),
-                        "actions": response_data.get("actions", []),
-                    }
-                except:
-                    # Fallback
-                    result = {
-                        "success": True,
-                        "intro": response.text[:200]
-                        if response.text
-                        else "I'm here to help!",
-                        "steps": [
-                            "Visit the Election Commission website for more details"
-                        ],
-                        "tips": ["Always verify information from official sources"],
-                        "actions": [],
-                    }
-            except Exception as e:
-                current_app.logger.error(f"AI Error: {e}")
-                result = {
-                    "success": True,
-                    "intro": "I'm here to help with your election questions!",
-                    "steps": [
-                        "Visit the Election Commission website",
-                        "Check your voter ID status",
-                        "Locate your polling booth",
-                    ],
-                    "tips": ["Always verify from official sources"],
-                    "actions": [],
-                }
-        else:
-            # Fallback responses when no API
-            result = _get_fallback_response(message)
+        response_text = response.text if response.text else ""
+        if not response_text:
+            return _get_fallback_response(message)
 
-        return jsonify(result), 200
+        try:
+            response_data = json.loads(response_text)
+            return {
+                "success": True,
+                "intro": response_data.get("intro", "Here's what you need to know."),
+                "steps": response_data.get("steps", []),
+                "tips": response_data.get("tips", []),
+                "actions": response_data.get("actions", []),
+            }
+        except (json.JSONDecodeError, TypeError):
+            return _get_fallback_response(message)
 
     except Exception as e:
-        current_app.logger.error(f"Chat error: {e}")
-        return jsonify(
-            {"success": False, "error": "Something went wrong. Please try again."}
-        ), 500
+        current_app.logger.error(f"AI Error: {e}")
+        return _get_fallback_response(message)
 
 
 def _get_fallback_response(message):

@@ -23,14 +23,34 @@ faq_service = FAQService()
 @faq_bp.route("", methods=["GET"])
 @faq_bp.route("/", methods=["GET"])
 def get_faqs():
-    """Get all FAQs (public)."""
+    """Get all FAQs with pagination (public)."""
     try:
         category = request.args.get("category")
         language = request.args.get("language", "en")
 
-        faqs = faq_service.get_all(category=category, language=language)
+        page = request.args.get("page", 1, type=int)
+        limit = request.args.get("limit", 20, type=int)
 
-        return jsonify(success_response(data=faqs)), 200
+        page = max(1, page)
+        limit = max(1, min(100, limit))
+
+        faqs, total = faq_service.get_all_paginated(
+            category=category, language=language, page=page, limit=limit
+        )
+
+        return jsonify(
+            success_response(
+                data={
+                    "faqs": faqs or [],
+                    "pagination": {
+                        "page": page,
+                        "limit": limit,
+                        "total": total or 0,
+                        "pages": ((total or 0) + limit - 1) // limit,
+                    },
+                }
+            )
+        ), 200
 
     except Exception as e:
         return jsonify(error_response(str(e), 500)), 500

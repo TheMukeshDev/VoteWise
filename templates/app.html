@@ -710,7 +710,7 @@
                     placeholder="Enter ZIP code or city..."
                     class="input flex-1"
                   />
-                  <button class="btn btn-primary whitespace-nowrap">
+                  <button id="detect-location-btn" class="btn btn-primary whitespace-nowrap">
                     <i class="fa-solid fa-location-crosshairs"></i>
                     Detect Location
                   </button>
@@ -1081,9 +1081,25 @@
     <script>
       // Load data on page init
       document.addEventListener("DOMContentLoaded", function () {
-        loadTimeline();
+loadTimeline();
         loadFAQs();
-        loadUserData();
+      });
+
+      // Add event listener for location detect button
+      document.getElementById("detect-location-btn")?.addEventListener("click", detectLocation);
+
+      // Add event listener for add reminder button
+      document.querySelectorAll(".add-reminder-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          // Get event data from the clicked button's data attributes
+          const eventData = {
+            event_name: "Election Day",
+            date: "2026-05-02",
+            description: "Vote for your representative",
+            reminder_type: "election"
+          };
+          addReminder(eventData);
+        });
       });
 
       async function loadTimeline() {
@@ -1114,7 +1130,7 @@
                         <h3 class="font-semibold text-white truncate">${event.title}</h3>
                         <p class="text-sm text-slate-500">${event.description || "Upcoming election event"}</p>
                     </div>
-                    <button class="px-3 py-2 bg-brand-500/10 text-brand-400 rounded-lg text-xs font-medium hover:bg-brand-500 hover:text-white transition-all flex-shrink-0">
+                    <button onclick="addReminder({title: '${event.title}', reminder_date: '${event.date}', description: '${event.description || 'Election reminder'}')" class="px-3 py-2 bg-brand-500/10 text-brand-400 rounded-lg text-xs font-medium hover:bg-brand-500 hover:text-white transition-all flex-shrink-0">
                         <i class="fa-solid fa-bell mr-1.5"></i> Remind
                     </button>
                 </div>
@@ -1124,11 +1140,16 @@
       }
 
       async function loadFAQs() {
+        const container = document.getElementById("faq-list");
+        if (container) {
+          container.innerHTML = '<div class="space-y-3"><div class="skeleton h-16 rounded-lg"></div><div class="skeleton h-16 rounded-lg"></div><div class="skeleton h-16 rounded-lg"></div></div>';
+        }
+        
         try {
           const res = await fetch("/api/faqs");
           const data = await res.json();
           if (data.success && data.data) {
-            renderFAQs(data.data);
+            renderFAQs(data.data.faqs || data.data);
           }
         } catch (e) {
           console.log("FAQ loading...");
@@ -1137,7 +1158,14 @@
 
       function renderFAQs(faqs) {
         const container = document.getElementById("faq-list");
-        if (!container || !faqs || faqs.length === 0) return;
+        if (!container) return;
+        
+        // Show empty state
+        if (!faqs || faqs.length === 0) {
+          container.innerHTML = '<div class="text-center py-8 text-slate-400"><p>No FAQs available yet.</p></div>';
+          return;
+        }
+        
         container.innerHTML = faqs
           .slice(0, 4)
           .map(
@@ -1156,7 +1184,23 @@
 
       async function loadUserData() {
         const token = localStorage.getItem("access_token");
-        if (token) {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+          try {
+            const userData = JSON.parse(storedUser);
+            const nameEl = document.getElementById("profile-name");
+            const emailEl = document.getElementById("profile-email");
+            const initialEl = document.getElementById("profile-initial");
+            if (nameEl && userData.name)
+              nameEl.textContent = userData.name;
+            if (emailEl && userData.email)
+              emailEl.textContent = userData.email;
+            if (initialEl && userData.name)
+              initialEl.textContent = userData.name.charAt(0).toUpperCase();
+          } catch (e) {
+            console.log("User data loading...");
+          }
+        } else if (token) {
           try {
             const res = await fetch("/api/auth/me", {
               headers: { Authorization: "Bearer " + token },
@@ -1167,19 +1211,20 @@
                 const nameEl = document.getElementById("profile-name");
                 const emailEl = document.getElementById("profile-email");
                 const initialEl = document.getElementById("profile-initial");
-                if (nameEl && data.data.full_name)
-                  nameEl.textContent = data.data.full_name;
+                if (nameEl && data.data.name)
+                  nameEl.textContent = data.data.name;
                 if (emailEl && data.data.email)
                   emailEl.textContent = data.data.email;
-                if (initialEl && data.data.full_name)
-                  initialEl.textContent = data.data.full_name
-                    .charAt(0)
-                    .toUpperCase();
+                if (initialEl && data.data.name)
+                  initialEl.textContent = data.data.name.charAt(0).toUpperCase();
+                localStorage.setItem('user', JSON.stringify(data.data));
               }
             }
           } catch (e) {
             console.log("User data loading...");
           }
+        } else {
+          window.location.href = '/login';
         }
       }
 
@@ -1240,7 +1285,11 @@
             aiMsg.className = "chat-message";
             let responseText = data.intro || data.error || "I'm ready to help!";
             aiMsg.innerHTML = `
-                    <div class="chat-avatar ai"><i class="fa-solid fa-robot text-white text-sm"></i></div>
+                    <div class="chat-avatar ai">
+                      <button onclick="speakText('${responseText.replace(/'/g, "\\'")}')" class="text-white hover:text-brand-400 transition-colors" title="Listen">
+                        <i class="fa-solid fa-volume-high text-sm"></i>
+                      </button>
+                    </div>
                     <div class="chat-bubble">
                         <p class="text-white mb-3">${responseText}</p>
                         ${
@@ -1282,6 +1331,202 @@
 
       function handleEnter(e) {
         if (e.key === "Enter") sendMessage();
+      }
+
+      // Text-to-Speech for AI responses
+      function speakText(text) {
+        if ('speechSynthesis' in window && text) {
+          window.speechSynthesis.cancel();
+          const utterance = new SpeechSynthesisUtterance(text);
+          utterance.lang = 'en-US';
+          utterance.rate = 0.9;
+          utterance.pitch = 1;
+          window.speechSynthesis.speak(utterance);
+        }
+      }
+
+      // Voice input using Web Speech API
+      let recognition = null;
+      const micBtn = document.querySelector('.chat-mic-btn');
+      
+      if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-US';
+        
+        recognition.onstart = function() {
+          if (micBtn) micBtn.classList.add('text-red-500');
+        };
+        
+        recognition.onresult = function(event) {
+          const transcript = Array.from(event.results)
+            .map(result => result[0].transcript)
+            .join('');
+          document.getElementById('chat-input').value = transcript;
+        };
+        
+        recognition.onerror = function(event) {
+          console.log('Speech recognition error:', event.error);
+          if (micBtn) micBtn.classList.remove('text-red-500');
+        };
+        
+        recognition.onend = function() {
+          if (micBtn) micBtn.classList.remove('text-red-500');
+        };
+        
+        if (micBtn) {
+          micBtn.addEventListener('click', function() {
+            if (recognition) {
+              recognition.start();
+            }
+          });
+        }
+      } else if (micBtn) {
+        micBtn.title = "Voice input not supported in this browser";
+        micBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+
+      // ===== REMINDERS =====
+      async function loadReminders() {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          // Show prompt to login
+          window.location.href = "/login";
+          return;
+        }
+        
+        try {
+          const res = await fetch("/api/reminders", {
+            headers: { Authorization: "Bearer " + token },
+          });
+          const data = await res.json();
+          if (data.success && data.data) {
+            renderReminders(data.data.reminders || data.data);
+          } else if (res.status === 401) {
+            window.location.href = "/login";
+          }
+        } catch (e) {
+          console.log("Reminders loading...");
+        }
+      }
+
+      function renderReminders(reminders) {
+        const container = document.getElementById("reminders-list");
+        if (!container) return;
+        
+        if (!reminders || reminders.length === 0) {
+          container.innerHTML = '<div class="text-center py-8 text-slate-400"><p>No reminders yet. Add one from the timeline!</p></div>';
+          return;
+        }
+        
+        container.innerHTML = reminders.map(r => `
+          <div class="flex items-center justify-between p-5 bg-slate-900/60 rounded-xl border border-slate-800/50">
+            <div class="flex items-center gap-4">
+              <div class="w-14 h-14 rounded-xl bg-brand-500/10 text-brand-400 flex flex-col items-center justify-center text-sm font-bold flex-shrink-0 border border-brand-500/20">
+                <span class="text-[10px] uppercase">${new Date(r.reminder_date || r.date).toLocaleString("en-US", { month: "short" })}</span>
+                <span class="text-lg">${new Date(r.reminder_date || r.date).getDate()}</span>
+              </div>
+              <div>
+                <h3 class="font-semibold text-white">${r.title || r.event_name}</h3>
+                <p class="text-sm text-slate-500">${r.description || "Election reminder"}</p>
+              </div>
+            </div>
+            <button onclick="deleteReminder('${r.id}')" class="p-2 text-slate-500 hover:text-red-400 transition-colors">
+              <i class="fa-solid fa-trash"></i>
+            </button>
+          </div>
+        `).join("");
+      }
+
+      async function deleteReminder(reminderId) {
+        const token = localStorage.getItem("access_token");
+        if (!token) return;
+        
+        try {
+          await fetch("/api/reminders/" + reminderId, {
+            method: "DELETE",
+            headers: { Authorization: "Bearer " + token },
+          });
+          loadReminders();
+        } catch (e) {
+          console.log("Error deleting reminder");
+        }
+      }
+
+      async function addReminder(eventData) {
+        const token = localStorage.getItem("access_token");
+        if (!token) {
+          window.location.href = "/login";
+          return;
+        }
+        
+        try {
+          const res = await fetch("/api/reminders", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: "Bearer " + token,
+            },
+            body: JSON.stringify(eventData),
+          });
+          if (res.ok) {
+            loadReminders();
+          }
+        } catch (e) {
+          console.log("Error adding reminder");
+        }
+      }
+
+      // ===== LOCATION =====
+      async function detectLocation() {
+        if (!navigator.geolocation) {
+          alert("Geolocation not supported");
+          return;
+        }
+        
+        const btn = document.getElementById("detect-location-btn");
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Detecting...';
+        
+        navigator.geolocation.getCurrentPosition(
+          async (position) => {
+            const lat = position.coords.latitude;
+            const lng = position.coords.longitude;
+            
+            document.getElementById("location-input").value = lat.toFixed(4) + ", " + lng.toFixed(4);
+            
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Auto-detect';
+            
+            // Try to get address
+            try {
+              const res = await fetch(`/api/polling?lat=${lat}&lng=${lng}`);
+              const data = await res.json();
+              if (data.success && data.data) {
+                showPollingData(data.data);
+              }
+            } catch (e) {
+              console.log("Getting polling info...");
+            }
+          },
+          (error) => {
+            alert("Location error: " + error.message);
+            if (btn) btn.innerHTML = '<i class="fa-solid fa-location-crosshairs"></i> Auto-detect';
+          }
+        );
+      }
+
+      function showPollingData(data) {
+        const container = document.getElementById("polling-result");
+        if (container && data) {
+          container.innerHTML = `
+            <div class="p-5 bg-slate-900/60 rounded-xl border border-brand-500/30">
+              <h3 class="font-bold text-white text-lg mb-2">${data.booth_name}</h3>
+              <p class="text-slate-400 text-sm mb-3">${data.address}</p>
+              ${data.map_link ? `<a href="${data.map_link}" target="_blank" class="text-brand-400 hover:underline">View on Map</a>` : ''}
+            </div>
+          `;
+        }
       }
 
       const views = [

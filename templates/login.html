@@ -118,6 +118,22 @@
         const auth = firebase.auth();
         const googleProvider = new firebase.auth.GoogleAuthProvider();
 
+        async function callVerifyEndpoint(idToken, name = null) {
+            const response = await fetch('/api/auth/verify', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id_token: idToken, name: name })
+            });
+            const result = await response.json();
+            if (result.success && result.data.access_token) {
+                localStorage.setItem('access_token', result.data.access_token);
+                localStorage.setItem('refresh_token', result.data.refresh_token);
+                localStorage.setItem('user', JSON.stringify(result.data.user));
+                return result.data;
+            }
+            throw new Error(result.message || 'Verification failed');
+        }
+
         document.getElementById('login-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('submit-btn');
@@ -130,8 +146,10 @@
             errorDiv.classList.add('hidden');
 
             try {
-                await auth.signInWithEmailAndPassword(email, password);
-                window.location.href = '/dashboard';
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const idToken = await userCredential.user.getIdToken();
+                await callVerifyEndpoint(idToken);
+                window.location.href = '/app';
             } catch (error) {
                 errorDiv.querySelector('span').textContent = error.message;
                 errorDiv.classList.remove('hidden');
@@ -146,8 +164,11 @@
             btn.disabled = true;
 
             try {
-                await auth.signInWithPopup(googleProvider);
-                window.location.href = '/dashboard';
+                const result = await auth.signInWithPopup(googleProvider);
+                const idToken = await result.user.getIdToken();
+                const name = result.user.displayName;
+                await callVerifyEndpoint(idToken, name);
+                window.location.href = '/app';
             } catch (error) {
                 document.getElementById('error-msg').querySelector('span').textContent = error.message;
                 document.getElementById('error-msg').classList.remove('hidden');

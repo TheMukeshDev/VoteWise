@@ -6,10 +6,13 @@ Handles:
 - Token verification
 - Role-based access control
 - User session management
+- Rate limiting for auth endpoints
 """
 
 from functools import wraps
 import os
+import time
+from collections import defaultdict
 from flask import request, jsonify, g
 from flask_jwt_extended import (
     JWTManager,
@@ -27,6 +30,29 @@ from config import Config
 ALLOWED_ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "").lower()
 
 jwt_manager = JWTManager()
+
+RateLimitStore = defaultdict(list)
+
+
+def check_rate_limit(key: str, max_requests: int = 5, window_seconds: int = 60) -> bool:
+    """Check if request key has exceeded rate limit."""
+    now = time.time()
+    key_requests = RateLimitStore[key]
+
+    key_requests = [ts for ts in key_requests if now - ts < window_seconds]
+
+    if len(key_requests) >= max_requests:
+        RateLimitStore[key] = key_requests
+        return False
+
+    key_requests.append(now)
+    RateLimitStore[key] = key_requests
+    return True
+
+
+def rate_limit_key_func() -> str:
+    """Extract rate limit key from request (IP + endpoint)."""
+    return f"{request.remote_addr}:{request.endpoint}"
 
 
 def init_auth_middleware(app):

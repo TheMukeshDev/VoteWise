@@ -86,15 +86,57 @@ def create_app(config_class=None):
             }
         )
 
+    @app.route("/api/test-firestore", methods=["GET", "POST"])
+    def test_firestore():
+        """Test Firestore connection with write/read/delete operations."""
+        from services.firestore_service import (
+            verify_firestore_connection,
+            get_db,
+            save_user,
+            get_user,
+        )
+        import uuid
+
+        result = {
+            "connection": verify_firestore_connection(),
+        }
+
+        if request.method == "POST":
+            test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+            test_data = {
+                "email": f"test_{test_user_id}@example.com",
+                "name": "Test User",
+                "role": "tester",
+                "test_run": True,
+            }
+
+            saved = save_user(test_user_id, test_data)
+            if saved:
+                result["write"] = {"success": True, "user_id": test_user_id}
+
+                fetched = get_user(test_user_id)
+                if fetched and fetched.get("email") == test_data["email"]:
+                    result["read"] = {"success": True, "data": fetched}
+                else:
+                    result["read"] = {"success": False, "error": "Data mismatch"}
+            else:
+                result["write"] = {"success": False}
+                result["read"] = {"success": False}
+
+        return jsonify(result)
+
     return app
 
 
 def _register_blueprints(app):
     """Register all API blueprints with URL prefixes."""
 
+    from routes.speech import speech_bp
+
     blueprints = [
         ("/api/auth", auth_bp),
         ("/api/chat", chat_bp),
+        ("/api/speech", speech_bp),
         ("/api/election", election_bp),
         ("/api/timeline", timeline_public_bp),
         ("/api/faqs", faq_bp),

@@ -21,31 +21,63 @@ def _get_required_env(name, fallback=None):
 
 
 def _get_firebase_admin_json():
-    """Get Firebase Admin JSON from env variable (from Secret Manager on Cloud Run)."""
+    """Get Firebase Admin JSON - either from env or construct from individual fields."""
     firebase_json_str = os.environ.get("FIREBASE_ADMIN_JSON")
-    if not firebase_json_str:
-        return None
-    try:
-        return json.loads(firebase_json_str)
-    except json.JSONDecodeError as e:
-        logger.error("FIREBASE_ADMIN_JSON is not valid JSON")
-        raise ValueError(
-            "FIREBASE_ADMIN_JSON environment variable is not valid JSON"
-        ) from e
+
+    if firebase_json_str:
+        try:
+            return json.loads(firebase_json_str)
+        except json.JSONDecodeError as e:
+            logger.error("FIREBASE_ADMIN_JSON is not valid JSON")
+            raise ValueError(
+                "FIREBASE_ADMIN_JSON environment variable is not valid JSON"
+            ) from e
+
+    private_key = os.environ.get("FIREBASE_PRIVATE_KEY", "")
+    if private_key:
+        private_key = private_key.replace("\\n", "\n")
+
+    project_id = os.environ.get("FIREBASE_PROJECT_ID")
+    client_email = os.environ.get("FIREBASE_CLIENT_EMAIL")
+    private_key_id = os.environ.get("FIREBASE_PRIVATE_KEY_ID")
+
+    if project_id and private_key and client_email:
+        return {
+            "type": "service_account",
+            "project_id": project_id,
+            "private_key_id": private_key_id,
+            "private_key": private_key,
+            "client_email": client_email,
+            "token_uri": "https://oauth2.googleapis.com/token",
+        }
+
+    return None
 
 
 class Config:
     """Base configuration."""
 
-    SECRET_KEY = _get_required_env(
-        "SECRET_KEY", "dev-only-insecure-key-do-not-use-in-prod"
-    )
+    _env = os.environ.get("FLASK_ENV", "production")
+    _secret_key = os.environ.get("SECRET_KEY")
+
+    if _env == "production" and not _secret_key:
+        raise ValueError("SECRET_KEY is required in production environment")
+
+    SECRET_KEY = _secret_key or "dev-only-insecure-key-do-not-use-in-prod"
     DEBUG = False
     PORT = int(os.environ.get("PORT", 8080))
     ENV_FILE = os.environ.get("ENV_FILE", ".env")
-    CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "*")
+    env = os.environ.get("FLASK_ENV", "production")
+    _cors_origins = os.environ.get("CORS_ORIGINS")
 
-    ENV = os.environ.get("FLASK_ENV", "production")
+    if env == "production" and not _cors_origins:
+        CORS_ORIGINS = ""  # Restrictive in production
+    elif env == "production" and _cors_origins == "*":
+        CORS_ORIGINS = ""  # Override wildcard in production
+    else:
+        CORS_ORIGINS = _cors_origins or "*"
+
+    ENV = env
     VERSION = "1.0.0"
 
     FIREBASE_ADMIN_JSON = _get_firebase_admin_json()
@@ -60,6 +92,7 @@ class Config:
 
     GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY")
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
+    REDIS_URL = os.environ.get("REDIS_URL")  # For rate limiting and caching
 
     ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")

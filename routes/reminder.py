@@ -30,13 +30,37 @@ ALLOWED_REMINDER_TYPES = ["voting", "registration", "deadline", "event", "custom
 @reminder_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_user_reminders():
-    """Get current user's reminders."""
+    """Get current user's reminders with pagination."""
     try:
         identity = get_jwt_identity()
         user_id = identity.get("user_id")
 
-        reminders = get_reminders(user_id)
-        return jsonify(success_response(data=reminders)), 200
+        # Pagination
+        page = request.args.get("page", 1, type=int)
+        limit = request.args.get("limit", 20, type=int)
+        page = max(1, page)
+        limit = max(1, min(100, limit))
+
+        all_reminders = get_reminders(user_id)
+        total = len(all_reminders) if all_reminders else 0
+        start = (page - 1) * limit
+        end = start + limit
+
+        paginated = all_reminders[start:end] if all_reminders else []
+
+        return jsonify(
+            success_response(
+                data={
+                    "reminders": paginated,
+                    "pagination": {
+                        "page": page,
+                        "limit": limit,
+                        "total": total,
+                        "pages": (total + limit - 1) // limit,
+                    },
+                }
+            )
+        ), 200
 
     except Exception as e:
         return jsonify(error_response(str(e), 500)), 500

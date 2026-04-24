@@ -90,7 +90,7 @@ class TestReminderSecurity:
         """Test users can only access their own reminders."""
         with (
             patch("services.firestore_service.save_reminder") as mock_save,
-            patch("services.firestore_service.get_reminders_by_user") as mock_get,
+            patch("services.firestore_service.get_reminders") as mock_get,
         ):
             mock_save.return_value = "reminder-id"
             mock_get.return_value = []

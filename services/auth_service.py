@@ -10,19 +10,15 @@ Handles:
 
 import firebase_admin
 from firebase_admin import auth, credentials
-from google.cloud import firestore
 import datetime
 from typing import Optional, Dict, Any
 from config import Config
 import os
+import logging
 
+from services.firestore_service import get_firestore_client
 
-def _get_firestore_client():
-    """Get Firestore client with error handling."""
-    try:
-        return firestore.Client()
-    except Exception:
-        return None
+logger = logging.getLogger(__name__)
 
 
 def _server_timestamp():
@@ -72,7 +68,7 @@ class FirebaseAuthService:
     @property
     def db(self):
         """Get Firestore client."""
-        return _get_firestore_client()
+        return get_firestore_client()
 
     def verify_id_token(self, id_token: str) -> Optional[Dict[str, Any]]:
         """Verify Firebase ID token and return claims."""
@@ -173,7 +169,7 @@ class UserProfileService:
     @property
     def db(self):
         """Get Firestore client."""
-        return _get_firestore_client()
+        return get_firestore_client()
 
     def create_user_profile(
         self, user_id: str, email: str, data: Dict[str, Any]
@@ -217,6 +213,65 @@ class UserProfileService:
             return None
         except Exception:
             return None
+
+    def upsert_user_profile(
+        self,
+        firebase_uid: str,
+        email: str,
+        name: Optional[str] = None,
+        photo_url: Optional[str] = None,
+        email_verified: bool = False,
+        provider_id: Optional[str] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Create or update user profile from Firebase token data."""
+        db = self.db
+        if not db:
+            return None
+
+        if not name:
+            name = email.split("@")[0] if email else "User"
+
+        existing = self.get_user_profile(firebase_uid)
+        now = _server_timestamp()
+
+        profile_data = {
+            "firebase_uid": firebase_uid,
+            "email": email,
+            "name": name,
+            "photo_url": photo_url or "",
+            "role": "user",
+            "auth_provider": provider_id or "firebase",
+            "email_verified": email_verified,
+            "last_login_at": now,
+            "updated_at": now,
+        }
+
+        if existing:
+            update_fields = {
+                "last_login_at": now,
+                "updated_at": now,
+            }
+            if name and name != existing.get("name"):
+                update_fields["name"] = name
+            if photo_url and photo_url != existing.get("photo_url"):
+                update_fields["photo_url"] = photo_url
+
+            try:
+                db.collection("users").document(firebase_uid).update(update_fields)
+                logger.info(f"User profile updated: uid={firebase_uid}, email={email}")
+            except Exception as e:
+                logger.error(f"Failed to update user profile: {e}")
+                return None
+        else:
+            profile_data["created_at"] = now
+            try:
+                db.collection("users").document(firebase_uid).set(profile_data)
+                logger.info(f"User profile created: uid={firebase_uid}, email={email}")
+            except Exception as e:
+                logger.error(f"Failed to create user profile: {e}")
+                return None
+
+        return self.get_user_profile(firebase_uid)
 
     def update_user_profile(self, user_id: str, data: Dict[str, Any]) -> bool:
         """Update user profile."""

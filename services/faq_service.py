@@ -1,12 +1,20 @@
 """
 FAQ Service for VoteWise AI
 
-Real Firestore CRUD operations for FAQs.
+Real Firestore CRUD operations for FAQs with caching.
 """
 
 import firebase_admin
 from firebase_admin import firestore
 from typing import Optional, List, Dict, Any
+
+from services.cache_service import (
+    get_cached,
+    set_cached,
+    delete_cached,
+    CACHE_KEYS,
+    TTL_VALUES,
+)
 
 
 class FAQService:
@@ -32,62 +40,56 @@ class FAQService:
     def get_all(
         self, category: Optional[str] = None, language: Optional[str] = None
     ) -> List[Dict[str, Any]]:
-        """
-        Get all FAQs from Firestore.
+        """Get all FAQs from Firestore with caching."""
+        cache_key = f"{CACHE_KEYS['faqs']}:{category}:{language}"
+        cached = get_cached(cache_key)
+        if cached is not None:
+            return cached
 
-        Args:
-            category: Filter by category (optional)
-            language: Filter by language (optional)
+        faqs, _ = self.get_all_paginated(category, language, page=1, limit=1000)
+        if faqs:
+            set_cached(cache_key, faqs, TTL_VALUES["faqs"])
+        return faqs
 
-        Returns:
-            List of FAQ documents
-        """
+    def get_all_paginated(
+        self,
+        category: Optional[str] = None,
+        language: Optional[str] = None,
+        page: int = 1,
+        limit: int = 20,
+    ) -> tuple:
+        """Get FAQs with pagination."""
+        all_faqs = self._get_all_no_cache(category, language)
+        total = len(all_faqs) if all_faqs else 0
+        start = (page - 1) * limit
+        end = start + limit
+        return (all_faqs[start:end] if all_faqs else [], total)
+
+    def _get_all_no_cache(
+        self, category: Optional[str] = None, language: Optional[str] = None
+    ) -> List[Dict[str, Any]]:
+        """Get all FAQs without caching."""
         coll = self._get_collection()
         if not coll:
             return []
 
         try:
-            query = coll.where("is_deleted", "!=", True).where(
-                "is_published", "==", True
-            )
-
-            if category:
-                query = query.where("category", "==", category)
-            if language:
-                query = query.where("language", "==", language)
-
-            docs = query.stream()
-            return [{"id": doc.id, **doc.to_dict()} for doc in docs]
+            docs = coll.stream()
+            results = []
+            for doc in docs:
+                data = doc.to_dict()
+                if data and data.get("is_published"):
+                    if category and data.get("category") != category:
+                        continue
+                    if language and data.get("language") != language:
+                        continue
+                    results.append({"id": doc.id, **data})
+            return results
         except Exception:
-            # Fallback: get all and filter in memory
-            try:
-                docs = coll.stream()
-                results = []
-                for doc in docs:
-                    data = doc.to_dict()
-                    if (
-                        data.get("is_deleted") != True
-                        and data.get("is_published") == True
-                    ):
-                        if category and data.get("category") != category:
-                            continue
-                        if language and data.get("language") != language:
-                            continue
-                        results.append({"id": doc.id, **data})
-                return results
-            except Exception:
-                return []
+            return []
 
     def get_by_id(self, faq_id: str) -> Optional[Dict[str, Any]]:
-        """
-        Get a specific FAQ by ID.
-
-        Args:
-            faq_id: FAQ document ID
-
-        Returns:
-            FAQ data or None
-        """
+        """Get a specific FAQ by ID."""
         coll = self._get_collection()
         if not coll:
             return None
@@ -95,10 +97,7 @@ class FAQService:
         try:
             doc = coll.document(faq_id).get()
             if doc.exists:
-                data = doc.to_dict()
-                if data.get("is_deleted") == True:
-                    return None
-                return {"id": doc.id, **data}
+                return {"id": doc.id, **doc.to_dict()}
             return None
         except Exception:
             return None
@@ -110,131 +109,76 @@ class FAQService:
         category: str = "general",
         language: str = "en",
         is_published: bool = True,
-    ) -> Dict[str, Any]:
-        """
-        Create a new FAQ.
-
-        Args:
-            question: FAQ question
-            answer: FAQ answer
-            category: FAQ category
-            language: Language code
-            is_published: Publication status
-
-        Returns:
-            Created FAQ data
-        """
-        coll = self._get_collection()
-        if not coll:
-            raise Exception("Database not available")
-
-        now = firestore.SERVER_TIMESTAMP
-
-        faq_data = {
-            "question": question,
-            "answer": answer,
-            "category": category,
-            "language": language,
-            "is_published": is_published,
-            "is_deleted": False,
-            "created_at": now,
-            "updated_at": now,
-        }
-
-        doc_ref = coll.document()
-        doc_ref.set(faq_data)
-
-        return {"id": doc_ref.id, **faq_data}
-
-    def update(self, faq_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """
-        Update an FAQ.
-
-        Args:
-            faq_id: FAQ document ID
-            data: Fields to update
-
-        Returns:
-            Updated FAQ data or None
-        """
+    ) -> Optional[Dict[str, Any]]:
+        """Create a new FAQ and invalidate cache."""
         coll = self._get_collection()
         if not coll:
             return None
 
         try:
-            doc_ref = coll.document(faq_id)
-            doc = doc_ref.get()
+            doc_ref = coll.document()
+            doc_ref.set(
+                {
+                    "question": question,
+                    "answer": answer,
+                    "category": category,
+                    "language": language,
+                    "is_published": is_published,
+                    "is_deleted": False,
+                    "created_at": firestore.SERVER_TIMESTAMP,
+                    "updated_at": firestore.SERVER_TIMESTAMP,
+                }
+            )
 
-            if not doc.exists:
-                return None
+            # Invalidate FAQ cache on create
+            for lang in ["en", "hi", "kn", "ta"]:
+                for cat in [None, "general", "registration", "voting"]:
+                    delete_cached(f"{CACHE_KEYS['faqs']}:{cat}:{lang}")
 
-            # Remove id from data if present
-            data.pop("id", None)
+            return {"id": doc_ref.id}
+        except Exception:
+            return None
 
-            # Add updated_at timestamp
+    def update(self, faq_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
+        """Update an FAQ."""
+        coll = self._get_collection()
+        if not coll:
+            return None
+
+        try:
             data["updated_at"] = firestore.SERVER_TIMESTAMP
+            coll.document(faq_id).update(data)
 
-            # Only update provided fields
-            doc_ref.update(data)
+            # Invalidate cache
+            for lang in ["en", "hi", "kn", "ta"]:
+                for cat in [None, "general", "registration", "voting"]:
+                    delete_cached(f"{CACHE_KEYS['faqs']}:{cat}:{lang}")
 
-            updated_doc = doc_ref.get()
-            return {"id": faq_id, **updated_doc.to_dict()}
+            return self.get_by_id(faq_id)
         except Exception:
             return None
 
     def delete(self, faq_id: str, soft: bool = True) -> bool:
-        """
-        Delete an FAQ (soft delete by default).
-
-        Args:
-            faq_id: FAQ document ID
-            soft: If True, soft delete; if False, hard delete
-
-        Returns:
-            True if successful
-        """
+        """Delete an FAQ (soft delete by default)."""
         coll = self._get_collection()
         if not coll:
             return False
 
         try:
             doc_ref = coll.document(faq_id)
-            doc = doc_ref.get()
-
-            if not doc.exists:
-                return False
-
             if soft:
-                doc_ref.update(
-                    {
-                        "is_deleted": True,
-                        "deleted_at": firestore.SERVER_TIMESTAMP,
-                        "updated_at": firestore.SERVER_TIMESTAMP,
-                    }
-                )
+                doc_ref.update({"is_deleted": True, "is_published": False})
             else:
                 doc_ref.delete()
+
+            # Invalidate cache
+            for lang in ["en", "hi", "kn", "ta"]:
+                for cat in [None, "general", "registration", "voting"]:
+                    delete_cached(f"{CACHE_KEYS['faqs']}:{cat}:{lang}")
 
             return True
         except Exception:
             return False
-
-    def get_all_for_admin(self) -> List[Dict[str, Any]]:
-        """
-        Get all FAQs including unpublished and soft-deleted (for admin).
-
-        Returns:
-            List of all FAQ documents
-        """
-        coll = self._get_collection()
-        if not coll:
-            return []
-
-        try:
-            docs = coll.stream()
-            return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        except Exception:
-            return []
 
 
 faq_service = FAQService()

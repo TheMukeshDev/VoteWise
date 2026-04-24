@@ -23,6 +23,10 @@ from utils.validators import validate_email
 from services.auth_service import firebase_auth_service, user_profile_service
 from middleware.auth_middleware import generate_tokens, verify_firebase_token
 from config import Config
+import logging
+import secrets
+
+logger = logging.getLogger(__name__)
 
 auth_bp = Blueprint("auth", __name__)
 
@@ -32,7 +36,14 @@ def login():
     """
     User login with Firebase ID token.
     Expected JSON: {"id_token": "firebase_id_token"}
+    Rate limited: 10 attempts per minute per IP.
     """
+    from middleware.auth_middleware import check_rate_limit, rate_limit_key_func
+
+    rate_key = f"user_login:{rate_limit_key_func()}"
+    if not check_rate_limit(rate_key, max_requests=10, window_seconds=60):
+        return jsonify(error_response("Too many attempts. Try again later.", 429)), 429
+
     try:
         data = request.get_json() or {}
         id_token = data.get("id_token")
@@ -89,7 +100,14 @@ def register():
     """
     User registration with Firebase ID token.
     Expected JSON: {"id_token": "firebase_id_token", "profile": {...}}
+    Rate limited: 5 attempts per minute per IP.
     """
+    from middleware.auth_middleware import check_rate_limit, rate_limit_key_func
+
+    rate_key = f"register:{rate_limit_key_func()}"
+    if not check_rate_limit(rate_key, max_requests=5, window_seconds=60):
+        return jsonify(error_response("Too many attempts. Try again later.", 429)), 429
+
     try:
         data = request.get_json() or {}
         id_token = data.get("id_token")
@@ -138,7 +156,14 @@ def google_signin():
     """
     Google Sign-In authentication.
     Expected JSON: {"id_token": "google_id_token"}
+    Rate limited: 10 attempts per minute per IP.
     """
+    from middleware.auth_middleware import check_rate_limit, rate_limit_key_func
+
+    rate_key = f"google_signin:{rate_limit_key_func()}"
+    if not check_rate_limit(rate_key, max_requests=10, window_seconds=60):
+        return jsonify(error_response("Too many attempts. Try again later.", 429)), 429
+
     try:
         data = request.get_json() or {}
         id_token = data.get("id_token")
@@ -291,7 +316,17 @@ def admin_login():
     Expected JSON: {"email": "...", "password": "..."}
 
     Validates against ADMIN_EMAIL and ADMIN_PASSWORD from environment.
+    Rate limited: 5 attempts per minute per IP.
     """
+    from middleware.auth_middleware import check_rate_limit, rate_limit_key_func
+
+    rate_key = f"admin_login:{rate_limit_key_func()}"
+    if not check_rate_limit(rate_key, max_requests=5, window_seconds=60):
+        logger.warning(
+            f"Rate limit exceeded for admin login from {request.remote_addr}"
+        )
+        return jsonify(error_response("Too many attempts. Try again later.", 429)), 429
+
     try:
         data = request.get_json() or {}
         email = data.get("email", "").strip().lower()
@@ -303,13 +338,20 @@ def admin_login():
         if not admin_email or not admin_password:
             return jsonify(error_response("Admin not configured", 500)), 500
 
-        if email != admin_email.lower():
+        email_lower = email.lower().encode("utf-8")
+        admin_lower = admin_email.lower().encode("utf-8")
+        if not secrets.compare_digest(email_lower, admin_lower):
+            logger.warning(f"Failed admin login attempt for email: {email}")
             return jsonify(error_response("Invalid admin credentials", 401)), 401
 
-        if password != admin_password:
+        if not secrets.compare_digest(
+            password.encode("utf-8"), admin_password.encode("utf-8")
+        ):
+            logger.warning(f"Failed admin login attempt for email: {email}")
             return jsonify(error_response("Invalid admin credentials", 401)), 401
 
         tokens = generate_tokens("admin_user", "admin")
+        logger.info(f"Admin login successful: {email}")
 
         return jsonify(
             success_response(
@@ -324,4 +366,81 @@ def admin_login():
         ), 200
 
     except Exception as e:
+        return jsonify(error_response(str(e), 500)), 500
+
+
+@auth_bp.route("/verify", methods=["POST"])
+def verify_token():
+    """
+    Verify Firebase ID token and upsert user profile.
+    Expected JSON: {"id_token": "firebase_id_token", "name": "optional name from form"}
+    Returns: Clean user object with JWT tokens.
+    """
+    try:
+        data = request.get_json() or {}
+        id_token = data.get("id_token")
+        form_name = data.get("name")
+
+        if not id_token:
+            return jsonify(error_response("ID token is required", 400)), 400
+
+        decoded_token = verify_firebase_token(id_token)
+        if not decoded_token:
+            return jsonify(error_response("Invalid or expired token", 401)), 401
+
+        uid = decoded_token.get("uid")
+        email = decoded_token.get("email")
+        display_name = decoded_token.get("name")
+        photo_url = decoded_token.get("picture")
+        email_verified = decoded_token.get("email_verified", False)
+        provider_id = decoded_token.get("provider_id", "firebase")
+
+        if not uid or not email:
+            return jsonify(error_response("Invalid token claims", 401)), 401
+
+        name = form_name or display_name
+        if not name:
+            name = email.split("@")[0]
+
+        profile = user_profile_service.upsert_user_profile(
+            firebase_uid=uid,
+            email=email,
+            name=name,
+            photo_url=photo_url,
+            email_verified=email_verified,
+            provider_id=provider_id,
+        )
+
+        if not profile:
+            return jsonify(error_response("Failed to create/update profile", 500)), 500
+
+        role = profile.get("role", "user")
+        tokens = generate_tokens(uid, role)
+
+        logger.info(f"User verified: uid={uid}, email={email}")
+
+        clean_user = {
+            "uid": profile.get("firebase_uid"),
+            "email": profile.get("email"),
+            "name": profile.get("name"),
+            "photo_url": profile.get("photo_url"),
+            "role": profile.get("role"),
+            "email_verified": profile.get("email_verified"),
+            "created_at": profile.get("created_at"),
+            "last_login_at": profile.get("last_login_at"),
+        }
+
+        return jsonify(
+            success_response(
+                message="Verification successful",
+                data={
+                    "user": clean_user,
+                    "access_token": tokens["access_token"],
+                    "refresh_token": tokens["refresh_token"],
+                },
+            )
+        ), 200
+
+    except Exception as e:
+        logger.error(f"Verify token error: {e}")
         return jsonify(error_response(str(e), 500)), 500

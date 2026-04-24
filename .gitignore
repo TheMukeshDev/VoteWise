@@ -16,6 +16,8 @@ client_secret*.json
 firebase-adminsdk.json
 admin-credentials.json
 service-account-*.json
+pytest.ini
+pytest.ini*
 
 # Secret Manager secrets (local copies)
 secrets/

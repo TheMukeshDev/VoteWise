@@ -33,13 +33,36 @@ ALLOWED_RESOURCE_TYPES = [
 @bookmark_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_user_bookmarks():
-    """Get current user's bookmarks."""
+    """Get current user's bookmarks with pagination."""
     try:
         identity = get_jwt_identity()
         user_id = identity.get("user_id")
 
-        bookmarks = get_bookmarks(user_id)
-        return jsonify(success_response(data=bookmarks)), 200
+        page = request.args.get("page", 1, type=int)
+        limit = request.args.get("limit", 20, type=int)
+        page = max(1, page)
+        limit = max(1, min(100, limit))
+
+        all_bookmarks = get_bookmarks(user_id)
+        total = len(all_bookmarks) if all_bookmarks else 0
+        start = (page - 1) * limit
+        end = start + limit
+
+        paginated = all_bookmarks[start:end] if all_bookmarks else []
+
+        return jsonify(
+            success_response(
+                data={
+                    "bookmarks": paginated,
+                    "pagination": {
+                        "page": page,
+                        "limit": limit,
+                        "total": total,
+                        "pages": (total + limit - 1) // limit,
+                    },
+                }
+            )
+        ), 200
 
     except Exception as e:
         return jsonify(error_response(str(e), 500)), 500
