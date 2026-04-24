@@ -17,11 +17,16 @@ from utils.response import success_response
 from routes.auth import auth_bp
 from routes.chat import chat_bp
 from routes.election import election_bp
-from routes.timeline import timeline_bp
+from routes.timeline import timeline_public_bp
+from routes.timeline_admin import timeline_admin_bp
 from routes.faq import faq_bp
 from routes.reminder import reminder_bp
 from routes.polling import polling_bp
 from routes.user import user_bp
+from routes.announcement import announcement_bp
+from routes.election_process import election_process_bp
+from routes.polling_guidance import polling_guidance_bp
+from routes.bookmark import bookmark_bp
 
 from middleware.error_handler import register_error_handlers
 from middleware.auth_middleware import setup_auth_middleware
@@ -42,11 +47,15 @@ def create_app(config_class=None):
 
     load_dotenv(app.config.get("ENV_FILE", ".env"))
 
+    cors_origins = app.config.get("CORS_ORIGINS", "*")
+    if app.config.get("ENV") == "production" and cors_origins == "*":
+        cors_origins = ""
+
     CORS(
         app,
         resources={
             r"/api/*": {
-                "origins": app.config.get("CORS_ORIGINS", "*"),
+                "origins": cors_origins,
                 "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                 "allow_headers": ["Content-Type", "Authorization"],
             }
@@ -69,7 +78,7 @@ def create_app(config_class=None):
                 "service": "VoteWise AI",
                 "version": app.config.get("VERSION", "1.0.0"),
                 "environment": app.config.get("ENV", "production"),
-                "timestamp": __import__("datetime").datetime.utcnow().isoformat() + "Z",
+                "timestamp": __import__("datetime").datetime.now(__import__("datetime").UTC).isoformat().replace("+00:00", "Z"),
             }
         )
 
@@ -83,11 +92,16 @@ def _register_blueprints(app):
         ("/api/auth", auth_bp),
         ("/api/chat", chat_bp),
         ("/api/election", election_bp),
-        ("/api/timeline", timeline_bp),
+        ("/api/timeline", timeline_public_bp),
         ("/api/faqs", faq_bp),
         ("/api/reminders", reminder_bp),
         ("/api/polling", polling_bp),
         ("/api/user", user_bp),
+        ("/api/user/bookmarks", bookmark_bp),
+        ("/api/admin/announcements", announcement_bp),
+        ("/api/admin/election-process", election_process_bp),
+        ("/api/admin/polling-guidance", polling_guidance_bp),
+        ("/api/admin/timelines", timeline_admin_bp),
     ]
 
     for url_prefix, blueprint in blueprints:
@@ -102,7 +116,7 @@ def _get_firebase_config(app):
         "projectId": app.config.get("FIREBASE_PROJECT_ID"),
         "storageBucket": app.config.get("FIREBASE_STORAGE_BUCKET"),
         "messagingSenderId": app.config.get("FIREBASE_MESSAGING_SENDER_ID"),
-        "appId": f"1:{app.config.get('FIREBASE_MESSAGING_SENDER_ID')}:web:abc123def456",
+        "appId": app.config.get("FIREBASE_APP_ID"),
     }
 
 
@@ -194,5 +208,5 @@ app = create_app()
 
 if __name__ == "__main__":
     port = app.config.get("PORT", 5000)
-    debug = app.config.get("DEBUG", True)
+    debug = app.config.get("DEBUG", False)
     app.run(host="0.0.0.0", port=port, debug=debug)

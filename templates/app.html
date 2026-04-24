@@ -1,708 +1,1147 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Dashboard - VoteWise AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-            theme: {
-                extend: {
-                    fontFamily: { sans: ['Inter', 'sans-serif'] },
-                    colors: {
-                        brand: {
-                            50: '#eef2ff', 100: '#e0e7ff', 200: '#c7d2fe', 300: '#a5b4fc',
-                            400: '#818cf8', 500: '#6366f1', 600: '#4f46e5', 700: '#4338ca',
-                            800: '#3730a3', 900: '#312e81', 950: '#1e1b4b',
-                        }
-                    },
-                    animation: {
-                        'slide-up': 'slideUp 0.4s ease-out',
-                        'fade-in': 'fadeIn 0.3s ease-out',
-                    },
-                    keyframes: {
-                        slideUp: { '0%': { opacity: '0', transform: 'translateY(20px)' }, '100%': { opacity: '1', transform: 'translateY(0)' } },
-                        fadeIn: { '0%': { opacity: '0' }, '100%': { opacity: '1' } }
-                    }
-                }
-            }
-        }
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            fontFamily: { sans: ["Inter", "sans-serif"] },
+            colors: {
+              brand: {
+                50: "#eef2ff",
+                100: "#e0e7ff",
+                200: "#c7d2fe",
+                300: "#a5b4fc",
+                400: "#818cf8",
+                500: "#6366f1",
+                600: "#4f46e5",
+                700: "#4338ca",
+                800: "#3730a3",
+                900: "#312e81",
+                950: "#1e1b4b",
+              },
+            },
+            animation: {
+              "slide-up": "slideUp 0.4s ease-out",
+              "fade-in": "fadeIn 0.3s ease-out",
+            },
+            keyframes: {
+              slideUp: {
+                "0%": { opacity: "0", transform: "translateY(20px)" },
+                "100%": { opacity: "1", transform: "translateY(0)" },
+              },
+              fadeIn: { "0%": { opacity: "0" }, "100%": { opacity: "1" } },
+            },
+          },
+        },
+      };
     </script>
-    
-    <link rel="stylesheet" href="/static/css/style.css">
-    
+
+    <link rel="stylesheet" href="/static/css/style.css" />
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #020617; }
-        .text-gradient { background: linear-gradient(135deg, #818cf8, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+      body {
+        font-family: "Inter", sans-serif;
+        background-color: #020617;
+      }
+
+      .text-gradient {
+        background: linear-gradient(135deg, #818cf8, #a78bfa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
     </style>
-</head>
-<body class="text-slate-100 font-sans h-screen flex overflow-hidden antialiased">
+  </head>
 
+  <body
+    class="text-slate-100 font-sans h-screen flex overflow-hidden antialiased"
+  >
     <!-- ==================== PREMIUM SIDEBAR ==================== -->
-    <aside id="sidebar" class="sidebar flex-shrink-0 flex flex-col h-full z-20 fixed md:relative transition-transform duration-300 -translate-x-full md:translate-x-0">
-        <!-- Logo -->
-        <div class="p-5 border-b border-white/[0.06]">
-            <a href="/" class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/25">
-                    <i class="fa-solid fa-bolt text-white text-lg"></i>
-                </div>
-                <div>
-                    <span class="text-lg font-bold text-white">VoteWise</span><span class="text-brand-400">AI</span>
-                    <p class="text-xs text-slate-500 mt-0.5">Voter Dashboard</p>
-                </div>
-            </a>
+    <aside
+      id="sidebar"
+      class="sidebar flex-shrink-0 flex flex-col h-full z-20 fixed md:relative transition-transform duration-300 -translate-x-full md:translate-x-0"
+    >
+      <!-- Logo -->
+      <div class="p-5 border-b border-white/[0.06]">
+        <a href="/" class="flex items-center gap-3">
+          <div
+            class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/25"
+          >
+            <i class="fa-solid fa-bolt text-white text-lg"></i>
+          </div>
+          <div>
+            <span class="text-lg font-bold text-white">VoteWise</span
+            ><span class="text-brand-400">AI</span>
+            <p class="text-xs text-slate-500 mt-0.5">Voter Dashboard</p>
+          </div>
+        </a>
+      </div>
+
+      <!-- Navigation -->
+      <nav class="flex-1 p-3 space-y-1 overflow-y-auto custom-scroll">
+        <button
+          onclick="switchView('home')"
+          id="nav-home"
+          class="sidebar-nav-item active w-full"
+        >
+          <i class="fa-solid fa-house nav-icon text-brand-400"></i>
+          <span>Dashboard</span>
+        </button>
+        <button
+          onclick="switchView('process')"
+          id="nav-process"
+          class="sidebar-nav-item w-full"
+        >
+          <i class="fa-solid fa-list-check nav-icon"></i>
+          <span>Election Process</span>
+        </button>
+        <button
+          onclick="switchView('timeline')"
+          id="nav-timeline"
+          class="sidebar-nav-item w-full"
+        >
+          <i class="fa-solid fa-calendar-days nav-icon"></i>
+          <span>Timeline</span>
+        </button>
+        <button
+          onclick="switchView('polling')"
+          id="nav-polling"
+          class="sidebar-nav-item w-full"
+        >
+          <i class="fa-solid fa-map-location-dot nav-icon"></i>
+          <span>Polling Booth</span>
+        </button>
+        <button
+          onclick="switchView('reminders')"
+          id="nav-reminders"
+          class="sidebar-nav-item w-full"
+        >
+          <i class="fa-solid fa-bell nav-icon"></i>
+          <span>Reminders</span>
+        </button>
+        <button
+          onclick="switchView('documents')"
+          id="nav-documents"
+          class="sidebar-nav-item w-full"
+        >
+          <i class="fa-solid fa-file-lines nav-icon"></i>
+          <span>Documents</span>
+        </button>
+        <button
+          onclick="switchView('chat')"
+          id="nav-chat"
+          class="sidebar-nav-item w-full"
+        >
+          <i class="fa-solid fa-robot nav-icon"></i>
+          <span>AI Assistant</span>
+        </button>
+        <button
+          onclick="switchView('faq')"
+          id="nav-faq"
+          class="sidebar-nav-item w-full"
+        >
+          <i class="fa-solid fa-circle-question nav-icon"></i>
+          <span>FAQ</span>
+        </button>
+      </nav>
+
+      <!-- Bottom Section -->
+      <div class="p-3 border-t border-white/[0.06] space-y-2">
+        <!-- Language Selector -->
+        <div
+          class="glass-card rounded-xl p-3 cursor-pointer hover:bg-slate-800/50 transition-all group"
+          onclick="toggleLanguage()"
+        >
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-slate-700 transition-colors"
+              >
+                <i class="fa-solid fa-globe text-slate-300 text-sm"></i>
+              </div>
+              <div>
+                <p class="text-xs text-slate-500">Language</p>
+                <p class="text-sm font-medium text-white" id="lang-display">
+                  English
+                </p>
+              </div>
+            </div>
+            <i
+              class="fa-solid fa-chevron-right text-slate-500 text-xs group-hover:text-slate-400 transition-colors"
+            ></i>
+          </div>
         </div>
 
-        <!-- Navigation -->
-        <nav class="flex-1 p-3 space-y-1 overflow-y-auto custom-scroll">
-            <button onclick="switchView('home')" id="nav-home" class="sidebar-nav-item active w-full">
-                <i class="fa-solid fa-house nav-icon text-brand-400"></i>
-                <span>Dashboard</span>
-            </button>
-            <button onclick="switchView('process')" id="nav-process" class="sidebar-nav-item w-full">
-                <i class="fa-solid fa-list-check nav-icon"></i>
-                <span>Election Process</span>
-            </button>
-            <button onclick="switchView('timeline')" id="nav-timeline" class="sidebar-nav-item w-full">
-                <i class="fa-solid fa-calendar-days nav-icon"></i>
-                <span>Timeline</span>
-            </button>
-            <button onclick="switchView('polling')" id="nav-polling" class="sidebar-nav-item w-full">
-                <i class="fa-solid fa-map-location-dot nav-icon"></i>
-                <span>Polling Booth</span>
-            </button>
-            <button onclick="switchView('reminders')" id="nav-reminders" class="sidebar-nav-item w-full">
-                <i class="fa-solid fa-bell nav-icon"></i>
-                <span>Reminders</span>
-            </button>
-            <button onclick="switchView('documents')" id="nav-documents" class="sidebar-nav-item w-full">
-                <i class="fa-solid fa-file-lines nav-icon"></i>
-                <span>Documents</span>
-            </button>
-            <button onclick="switchView('chat')" id="nav-chat" class="sidebar-nav-item w-full">
-                <i class="fa-solid fa-robot nav-icon"></i>
-                <span>AI Assistant</span>
-            </button>
-            <button onclick="switchView('faq')" id="nav-faq" class="sidebar-nav-item w-full">
-                <i class="fa-solid fa-circle-question nav-icon"></i>
-                <span>FAQ</span>
-            </button>
-        </nav>
-
-        <!-- Bottom Section -->
-        <div class="p-3 border-t border-white/[0.06] space-y-2">
-            <!-- Language Selector -->
-            <div class="glass-card rounded-xl p-3 cursor-pointer hover:bg-slate-800/50 transition-all group" onclick="toggleLanguage()">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center group-hover:bg-slate-700 transition-colors">
-                            <i class="fa-solid fa-globe text-slate-300 text-sm"></i>
-                        </div>
-                        <div>
-                            <p class="text-xs text-slate-500">Language</p>
-                            <p class="text-sm font-medium text-white" id="lang-display">English</p>
-                        </div>
-                    </div>
-                    <i class="fa-solid fa-chevron-right text-slate-500 text-xs group-hover:text-slate-400 transition-colors"></i>
-                </div>
+        <!-- Profile -->
+        <div
+          class="glass-card rounded-xl p-3 cursor-pointer hover:bg-slate-800/50 transition-all"
+        >
+          <div class="flex items-center gap-3">
+            <div
+              class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium"
+            >
+              V
             </div>
-            
-            <!-- Profile -->
-            <div class="glass-card rounded-xl p-3 cursor-pointer hover:bg-slate-800/50 transition-all">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center text-white text-sm font-medium">
-                        V
-                    </div>
-                    <div>
-                        <p class="text-xs text-slate-500">Logged in as</p>
-                        <p class="text-sm font-medium text-white">Voter</p>
-                    </div>
-                </div>
+            <div>
+              <p class="text-xs text-slate-500">Logged in as</p>
+              <p class="text-sm font-medium text-white">Voter</p>
             </div>
-            
-            <!-- Logout -->
-            <a href="/" class="glass-card rounded-xl p-3 flex items-center gap-3 hover:bg-slate-800/50 transition-all">
-                <div class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center">
-                    <i class="fa-solid fa-arrow-right-from-bracket text-slate-300 text-sm"></i>
-                </div>
-                <span class="text-sm text-slate-400">Leave Dashboard</span>
-            </a>
+          </div>
         </div>
+
+        <!-- Logout -->
+        <a
+          href="/"
+          class="glass-card rounded-xl p-3 flex items-center gap-3 hover:bg-slate-800/50 transition-all"
+        >
+          <div
+            class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center"
+          >
+            <i
+              class="fa-solid fa-arrow-right-from-bracket text-slate-300 text-sm"
+            ></i>
+          </div>
+          <span class="text-sm text-slate-400">Leave Dashboard</span>
+        </a>
+      </div>
     </aside>
 
     <!-- Sidebar Overlay (Mobile) -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-10 hidden md:hidden" onclick="toggleSidebarMobile()"></div>
+    <div
+      id="sidebar-overlay"
+      class="fixed inset-0 bg-black/60 backdrop-blur-sm z-10 hidden md:hidden"
+      onclick="toggleSidebarMobile()"
+    ></div>
 
     <!-- ==================== MAIN CONTENT ==================== -->
     <main class="flex-1 flex flex-col overflow-hidden">
-        <!-- Top Header -->
-        <header class="h-[72px] border-b border-white/[0.06] flex items-center justify-between px-6 lg:px-8 bg-[rgba(2,6,23,0.8)] backdrop-blur-xl">
-            <div>
-                <h1 class="text-xl font-semibold text-white" id="page-title">Dashboard</h1>
-                <p class="text-sm text-slate-500">Welcome back, here's your election guidance</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <button class="w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 hover:text-white transition-colors border border-white/[0.06]">
-                    <i class="fa-solid fa-bell"></i>
-                </button>
-                <button onclick="toggleSidebarMobile()" class="md:hidden w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 border border-white/[0.06]">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
-            </div>
-        </header>
-
-        <!-- Content Area -->
-        <div class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-8">
-            
-            <!-- ==================== HOME VIEW ==================== -->
-            <div id="view-home" class="space-y-6 animate-fade-in">
-                <!-- Quick Action Cards -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-                    <div onclick="switchView('process')" class="glass-card-hover p-5 cursor-pointer group">
-                        <div class="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-user-plus"></i>
-                        </div>
-                        <h3 class="font-semibold text-white text-sm mb-1">Register to Vote</h3>
-                        <p class="text-xs text-slate-500">Step-by-step guide</p>
-                    </div>
-                    <div onclick="switchView('timeline')" class="glass-card-hover p-5 cursor-pointer group">
-                        <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-calendar-days"></i>
-                        </div>
-                        <h3 class="font-semibold text-white text-sm mb-1">Election Timeline</h3>
-                        <p class="text-xs text-slate-500">Important dates</p>
-                    </div>
-                    <div onclick="switchView('polling')" class="glass-card-hover p-5 cursor-pointer group">
-                        <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-map-location-dot"></i>
-                        </div>
-                        <h3 class="font-semibold text-white text-sm mb-1">Find Polling Booth</h3>
-                        <p class="text-xs text-slate-500">Locate your booth</p>
-                    </div>
-                    <div onclick="switchView('documents')" class="glass-card-hover p-5 cursor-pointer group">
-                        <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-file-contract"></i>
-                        </div>
-                        <h3 class="font-semibold text-white text-sm mb-1">Required Documents</h3>
-                        <p class="text-xs text-slate-500">ID proofs needed</p>
-                    </div>
-                    <div onclick="switchView('chat')" class="glass-card-hover p-5 cursor-pointer group sm:col-span-1 md:col-span-2 lg:col-span-1">
-                        <div class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform">
-                            <i class="fa-solid fa-robot"></i>
-                        </div>
-                        <h3 class="font-semibold text-white text-sm mb-1">Ask AI Helper</h3>
-                        <p class="text-xs text-slate-500">Get instant answers</p>
-                    </div>
-                </div>
-
-                <!-- Main Grid -->
-                <div class="grid lg:grid-cols-3 gap-6">
-                    <!-- Left Column -->
-                    <div class="lg:col-span-2 space-y-6">
-                        <!-- Upcoming Events -->
-                        <div class="glass-card rounded-xl p-6">
-                            <div class="flex items-center justify-between mb-6">
-                                <h2 class="text-lg font-semibold text-white">Upcoming Events</h2>
-                                <button class="text-sm text-brand-400 hover:text-brand-300 transition-colors">View All</button>
-                            </div>
-                            <div class="space-y-4">
-                                <div class="flex items-center gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
-                                    <div class="w-14 h-14 rounded-xl bg-brand-500/10 text-brand-400 flex flex-col items-center justify-center text-sm font-bold flex-shrink-0 border border-brand-500/20">
-                                        <span class="text-[10px] uppercase tracking-wider">Mar</span>
-                                        <span class="text-lg">15</span>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <h3 class="font-semibold text-white truncate">Voter Registration Deadline</h3>
-                                        <p class="text-sm text-slate-500">Last date to register for upcoming elections</p>
-                                    </div>
-                                    <button class="px-3 py-2 bg-brand-500/10 text-brand-400 rounded-lg text-xs font-medium hover:bg-brand-500 hover:text-white transition-all flex-shrink-0">
-                                        <i class="fa-solid fa-bell mr-1.5"></i> Remind
-                                    </button>
-                                </div>
-                                <div class="flex items-center gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
-                                    <div class="w-14 h-14 rounded-xl bg-purple-500/10 text-purple-400 flex flex-col items-center justify-center text-sm font-bold flex-shrink-0 border border-purple-500/20">
-                                        <span class="text-[10px] uppercase tracking-wider">Apr</span>
-                                        <span class="text-lg">20</span>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <h3 class="font-semibold text-white truncate">Voting Day</h3>
-                                        <p class="text-sm text-slate-500">Cast your vote at your assigned polling booth</p>
-                                    </div>
-                                    <button class="px-3 py-2 bg-purple-500/10 text-purple-400 rounded-lg text-xs font-medium hover:bg-purple-500 hover:text-white transition-all flex-shrink-0">
-                                        <i class="fa-solid fa-bell mr-1.5"></i> Remind
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- First-Time Voter Guide -->
-                        <div class="glass-card rounded-xl p-6 border-l-4 border-lime-500">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-10 h-10 rounded-xl bg-lime-500/10 text-lime-400 flex items-center justify-center">
-                                    <i class="fa-solid fa-graduation-cap"></i>
-                                </div>
-                                <h2 class="text-lg font-semibold text-white">First-Time Voter?</h2>
-                            </div>
-                            <p class="text-slate-400 text-sm mb-4">Everything you need to know as a first-time voter, explained simply.</p>
-                            <div class="flex flex-wrap gap-2">
-                                <button onclick="quickAsk('How do I register to vote?')" class="px-3 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-sm transition-all">
-                                    <i class="fa-solid fa-arrow-right mr-2 text-brand-400"></i>Registration Guide
-                                </button>
-                                <button onclick="quickAsk('What documents do I need?')" class="px-3 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-sm transition-all">
-                                    <i class="fa-solid fa-arrow-right mr-2 text-brand-400"></i>Documents List
-                                </button>
-                                <button onclick="quickAsk('What happens on voting day?')" class="px-3 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-sm transition-all">
-                                    <i class="fa-solid fa-arrow-right mr-2 text-brand-400"></i>Voting Day Guide
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Right Column -->
-                    <div class="space-y-6">
-                        <!-- My Reminders -->
-                        <div class="glass-card rounded-xl p-5">
-                            <div class="flex items-center justify-between mb-5">
-                                <h2 class="text-lg font-semibold text-white">My Reminders</h2>
-                                <button onclick="switchView('reminders')" class="text-sm text-brand-400 hover:text-brand-300 transition-colors">Manage</button>
-                            </div>
-                            <div class="space-y-3">
-                                <div class="flex items-center gap-3 p-3 bg-slate-900/60 rounded-lg border border-slate-800/50">
-                                    <div class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center flex-shrink-0">
-                                        <i class="fa-solid fa-bell text-xs"></i>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm text-white">Registration Deadline</p>
-                                        <p class="text-xs text-slate-500">Mar 15, 2026</p>
-                                    </div>
-                                </div>
-                                <div class="flex items-center gap-3 p-3 bg-slate-900/60 rounded-lg border border-slate-800/50">
-                                    <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center flex-shrink-0">
-                                        <i class="fa-solid fa-bell text-xs"></i>
-                                    </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm text-white">Voting Day</p>
-                                        <p class="text-xs text-slate-500">Apr 20, 2026</p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-4 pt-4 border-t border-white/[0.06]">
-                                <button class="w-full py-2.5 bg-slate-800/50 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2">
-                                    <i class="fa-solid fa-plus text-xs"></i>
-                                    Add Reminder
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Quick AI Help -->
-                        <div class="glass-card rounded-xl p-5">
-                            <div class="flex items-center gap-3 mb-4">
-                                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/20">
-                                    <i class="fa-solid fa-robot text-white text-sm"></i>
-                                </div>
-                                <h2 class="text-lg font-semibold text-white">Quick Help</h2>
-                            </div>
-                            <p class="text-sm text-slate-400 mb-4">Ask any question about elections.</p>
-                            <button onclick="switchView('chat')" class="w-full py-3 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white rounded-xl font-medium transition-all shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-comments"></i>
-                                Open AI Chat
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== ELECTION PROCESS VIEW ==================== -->
-            <div id="view-process" class="hidden space-y-6 max-w-4xl animate-fade-in">
-                <div class="glass-card rounded-xl p-8">
-                    <h2 class="text-2xl font-bold text-white mb-8">Election Process Guide</h2>
-                    
-                    <div class="relative">
-                        <div class="absolute left-7 top-0 bottom-0 w-0.5 bg-gradient-to-b from-brand-500 to-transparent"></div>
-                        
-                        <div class="space-y-8">
-                            <div class="relative pl-16">
-                                <div class="absolute left-4 w-6 h-6 rounded-full bg-brand-500 border-4 border-slate-950 shadow-lg shadow-brand-500/30"></div>
-                                <h3 class="text-lg font-semibold text-white mb-2">1. Voter Registration</h3>
-                                <p class="text-slate-400 text-sm leading-relaxed">Register yourself as a voter on the Election Commission website or at your local Electoral Registration Office. You'll need valid ID proof and address proof.</p>
-                            </div>
-                            
-                            <div class="relative pl-16">
-                                <div class="absolute left-4 w-6 h-6 rounded-full bg-slate-700 border-4 border-slate-950"></div>
-                                <h3 class="text-lg font-semibold text-white mb-2">2. Verify Your Name</h3>
-                                <p class="text-slate-400 text-sm leading-relaxed">Check that your name appears in the electoral roll for your constituency. You can verify this online through the Election Commission portal.</p>
-                            </div>
-                            
-                            <div class="relative pl-16">
-                                <div class="absolute left-4 w-6 h-6 rounded-full bg-slate-700 border-4 border-slate-950"></div>
-                                <h3 class="text-lg font-semibold text-white mb-2">3. Know Your Polling Booth</h3>
-                                <p class="text-slate-400 text-sm leading-relaxed">Find your assigned polling station using the voter slip or our Polling Booth Finder tool. Locate it on Google Maps for easy navigation.</p>
-                            </div>
-                            
-                            <div class="relative pl-16">
-                                <div class="absolute left-4 w-6 h-6 rounded-full bg-slate-700 border-4 border-slate-950"></div>
-                                <h3 class="text-lg font-semibold text-white mb-2">4. Gather Required Documents</h3>
-                                <p class="text-slate-400 text-sm leading-relaxed">Carry your Voter ID (EPIC) or valid photo ID proof to the polling station. Accepted IDs include Aadhaar, Passport, or Driving License.</p>
-                            </div>
-                            
-                            <div class="relative pl-16">
-                                <div class="absolute left-4 w-6 h-6 rounded-full bg-emerald-500 border-4 border-slate-950 shadow-lg shadow-emerald-500/30"></div>
-                                <h3 class="text-lg font-semibold text-white mb-2">5. Cast Your Vote</h3>
-                                <p class="text-slate-400 text-sm leading-relaxed">Go to your polling station on election day, verify your identity, and cast your vote. Remember to follow the voting guidelines inside the booth.</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== TIMELINE VIEW ==================== -->
-            <div id="view-timeline" class="hidden space-y-6 max-w-4xl animate-fade-in">
-                <div class="glass-card rounded-xl p-8">
-                    <h2 class="text-2xl font-bold text-white mb-8">Election Timeline</h2>
-                    
-                    <div class="grid md:grid-cols-2 gap-5">
-                        <div class="p-5 bg-slate-900/60 rounded-xl border border-brand-500/30">
-                            <div class="flex items-center gap-3 mb-3">
-                                <i class="fa-solid fa-flag text-brand-400"></i>
-                                <span class="badge badge-success">Active</span>
-                            </div>
-                            <h3 class="font-semibold text-white mb-1">Registration Started</h3>
-                            <p class="text-2xl font-bold text-white">Jan 1, 2026</p>
-                        </div>
-                        
-                        <div class="p-5 bg-slate-900/60 rounded-xl border border-slate-700/50">
-                            <div class="flex items-center gap-3 mb-3">
-                                <i class="fa-solid fa-clock text-slate-400"></i>
-                                <span class="badge badge-warning">Upcoming</span>
-                            </div>
-                            <h3 class="font-semibold text-white mb-1">Registration Deadline</h3>
-                            <p class="text-2xl font-bold text-white">Mar 15, 2026</p>
-                        </div>
-                        
-                        <div class="p-5 bg-slate-900/60 rounded-xl border border-slate-700/50">
-                            <div class="flex items-center gap-3 mb-3">
-                                <i class="fa-solid fa-calendar text-slate-400"></i>
-                                <span class="badge badge-info">Scheduled</span>
-                            </div>
-                            <h3 class="font-semibold text-white mb-1">Election Day</h3>
-                            <p class="text-2xl font-bold text-white">Apr 20, 2026</p>
-                        </div>
-                        
-                        <div class="p-5 bg-slate-900/60 rounded-xl border border-slate-700/50">
-                            <div class="flex items-center gap-3 mb-3">
-                                <i class="fa-solid fa-chart-bar text-slate-400"></i>
-                                <span class="badge badge-neutral">Scheduled</span>
-                            </div>
-                            <h3 class="font-semibold text-white mb-1">Results Declaration</h3>
-                            <p class="text-2xl font-bold text-white">May 2, 2026</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== POLLING VIEW ==================== -->
-            <div id="view-polling" class="hidden space-y-6 max-w-4xl animate-fade-in">
-                <div class="glass-card rounded-xl p-8">
-                    <div class="flex items-center gap-3 mb-2">
-                        <div class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
-                            <i class="fa-solid fa-map-location-dot"></i>
-                        </div>
-                        <h2 class="text-2xl font-bold text-white">Find Your Polling Booth</h2>
-                    </div>
-                    <p class="text-slate-400 mb-8">Locate your nearest official polling station.</p>
-                    
-                    <div class="space-y-6">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-3">Enter your location or use auto-detect</label>
-                            <div class="flex flex-col sm:flex-row gap-3">
-                                <input type="text" placeholder="Enter ZIP code or city..." class="input flex-1">
-                                <button class="btn btn-primary whitespace-nowrap">
-                                    <i class="fa-solid fa-location-crosshairs"></i>
-                                    Detect Location
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="p-8 bg-slate-900/60 rounded-xl border border-slate-800/50 text-center">
-                            <div class="w-16 h-16 rounded-2xl bg-slate-800/80 flex items-center justify-center mx-auto mb-4">
-                                <i class="fa-solid fa-map-marked-alt text-3xl text-slate-600"></i>
-                            </div>
-                            <h3 class="text-lg font-semibold text-white mb-2">Map Preview</h3>
-                            <p class="text-slate-500 text-sm mb-5">Enter your location to see the polling booth map</p>
-                            <button class="btn btn-secondary">
-                                <i class="fa-solid fa-map"></i>
-                                Open in Google Maps
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== REMINDERS VIEW ==================== -->
-            <div id="view-reminders" class="hidden space-y-6 max-w-4xl animate-fade-in">
-                <div class="glass-card rounded-xl p-8">
-                    <div class="flex items-center justify-between mb-8">
-                        <h2 class="text-2xl font-bold text-white">My Reminders</h2>
-                        <button class="btn btn-primary btn-sm">
-                            <i class="fa-solid fa-plus"></i>
-                            Add Reminder
-                        </button>
-                    </div>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-center justify-between p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center flex-shrink-0">
-                                    <i class="fa-solid fa-bell"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-white">Registration Deadline</h3>
-                                    <p class="text-sm text-slate-500">March 15, 2026</p>
-                                </div>
-                            </div>
-                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100">
-                                <i class="fa-solid fa-trash text-sm"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="flex items-center justify-between p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center flex-shrink-0">
-                                    <i class="fa-solid fa-bell"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-white">Voting Day</h3>
-                                    <p class="text-sm text-slate-500">April 20, 2026</p>
-                                </div>
-                            </div>
-                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100">
-                                <i class="fa-solid fa-trash text-sm"></i>
-                            </button>
-                        </div>
-                        
-                        <div class="flex items-center justify-between p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0">
-                                    <i class="fa-solid fa-bell"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-white">Results Declaration</h3>
-                                    <p class="text-sm text-slate-500">May 2, 2026</p>
-                                </div>
-                            </div>
-                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100">
-                                <i class="fa-solid fa-trash text-sm"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== DOCUMENTS VIEW ==================== -->
-            <div id="view-documents" class="hidden space-y-6 max-w-4xl animate-fade-in">
-                <div class="glass-card rounded-xl p-8">
-                    <h2 class="text-2xl font-bold text-white mb-8">Required Documents</h2>
-                    
-                    <div class="space-y-4">
-                        <div class="p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-xl flex-shrink-0">
-                                    <i class="fa-solid fa-id-card"></i>
-                                </div>
-                                <div class="flex-1">
-                                    <h3 class="font-semibold text-white">Voter ID (EPIC)</h3>
-                                    <p class="text-sm text-slate-500">Elector's Photo Identity Card - Primary ID</p>
-                                </div>
-                                <span class="badge badge-success">Recommended</span>
-                            </div>
-                        </div>
-                        
-                        <div class="p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl flex-shrink-0">
-                                    <i class="fa-solid fa-address-card"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-white">Aadhaar Card</h3>
-                                    <p class="text-sm text-slate-500">UIDAI issued unique identification</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl flex-shrink-0">
-                                    <i class="fa-solid fa-passport"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-white">Passport</h3>
-                                    <p class="text-sm text-slate-500">Valid Indian passport</p>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
-                            <div class="flex items-center gap-4">
-                                <div class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl flex-shrink-0">
-                                    <i class="fa-solid fa-car"></i>
-                                </div>
-                                <div>
-                                    <h3 class="font-semibold text-white">Driving License</h3>
-                                    <p class="text-sm text-slate-500">Valid driving license issued by RTO</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== CHAT VIEW ==================== -->
-            <div id="view-chat" class="hidden h-full flex flex-col animate-fade-in">
-                <div class="chat-container flex-1">
-                    <!-- Chat Header -->
-                    <div class="chat-header">
-                        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/25">
-                            <i class="fa-solid fa-robot text-white"></i>
-                        </div>
-                        <div>
-                            <h2 class="font-semibold text-white">VoteWise AI Assistant</h2>
-                            <p class="text-xs text-slate-500">Ask anything about elections</p>
-                        </div>
-                    </div>
-                    
-                    <!-- Messages -->
-                    <div class="chat-messages" id="chat-container">
-                        <div class="chat-message">
-                            <div class="chat-avatar ai">
-                                <i class="fa-solid fa-robot text-white text-sm"></i>
-                            </div>
-                            <div class="chat-bubble">
-                                <p class="text-white">Hello! I'm VoteWise AI. How can I help you today?</p>
-                                <div class="flex flex-wrap gap-2 mt-4">
-                                    <button onclick="quickAsk('How do I register to vote?')" class="px-3 py-1.5 bg-slate-700/50 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-600 transition-all">How to register</button>
-                                    <button onclick="quickAsk('What documents do I need?')" class="px-3 py-1.5 bg-slate-700/50 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-600 transition-all">Required documents</button>
-                                    <button onclick="quickAsk('Find my polling booth')" class="px-3 py-1.5 bg-slate-700/50 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-600 transition-all">Find polling booth</button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Input Area -->
-                    <div class="chat-input-area">
-                        <div class="chat-input-wrapper">
-                            <button class="chat-mic-btn" title="Voice input">
-                                <i class="fa-solid fa-microphone"></i>
-                            </button>
-                            <input type="text" id="chat-input" placeholder="Type your question..." class="chat-input" onkeypress="handleEnter(event)">
-                            <button onclick="sendMessage()" class="chat-send-btn" title="Send message">
-                                <i class="fa-solid fa-paper-plane"></i>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ==================== FAQ VIEW ==================== -->
-            <div id="view-faq" class="hidden space-y-6 max-w-4xl animate-fade-in">
-                <div class="glass-card rounded-xl p-8">
-                    <h2 class="text-2xl font-bold text-white mb-8">Frequently Asked Questions</h2>
-                    
-                    <div class="space-y-4">
-                        <details class="group p-5 bg-slate-900/60 rounded-xl border border-slate-800/50">
-                            <summary class="flex items-center justify-between cursor-pointer list-none">
-                                <h3 class="font-semibold text-white pr-4">Who is eligible to vote?</h3>
-                                <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
-                            </summary>
-                            <p class="text-slate-400 text-sm mt-4 leading-relaxed">Any Indian citizen aged 18 years or above on the qualifying date is eligible to vote.</p>
-                        </details>
-                        
-                        <details class="group p-5 bg-slate-900/60 rounded-xl border border-slate-800/50">
-                            <summary class="flex items-center justify-between cursor-pointer list-none">
-                                <h3 class="font-semibold text-white pr-4">How do I check if I'm registered?</h3>
-                                <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
-                            </summary>
-                            <p class="text-slate-400 text-sm mt-4 leading-relaxed">Visit the Election Commission website and search with your name and constituency.</p>
-                        </details>
-                        
-                        <details class="group p-5 bg-slate-900/60 rounded-xl border border-slate-800/50">
-                            <summary class="flex items-center justify-between cursor-pointer list-none">
-                                <h3 class="font-semibold text-white pr-4">What if my name is not in the list?</h3>
-                                <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
-                            </summary>
-                            <p class="text-slate-400 text-sm mt-4 leading-relaxed">You can register as a new voter through the online or offline process at your local electoral office.</p>
-                        </details>
-                        
-                        <details class="group p-5 bg-slate-900/60 rounded-xl border border-slate-800/50">
-                            <summary class="flex items-center justify-between cursor-pointer list-none">
-                                <h3 class="font-semibold text-white pr-4">Can I vote from anywhere?</h3>
-                                <i class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"></i>
-                            </summary>
-                            <p class="text-slate-400 text-sm mt-4 leading-relaxed">No, you must vote at your assigned polling station in your constituency.</p>
-                        </details>
-                    </div>
-                </div>
-            </div>
-
+      <!-- Top Header -->
+      <header
+        class="h-[72px] border-b border-white/[0.06] flex items-center justify-between px-6 lg:px-8 bg-[rgba(2,6,23,0.8)] backdrop-blur-xl"
+      >
+        <div>
+          <h1 class="text-xl font-semibold text-white" id="page-title">
+            Dashboard
+          </h1>
+          <p class="text-sm text-slate-500">
+            Welcome back, here's your election guidance
+          </p>
         </div>
+        <div class="flex items-center gap-3">
+          <button
+            class="w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 hover:text-white transition-colors border border-white/[0.06]"
+          >
+            <i class="fa-solid fa-bell"></i>
+          </button>
+          <button
+            onclick="toggleSidebarMobile()"
+            class="md:hidden w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 border border-white/[0.06]"
+          >
+            <i class="fa-solid fa-bars"></i>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-8">
+        <!-- ==================== HOME VIEW ==================== -->
+        <div id="view-home" class="space-y-6 animate-fade-in">
+          <!-- Quick Action Cards -->
+          <div
+            class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4"
+          >
+            <div
+              onclick="switchView('process')"
+              class="glass-card-hover p-5 cursor-pointer group"
+            >
+              <div
+                class="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i class="fa-solid fa-user-plus"></i>
+              </div>
+              <h3 class="font-semibold text-white text-sm mb-1">
+                Register to Vote
+              </h3>
+              <p class="text-xs text-slate-500">Step-by-step guide</p>
+            </div>
+            <div
+              onclick="switchView('timeline')"
+              class="glass-card-hover p-5 cursor-pointer group"
+            >
+              <div
+                class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i class="fa-solid fa-calendar-days"></i>
+              </div>
+              <h3 class="font-semibold text-white text-sm mb-1">
+                Election Timeline
+              </h3>
+              <p class="text-xs text-slate-500">Important dates</p>
+            </div>
+            <div
+              onclick="switchView('polling')"
+              class="glass-card-hover p-5 cursor-pointer group"
+            >
+              <div
+                class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i class="fa-solid fa-map-location-dot"></i>
+              </div>
+              <h3 class="font-semibold text-white text-sm mb-1">
+                Find Polling Booth
+              </h3>
+              <p class="text-xs text-slate-500">Locate your booth</p>
+            </div>
+            <div
+              onclick="switchView('documents')"
+              class="glass-card-hover p-5 cursor-pointer group"
+            >
+              <div
+                class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i class="fa-solid fa-file-contract"></i>
+              </div>
+              <h3 class="font-semibold text-white text-sm mb-1">
+                Required Documents
+              </h3>
+              <p class="text-xs text-slate-500">ID proofs needed</p>
+            </div>
+            <div
+              onclick="switchView('chat')"
+              class="glass-card-hover p-5 cursor-pointer group sm:col-span-1 md:col-span-2 lg:col-span-1"
+            >
+              <div
+                class="w-12 h-12 rounded-xl bg-cyan-500/10 text-cyan-400 flex items-center justify-center text-xl mb-4 group-hover:scale-110 transition-transform"
+              >
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <h3 class="font-semibold text-white text-sm mb-1">
+                Ask AI Helper
+              </h3>
+              <p class="text-xs text-slate-500">Get instant answers</p>
+            </div>
+          </div>
+
+          <!-- Main Grid -->
+          <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Left Column -->
+            <div class="lg:col-span-2 space-y-6">
+              <!-- Upcoming Events -->
+              <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center justify-between mb-6">
+                  <h2 class="text-lg font-semibold text-white">
+                    Upcoming Events
+                  </h2>
+                  <button
+                    class="text-sm text-brand-400 hover:text-brand-300 transition-colors"
+                  >
+                    View All
+                  </button>
+                </div>
+                <div class="space-y-4">
+                  <div
+                    class="flex items-center gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors"
+                  >
+                    <div
+                      class="w-14 h-14 rounded-xl bg-brand-500/10 text-brand-400 flex flex-col items-center justify-center text-sm font-bold flex-shrink-0 border border-brand-500/20"
+                    >
+                      <span class="text-[10px] uppercase tracking-wider"
+                        >Mar</span
+                      >
+                      <span class="text-lg">15</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-semibold text-white truncate">
+                        Voter Registration Deadline
+                      </h3>
+                      <p class="text-sm text-slate-500">
+                        Last date to register for upcoming elections
+                      </p>
+                    </div>
+                    <button
+                      class="px-3 py-2 bg-brand-500/10 text-brand-400 rounded-lg text-xs font-medium hover:bg-brand-500 hover:text-white transition-all flex-shrink-0"
+                    >
+                      <i class="fa-solid fa-bell mr-1.5"></i> Remind
+                    </button>
+                  </div>
+                  <div
+                    class="flex items-center gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors"
+                  >
+                    <div
+                      class="w-14 h-14 rounded-xl bg-purple-500/10 text-purple-400 flex flex-col items-center justify-center text-sm font-bold flex-shrink-0 border border-purple-500/20"
+                    >
+                      <span class="text-[10px] uppercase tracking-wider"
+                        >Apr</span
+                      >
+                      <span class="text-lg">20</span>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <h3 class="font-semibold text-white truncate">
+                        Voting Day
+                      </h3>
+                      <p class="text-sm text-slate-500">
+                        Cast your vote at your assigned polling booth
+                      </p>
+                    </div>
+                    <button
+                      class="px-3 py-2 bg-purple-500/10 text-purple-400 rounded-lg text-xs font-medium hover:bg-purple-500 hover:text-white transition-all flex-shrink-0"
+                    >
+                      <i class="fa-solid fa-bell mr-1.5"></i> Remind
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- First-Time Voter Guide -->
+              <div class="glass-card rounded-xl p-6 border-l-4 border-lime-500">
+                <div class="flex items-center gap-3 mb-4">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-lime-500/10 text-lime-400 flex items-center justify-center"
+                  >
+                    <i class="fa-solid fa-graduation-cap"></i>
+                  </div>
+                  <h2 class="text-lg font-semibold text-white">
+                    First-Time Voter?
+                  </h2>
+                </div>
+                <p class="text-slate-400 text-sm mb-4">
+                  Everything you need to know as a first-time voter, explained
+                  simply.
+                </p>
+                <div class="flex flex-wrap gap-2">
+                  <button
+                    onclick="quickAsk('How do I register to vote?')"
+                    class="px-3 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-sm transition-all"
+                  >
+                    <i class="fa-solid fa-arrow-right mr-2 text-brand-400"></i
+                    >Registration Guide
+                  </button>
+                  <button
+                    onclick="quickAsk('What documents do I need?')"
+                    class="px-3 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-sm transition-all"
+                  >
+                    <i class="fa-solid fa-arrow-right mr-2 text-brand-400"></i
+                    >Documents List
+                  </button>
+                  <button
+                    onclick="quickAsk('What happens on voting day?')"
+                    class="px-3 py-2 bg-slate-800/80 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg text-sm transition-all"
+                  >
+                    <i class="fa-solid fa-arrow-right mr-2 text-brand-400"></i
+                    >Voting Day Guide
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="space-y-6">
+              <!-- My Reminders -->
+              <div class="glass-card rounded-xl p-5">
+                <div class="flex items-center justify-between mb-5">
+                  <h2 class="text-lg font-semibold text-white">My Reminders</h2>
+                  <button
+                    onclick="switchView('reminders')"
+                    class="text-sm text-brand-400 hover:text-brand-300 transition-colors"
+                  >
+                    Manage
+                  </button>
+                </div>
+                <div class="space-y-3">
+                  <div
+                    class="flex items-center gap-3 p-3 bg-slate-900/60 rounded-lg border border-slate-800/50"
+                  >
+                    <div
+                      class="w-8 h-8 rounded-lg bg-brand-500/20 text-brand-400 flex items-center justify-center flex-shrink-0"
+                    >
+                      <i class="fa-solid fa-bell text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm text-white">Registration Deadline</p>
+                      <p class="text-xs text-slate-500">Mar 15, 2026</p>
+                    </div>
+                  </div>
+                  <div
+                    class="flex items-center gap-3 p-3 bg-slate-900/60 rounded-lg border border-slate-800/50"
+                  >
+                    <div
+                      class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-400 flex items-center justify-center flex-shrink-0"
+                    >
+                      <i class="fa-solid fa-bell text-xs"></i>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm text-white">Voting Day</p>
+                      <p class="text-xs text-slate-500">Apr 20, 2026</p>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-4 pt-4 border-t border-white/[0.06]">
+                  <button
+                    class="w-full py-2.5 bg-slate-800/50 hover:bg-slate-700 text-slate-300 rounded-lg text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  >
+                    <i class="fa-solid fa-plus text-xs"></i>
+                    Add Reminder
+                  </button>
+                </div>
+              </div>
+
+              <!-- Quick AI Help -->
+              <div class="glass-card rounded-xl p-5">
+                <div class="flex items-center gap-3 mb-4">
+                  <div
+                    class="w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/20"
+                  >
+                    <i class="fa-solid fa-robot text-white text-sm"></i>
+                  </div>
+                  <h2 class="text-lg font-semibold text-white">Quick Help</h2>
+                </div>
+                <p class="text-sm text-slate-400 mb-4">
+                  Ask any question about elections.
+                </p>
+                <button
+                  onclick="switchView('chat')"
+                  class="w-full py-3 bg-gradient-to-r from-brand-600 to-purple-600 hover:from-brand-500 hover:to-purple-500 text-white rounded-xl font-medium transition-all shadow-lg shadow-brand-500/20 flex items-center justify-center gap-2"
+                >
+                  <i class="fa-solid fa-comments"></i>
+                  Open AI Chat
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== ELECTION PROCESS VIEW ==================== -->
+        <div
+          id="view-process"
+          class="hidden space-y-6 max-w-4xl animate-fade-in"
+        >
+          <div class="glass-card rounded-xl p-8">
+            <h2 class="text-2xl font-bold text-white mb-8">
+              Election Process Guide
+            </h2>
+
+            <div class="relative">
+              <div
+                class="absolute left-7 top-0 bottom-0 w-0.5 bg-gradient-to-b from-brand-500 to-transparent"
+              ></div>
+
+              <div class="space-y-8">
+                <div class="relative pl-16">
+                  <div
+                    class="absolute left-4 w-6 h-6 rounded-full bg-brand-500 border-4 border-slate-950 shadow-lg shadow-brand-500/30"
+                  ></div>
+                  <h3 class="text-lg font-semibold text-white mb-2">
+                    1. Voter Registration
+                  </h3>
+                  <p class="text-slate-400 text-sm leading-relaxed">
+                    Register yourself as a voter on the Election Commission
+                    website or at your local Electoral Registration Office.
+                    You'll need valid ID proof and address proof.
+                  </p>
+                </div>
+
+                <div class="relative pl-16">
+                  <div
+                    class="absolute left-4 w-6 h-6 rounded-full bg-slate-700 border-4 border-slate-950"
+                  ></div>
+                  <h3 class="text-lg font-semibold text-white mb-2">
+                    2. Verify Your Name
+                  </h3>
+                  <p class="text-slate-400 text-sm leading-relaxed">
+                    Check that your name appears in the electoral roll for your
+                    constituency. You can verify this online through the
+                    Election Commission portal.
+                  </p>
+                </div>
+
+                <div class="relative pl-16">
+                  <div
+                    class="absolute left-4 w-6 h-6 rounded-full bg-slate-700 border-4 border-slate-950"
+                  ></div>
+                  <h3 class="text-lg font-semibold text-white mb-2">
+                    3. Know Your Polling Booth
+                  </h3>
+                  <p class="text-slate-400 text-sm leading-relaxed">
+                    Find your assigned polling station using the voter slip or
+                    our Polling Booth Finder tool. Locate it on Google Maps for
+                    easy navigation.
+                  </p>
+                </div>
+
+                <div class="relative pl-16">
+                  <div
+                    class="absolute left-4 w-6 h-6 rounded-full bg-slate-700 border-4 border-slate-950"
+                  ></div>
+                  <h3 class="text-lg font-semibold text-white mb-2">
+                    4. Gather Required Documents
+                  </h3>
+                  <p class="text-slate-400 text-sm leading-relaxed">
+                    Carry your Voter ID (EPIC) or valid photo ID proof to the
+                    polling station. Accepted IDs include Aadhaar, Passport, or
+                    Driving License.
+                  </p>
+                </div>
+
+                <div class="relative pl-16">
+                  <div
+                    class="absolute left-4 w-6 h-6 rounded-full bg-emerald-500 border-4 border-slate-950 shadow-lg shadow-emerald-500/30"
+                  ></div>
+                  <h3 class="text-lg font-semibold text-white mb-2">
+                    5. Cast Your Vote
+                  </h3>
+                  <p class="text-slate-400 text-sm leading-relaxed">
+                    Go to your polling station on election day, verify your
+                    identity, and cast your vote. Remember to follow the voting
+                    guidelines inside the booth.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== TIMELINE VIEW ==================== -->
+        <div
+          id="view-timeline"
+          class="hidden space-y-6 max-w-4xl animate-fade-in"
+        >
+          <div class="glass-card rounded-xl p-8">
+            <h2 class="text-2xl font-bold text-white mb-8">
+              Election Timeline
+            </h2>
+
+            <div class="grid md:grid-cols-2 gap-5">
+              <div
+                class="p-5 bg-slate-900/60 rounded-xl border border-brand-500/30"
+              >
+                <div class="flex items-center gap-3 mb-3">
+                  <i class="fa-solid fa-flag text-brand-400"></i>
+                  <span class="badge badge-success">Active</span>
+                </div>
+                <h3 class="font-semibold text-white mb-1">
+                  Registration Started
+                </h3>
+                <p class="text-2xl font-bold text-white">Jan 1, 2026</p>
+              </div>
+
+              <div
+                class="p-5 bg-slate-900/60 rounded-xl border border-slate-700/50"
+              >
+                <div class="flex items-center gap-3 mb-3">
+                  <i class="fa-solid fa-clock text-slate-400"></i>
+                  <span class="badge badge-warning">Upcoming</span>
+                </div>
+                <h3 class="font-semibold text-white mb-1">
+                  Registration Deadline
+                </h3>
+                <p class="text-2xl font-bold text-white">Mar 15, 2026</p>
+              </div>
+
+              <div
+                class="p-5 bg-slate-900/60 rounded-xl border border-slate-700/50"
+              >
+                <div class="flex items-center gap-3 mb-3">
+                  <i class="fa-solid fa-calendar text-slate-400"></i>
+                  <span class="badge badge-info">Scheduled</span>
+                </div>
+                <h3 class="font-semibold text-white mb-1">Election Day</h3>
+                <p class="text-2xl font-bold text-white">Apr 20, 2026</p>
+              </div>
+
+              <div
+                class="p-5 bg-slate-900/60 rounded-xl border border-slate-700/50"
+              >
+                <div class="flex items-center gap-3 mb-3">
+                  <i class="fa-solid fa-chart-bar text-slate-400"></i>
+                  <span class="badge badge-neutral">Scheduled</span>
+                </div>
+                <h3 class="font-semibold text-white mb-1">
+                  Results Declaration
+                </h3>
+                <p class="text-2xl font-bold text-white">May 2, 2026</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== POLLING VIEW ==================== -->
+        <div
+          id="view-polling"
+          class="hidden space-y-6 max-w-4xl animate-fade-in"
+        >
+          <div class="glass-card rounded-xl p-8">
+            <div class="flex items-center gap-3 mb-2">
+              <div
+                class="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center"
+              >
+                <i class="fa-solid fa-map-location-dot"></i>
+              </div>
+              <h2 class="text-2xl font-bold text-white">
+                Find Your Polling Booth
+              </h2>
+            </div>
+            <p class="text-slate-400 mb-8">
+              Locate your nearest official polling station.
+            </p>
+
+            <div class="space-y-6">
+              <div>
+                <label class="block text-sm font-medium text-slate-300 mb-3"
+                  >Enter your location or use auto-detect</label
+                >
+                <div class="flex flex-col sm:flex-row gap-3">
+                  <input
+                    type="text"
+                    placeholder="Enter ZIP code or city..."
+                    class="input flex-1"
+                  />
+                  <button class="btn btn-primary whitespace-nowrap">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                    Detect Location
+                  </button>
+                </div>
+              </div>
+
+              <div
+                class="p-8 bg-slate-900/60 rounded-xl border border-slate-800/50 text-center"
+              >
+                <div
+                  class="w-16 h-16 rounded-2xl bg-slate-800/80 flex items-center justify-center mx-auto mb-4"
+                >
+                  <i
+                    class="fa-solid fa-map-marked-alt text-3xl text-slate-600"
+                  ></i>
+                </div>
+                <h3 class="text-lg font-semibold text-white mb-2">
+                  Map Preview
+                </h3>
+                <p class="text-slate-500 text-sm mb-5">
+                  Enter your location to see the polling booth map
+                </p>
+                <button class="btn btn-secondary">
+                  <i class="fa-solid fa-map"></i>
+                  Open in Google Maps
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== REMINDERS VIEW ==================== -->
+        <div
+          id="view-reminders"
+          class="hidden space-y-6 max-w-4xl animate-fade-in"
+        >
+          <div class="glass-card rounded-xl p-8">
+            <div class="flex items-center justify-between mb-8">
+              <h2 class="text-2xl font-bold text-white">My Reminders</h2>
+              <button class="btn btn-primary btn-sm">
+                <i class="fa-solid fa-plus"></i>
+                Add Reminder
+              </button>
+            </div>
+
+            <div class="space-y-4">
+              <div
+                class="flex items-center justify-between p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center flex-shrink-0"
+                  >
+                    <i class="fa-solid fa-bell"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-white">
+                      Registration Deadline
+                    </h3>
+                    <p class="text-sm text-slate-500">March 15, 2026</p>
+                  </div>
+                </div>
+                <button
+                  class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                >
+                  <i class="fa-solid fa-trash text-sm"></i>
+                </button>
+              </div>
+
+              <div
+                class="flex items-center justify-between p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center flex-shrink-0"
+                  >
+                    <i class="fa-solid fa-bell"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-white">Voting Day</h3>
+                    <p class="text-sm text-slate-500">April 20, 2026</p>
+                  </div>
+                </div>
+                <button
+                  class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                >
+                  <i class="fa-solid fa-trash text-sm"></i>
+                </button>
+              </div>
+
+              <div
+                class="flex items-center justify-between p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center flex-shrink-0"
+                  >
+                    <i class="fa-solid fa-bell"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-white">
+                      Results Declaration
+                    </h3>
+                    <p class="text-sm text-slate-500">May 2, 2026</p>
+                  </div>
+                </div>
+                <button
+                  class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all opacity-0 group-hover:opacity-100"
+                >
+                  <i class="fa-solid fa-trash text-sm"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== DOCUMENTS VIEW ==================== -->
+        <div
+          id="view-documents"
+          class="hidden space-y-6 max-w-4xl animate-fade-in"
+        >
+          <div class="glass-card rounded-xl p-8">
+            <h2 class="text-2xl font-bold text-white mb-8">
+              Required Documents
+            </h2>
+
+            <div class="space-y-4">
+              <div
+                class="p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center text-xl flex-shrink-0"
+                  >
+                    <i class="fa-solid fa-id-card"></i>
+                  </div>
+                  <div class="flex-1">
+                    <h3 class="font-semibold text-white">Voter ID (EPIC)</h3>
+                    <p class="text-sm text-slate-500">
+                      Elector's Photo Identity Card - Primary ID
+                    </p>
+                  </div>
+                  <span class="badge badge-success">Recommended</span>
+                </div>
+              </div>
+
+              <div
+                class="p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center text-xl flex-shrink-0"
+                  >
+                    <i class="fa-solid fa-address-card"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-white">Aadhaar Card</h3>
+                    <p class="text-sm text-slate-500">
+                      UIDAI issued unique identification
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center text-xl flex-shrink-0"
+                  >
+                    <i class="fa-solid fa-passport"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-white">Passport</h3>
+                    <p class="text-sm text-slate-500">Valid Indian passport</p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                class="p-5 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors"
+              >
+                <div class="flex items-center gap-4">
+                  <div
+                    class="w-12 h-12 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center text-xl flex-shrink-0"
+                  >
+                    <i class="fa-solid fa-car"></i>
+                  </div>
+                  <div>
+                    <h3 class="font-semibold text-white">Driving License</h3>
+                    <p class="text-sm text-slate-500">
+                      Valid driving license issued by RTO
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== CHAT VIEW ==================== -->
+        <div id="view-chat" class="hidden h-full flex flex-col animate-fade-in">
+          <div class="chat-container flex-1">
+            <!-- Chat Header -->
+            <div class="chat-header">
+              <div
+                class="w-12 h-12 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/25"
+              >
+                <i class="fa-solid fa-robot text-white"></i>
+              </div>
+              <div>
+                <h2 class="font-semibold text-white">VoteWise AI Assistant</h2>
+                <p class="text-xs text-slate-500">
+                  Ask anything about elections
+                </p>
+              </div>
+            </div>
+
+            <!-- Messages -->
+            <div class="chat-messages" id="chat-container">
+              <div class="chat-message">
+                <div class="chat-avatar ai">
+                  <i class="fa-solid fa-robot text-white text-sm"></i>
+                </div>
+                <div class="chat-bubble">
+                  <p class="text-white">
+                    Hello! I'm VoteWise AI. How can I help you today?
+                  </p>
+                  <div class="flex flex-wrap gap-2 mt-4">
+                    <button
+                      onclick="quickAsk('How do I register to vote?')"
+                      class="px-3 py-1.5 bg-slate-700/50 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-600 transition-all"
+                    >
+                      How to register
+                    </button>
+                    <button
+                      onclick="quickAsk('What documents do I need?')"
+                      class="px-3 py-1.5 bg-slate-700/50 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-600 transition-all"
+                    >
+                      Required documents
+                    </button>
+                    <button
+                      onclick="quickAsk('Find my polling booth')"
+                      class="px-3 py-1.5 bg-slate-700/50 rounded-lg text-xs text-slate-300 hover:text-white hover:bg-slate-600 transition-all"
+                    >
+                      Find polling booth
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Input Area -->
+            <div class="chat-input-area">
+              <div class="chat-input-wrapper">
+                <button class="chat-mic-btn" title="Voice input">
+                  <i class="fa-solid fa-microphone"></i>
+                </button>
+                <input
+                  type="text"
+                  id="chat-input"
+                  placeholder="Type your question..."
+                  class="chat-input"
+                  onkeypress="handleEnter(event)"
+                />
+                <button
+                  onclick="sendMessage()"
+                  class="chat-send-btn"
+                  title="Send message"
+                >
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ==================== FAQ VIEW ==================== -->
+        <div id="view-faq" class="hidden space-y-6 max-w-4xl animate-fade-in">
+          <div class="glass-card rounded-xl p-8">
+            <h2 class="text-2xl font-bold text-white mb-8">
+              Frequently Asked Questions
+            </h2>
+
+            <div class="space-y-4">
+              <details
+                class="group p-5 bg-slate-900/60 rounded-xl border border-slate-800/50"
+              >
+                <summary
+                  class="flex items-center justify-between cursor-pointer list-none"
+                >
+                  <h3 class="font-semibold text-white pr-4">
+                    Who is eligible to vote?
+                  </h3>
+                  <i
+                    class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"
+                  ></i>
+                </summary>
+                <p class="text-slate-400 text-sm mt-4 leading-relaxed">
+                  Any Indian citizen aged 18 years or above on the qualifying
+                  date is eligible to vote.
+                </p>
+              </details>
+
+              <details
+                class="group p-5 bg-slate-900/60 rounded-xl border border-slate-800/50"
+              >
+                <summary
+                  class="flex items-center justify-between cursor-pointer list-none"
+                >
+                  <h3 class="font-semibold text-white pr-4">
+                    How do I check if I'm registered?
+                  </h3>
+                  <i
+                    class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"
+                  ></i>
+                </summary>
+                <p class="text-slate-400 text-sm mt-4 leading-relaxed">
+                  Visit the Election Commission website and search with your
+                  name and constituency.
+                </p>
+              </details>
+
+              <details
+                class="group p-5 bg-slate-900/60 rounded-xl border border-slate-800/50"
+              >
+                <summary
+                  class="flex items-center justify-between cursor-pointer list-none"
+                >
+                  <h3 class="font-semibold text-white pr-4">
+                    What if my name is not in the list?
+                  </h3>
+                  <i
+                    class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"
+                  ></i>
+                </summary>
+                <p class="text-slate-400 text-sm mt-4 leading-relaxed">
+                  You can register as a new voter through the online or offline
+                  process at your local electoral office.
+                </p>
+              </details>
+
+              <details
+                class="group p-5 bg-slate-900/60 rounded-xl border border-slate-800/50"
+              >
+                <summary
+                  class="flex items-center justify-between cursor-pointer list-none"
+                >
+                  <h3 class="font-semibold text-white pr-4">
+                    Can I vote from anywhere?
+                  </h3>
+                  <i
+                    class="fa-solid fa-chevron-down text-slate-500 group-open:rotate-180 transition-transform"
+                  ></i>
+                </summary>
+                <p class="text-slate-400 text-sm mt-4 leading-relaxed">
+                  No, you must vote at your assigned polling station in your
+                  constituency.
+                </p>
+              </details>
+            </div>
+          </div>
+        </div>
+      </div>
     </main>
 
     <script>
-        // Load data on page init
-        document.addEventListener('DOMContentLoaded', function() {
-            loadTimeline();
-            loadFAQs();
-            loadUserData();
-        });
+      // Load data on page init
+      document.addEventListener("DOMContentLoaded", function () {
+        loadTimeline();
+        loadFAQs();
+        loadUserData();
+      });
 
-        async function loadTimeline() {
-            try {
-                const res = await fetch('/api/timeline');
-                const data = await res.json();
-                if (data.success && data.data) {
-                    renderTimeline(data.data);
-                }
-            } catch(e) { console.log('Timeline loading...'); }
+      async function loadTimeline() {
+        try {
+          const res = await fetch("/api/timeline");
+          const data = await res.json();
+          if (data.success && data.data) {
+            renderTimeline(data.data);
+          }
+        } catch (e) {
+          console.log("Timeline loading...");
         }
+      }
 
-        function renderTimeline(events) {
-            const container = document.getElementById('upcoming-events');
-            if (!container || !events || events.length === 0) return;
-            container.innerHTML = events.slice(0, 3).map(event => `
+      function renderTimeline(events) {
+        const container = document.getElementById("upcoming-events");
+        if (!container || !events || events.length === 0) return;
+        container.innerHTML = events
+          .slice(0, 3)
+          .map(
+            (event) => `
                 <div class="flex items-center gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors">
                     <div class="w-14 h-14 rounded-xl bg-brand-500/10 text-brand-400 flex flex-col items-center justify-center text-sm font-bold flex-shrink-0 border border-brand-500/20">
-                        <span class="text-[10px] uppercase">${new Date(event.date).toLocaleString('en-US', { month: 'short' })}</span>
+                        <span class="text-[10px] uppercase">${new Date(event.date).toLocaleString("en-US", { month: "short" })}</span>
                         <span class="text-lg">${new Date(event.date).getDate()}</span>
                     </div>
                     <div class="flex-1 min-w-0">
                         <h3 class="font-semibold text-white truncate">${event.title}</h3>
-                        <p class="text-sm text-slate-500">${event.description || 'Upcoming election event'}</p>
+                        <p class="text-sm text-slate-500">${event.description || "Upcoming election event"}</p>
                     </div>
                     <button class="px-3 py-2 bg-brand-500/10 text-brand-400 rounded-lg text-xs font-medium hover:bg-brand-500 hover:text-white transition-all flex-shrink-0">
                         <i class="fa-solid fa-bell mr-1.5"></i> Remind
                     </button>
                 </div>
-            `).join('');
-        }
+            `,
+          )
+          .join("");
+      }
 
-        async function loadFAQs() {
-            try {
-                const res = await fetch('/api/faqs');
-                const data = await res.json();
-                if (data.success && data.data) {
-                    renderFAQs(data.data);
-                }
-            } catch(e) { console.log('FAQ loading...'); }
+      async function loadFAQs() {
+        try {
+          const res = await fetch("/api/faqs");
+          const data = await res.json();
+          if (data.success && data.data) {
+            renderFAQs(data.data);
+          }
+        } catch (e) {
+          console.log("FAQ loading...");
         }
+      }
 
-        function renderFAQs(faqs) {
-            const container = document.getElementById('faq-list');
-            if (!container || !faqs || faqs.length === 0) return;
-            container.innerHTML = faqs.slice(0, 4).map(faq => `
+      function renderFAQs(faqs) {
+        const container = document.getElementById("faq-list");
+        if (!container || !faqs || faqs.length === 0) return;
+        container.innerHTML = faqs
+          .slice(0, 4)
+          .map(
+            (faq) => `
                 <details class="group p-5 bg-slate-900/60 rounded-xl border border-slate-800/50">
                     <summary class="flex items-center justify-between cursor-pointer list-none">
                         <h3 class="font-semibold text-white pr-4">${faq.question}</h3>
@@ -710,157 +1149,197 @@
                     </summary>
                     <p class="text-slate-400 text-sm mt-4 leading-relaxed">${faq.answer}</p>
                 </details>
-            `).join('');
-        }
+            `,
+          )
+          .join("");
+      }
 
-        async function loadUserData() {
-            const token = localStorage.getItem('access_token');
-            if (token) {
-                try {
-                    const res = await fetch('/api/auth/me', { headers: { 'Authorization': 'Bearer ' + token } });
-                    if (res.ok) {
-                        const data = await res.json();
-                        if (data.success && data.data) {
-                            const nameEl = document.getElementById('profile-name');
-                            const emailEl = document.getElementById('profile-email');
-                            const initialEl = document.getElementById('profile-initial');
-                            if (nameEl && data.data.full_name) nameEl.textContent = data.data.full_name;
-                            if (emailEl && data.data.email) emailEl.textContent = data.data.email;
-                            if (initialEl && data.data.full_name) initialEl.textContent = data.data.full_name.charAt(0).toUpperCase();
-                        }
-                    }
-                } catch(e) { console.log('User data loading...'); }
+      async function loadUserData() {
+        const token = localStorage.getItem("access_token");
+        if (token) {
+          try {
+            const res = await fetch("/api/auth/me", {
+              headers: { Authorization: "Bearer " + token },
+            });
+            if (res.ok) {
+              const data = await res.json();
+              if (data.success && data.data) {
+                const nameEl = document.getElementById("profile-name");
+                const emailEl = document.getElementById("profile-email");
+                const initialEl = document.getElementById("profile-initial");
+                if (nameEl && data.data.full_name)
+                  nameEl.textContent = data.data.full_name;
+                if (emailEl && data.data.email)
+                  emailEl.textContent = data.data.email;
+                if (initialEl && data.data.full_name)
+                  initialEl.textContent = data.data.full_name
+                    .charAt(0)
+                    .toUpperCase();
+              }
             }
+          } catch (e) {
+            console.log("User data loading...");
+          }
         }
+      }
 
-        let currentLang = 'en';
-        function toggleLanguage() {
-            currentLang = currentLang === 'en' ? 'hi' : 'en';
-            document.getElementById('lang-display').textContent = currentLang === 'en' ? 'English' : 'हिंदी';
-        }
+      let currentLang = "en";
+      function toggleLanguage() {
+        currentLang = currentLang === "en" ? "hi" : "en";
+        document.getElementById("lang-display").textContent =
+          currentLang === "en" ? "English" : "हिंदी";
+      }
 
-        function quickAsk(question) {
-            switchView('chat');
-            setTimeout(() => {
-                document.getElementById('chat-input').value = question;
-                sendMessage();
-            }, 100);
-        }
+      function quickAsk(question) {
+        switchView("chat");
+        setTimeout(() => {
+          document.getElementById("chat-input").value = question;
+          sendMessage();
+        }, 100);
+      }
 
-        function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const message = input.value.trim();
-            if (!message) return;
-            
-            const container = document.getElementById('chat-container');
-            
-            const userMsg = document.createElement('div');
-            userMsg.className = 'chat-message user';
-            userMsg.innerHTML = `
+      function sendMessage() {
+        const input = document.getElementById("chat-input");
+        const message = input.value.trim();
+        if (!message) return;
+
+        const container = document.getElementById("chat-container");
+
+        const userMsg = document.createElement("div");
+        userMsg.className = "chat-message user";
+        userMsg.innerHTML = `
                 <div class="chat-bubble"><p class="text-white">${message}</p></div>
                 <div class="chat-avatar user"><i class="fa-solid fa-user text-white text-sm"></i></div>
             `;
-            container.appendChild(userMsg);
-            
-            input.value = '';
-            container.scrollTop = container.scrollHeight;
-            
-            // Show loading indicator
-            const loadingMsg = document.createElement('div');
-            loadingMsg.className = 'chat-message';
-            loadingMsg.id = 'chat-loading';
-            loadingMsg.innerHTML = `
+        container.appendChild(userMsg);
+
+        input.value = "";
+        container.scrollTop = container.scrollHeight;
+
+        // Show loading indicator
+        const loadingMsg = document.createElement("div");
+        loadingMsg.className = "chat-message";
+        loadingMsg.id = "chat-loading";
+        loadingMsg.innerHTML = `
                 <div class="chat-avatar ai"><i class="fa-solid fa-robot text-white text-sm"></i></div>
                 <div class="chat-bubble"><p class="text-slate-400"><i class="fa-solid fa-circle-notch fa-spin mr-2"></i>Thinking...</p></div>
             `;
-            container.appendChild(loadingMsg);
-            container.scrollTop = container.scrollHeight;
-            
-            // Call real API
-            fetch('/api/chat/chat', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: message })
-            })
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById('chat-loading')?.remove();
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'chat-message';
-                let responseText = data.intro || data.error || 'I\'m ready to help!';
-                aiMsg.innerHTML = `
+        container.appendChild(loadingMsg);
+        container.scrollTop = container.scrollHeight;
+
+        // Call real API
+        fetch("/api/chat/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: message }),
+        })
+          .then((res) => res.json())
+          .then((data) => {
+            document.getElementById("chat-loading")?.remove();
+            const aiMsg = document.createElement("div");
+            aiMsg.className = "chat-message";
+            let responseText = data.intro || data.error || "I'm ready to help!";
+            aiMsg.innerHTML = `
                     <div class="chat-avatar ai"><i class="fa-solid fa-robot text-white text-sm"></i></div>
                     <div class="chat-bubble">
                         <p class="text-white mb-3">${responseText}</p>
-                        ${data.steps && data.steps.length > 0 ? `
+                        ${
+                          data.steps && data.steps.length > 0
+                            ? `
                             <div class="mt-3 space-y-2">
-                                ${data.steps.map((step, i) => `<div class="flex items-start gap-2 text-sm"><span class="text-brand-400 font-medium">${i+1}.</span><span class="text-slate-300">${step}</span></div>`).join('')}
+                                ${data.steps.map((step, i) => `<div class="flex items-start gap-2 text-sm"><span class="text-brand-400 font-medium">${i + 1}.</span><span class="text-slate-300">${step}</span></div>`).join("")}
                             </div>
-                        ` : ''}
-                        ${data.tips && data.tips.length > 0 ? `
+                        `
+                            : ""
+                        }
+                        ${
+                          data.tips && data.tips.length > 0
+                            ? `
                             <div class="mt-3 pt-3 border-t border-white/10">
                                 <p class="text-xs text-slate-500 mb-2">💡 Tips:</p>
-                                ${data.tips.map(tip => `<span class="inline-block px-2 py-1 bg-amber-500/10 text-amber-400 rounded text-xs mr-1 mb-1">${tip}</span>`).join('')}
+                                ${data.tips.map((tip) => `<span class="inline-block px-2 py-1 bg-amber-500/10 text-amber-400 rounded text-xs mr-1 mb-1">${tip}</span>`).join("")}
                             </div>
-                        ` : ''}
+                        `
+                            : ""
+                        }
                     </div>
                 `;
-                container.appendChild(aiMsg);
-                container.scrollTop = container.scrollHeight;
-            })
-            .catch(err => {
-                document.getElementById('chat-loading')?.remove();
-                const aiMsg = document.createElement('div');
-                aiMsg.className = 'chat-message';
-                aiMsg.innerHTML = `
+            container.appendChild(aiMsg);
+            container.scrollTop = container.scrollHeight;
+          })
+          .catch((err) => {
+            document.getElementById("chat-loading")?.remove();
+            const aiMsg = document.createElement("div");
+            aiMsg.className = "chat-message";
+            aiMsg.innerHTML = `
                     <div class="chat-avatar ai"><i class="fa-solid fa-robot text-white text-sm"></i></div>
                     <div class="chat-bubble"><p class="text-red-400">Sorry, I'm having trouble connecting. Please try again.</p></div>
                 `;
-                container.appendChild(aiMsg);
-                container.scrollTop = container.scrollHeight;
-            });
-        }
+            container.appendChild(aiMsg);
+            container.scrollTop = container.scrollHeight;
+          });
+      }
 
-        function handleEnter(e) {
-            if (e.key === 'Enter') sendMessage();
-        }
+      function handleEnter(e) {
+        if (e.key === "Enter") sendMessage();
+      }
 
-        const views = ['home', 'process', 'timeline', 'polling', 'reminders', 'documents', 'chat', 'faq'];
-        const titles = {
-            'home': 'Dashboard', 'process': 'Election Process', 'timeline': 'Timeline',
-            'polling': 'Polling Booth', 'reminders': 'Reminders', 'documents': 'Documents',
-            'chat': 'AI Assistant', 'faq': 'FAQ'
-        };
+      const views = [
+        "home",
+        "process",
+        "timeline",
+        "polling",
+        "reminders",
+        "documents",
+        "chat",
+        "faq",
+      ];
+      const titles = {
+        home: "Dashboard",
+        process: "Election Process",
+        timeline: "Timeline",
+        polling: "Polling Booth",
+        reminders: "Reminders",
+        documents: "Documents",
+        chat: "AI Assistant",
+        faq: "FAQ",
+      };
 
-        function switchView(viewName) {
-            views.forEach(v => document.getElementById('view-' + v).classList.add('hidden'));
-            document.getElementById('view-' + viewName).classList.remove('hidden');
-            
-            views.forEach(v => {
-                const nav = document.getElementById('nav-' + v);
-                if (v === viewName) {
-                    nav.className = 'sidebar-nav-item active w-full';
-                } else {
-                    nav.className = 'sidebar-nav-item w-full';
-                }
-            });
-            
-            document.getElementById('page-title').textContent = titles[viewName];
-            
-            if (window.innerWidth < 768) {
-                document.getElementById('sidebar').classList.add('-translate-x-full');
-                document.getElementById('sidebar-overlay').classList.add('hidden');
-                document.body.style.overflow = '';
-            }
-        }
+      function switchView(viewName) {
+        views.forEach((v) =>
+          document.getElementById("view-" + v).classList.add("hidden"),
+        );
+        document.getElementById("view-" + viewName).classList.remove("hidden");
 
-        function toggleSidebarMobile() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-            document.body.style.overflow = sidebar.classList.contains('-translate-x-full') ? '' : 'hidden';
+        views.forEach((v) => {
+          const nav = document.getElementById("nav-" + v);
+          if (v === viewName) {
+            nav.className = "sidebar-nav-item active w-full";
+          } else {
+            nav.className = "sidebar-nav-item w-full";
+          }
+        });
+
+        document.getElementById("page-title").textContent = titles[viewName];
+
+        if (window.innerWidth < 768) {
+          document.getElementById("sidebar").classList.add("-translate-x-full");
+          document.getElementById("sidebar-overlay").classList.add("hidden");
+          document.body.style.overflow = "";
         }
+      }
+
+      function toggleSidebarMobile() {
+        const sidebar = document.getElementById("sidebar");
+        const overlay = document.getElementById("sidebar-overlay");
+        sidebar.classList.toggle("-translate-x-full");
+        overlay.classList.toggle("hidden");
+        document.body.style.overflow = sidebar.classList.contains(
+          "-translate-x-full",
+        )
+          ? ""
+          : "hidden";
+      }
     </script>
-</body>
+  </body>
 </html>

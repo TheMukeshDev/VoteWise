@@ -11,6 +11,7 @@ credentials.json
 client_secret*.json
 *.pem
 *.key
+firebase-adminsdk.json
 
 # Python
 __pycache__/

@@ -4,7 +4,7 @@ Logging configuration for VoteWise AI.
 
 import logging
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 import json
 
 
@@ -13,7 +13,7 @@ class JSONFormatter(logging.Formatter):
 
     def format(self, record):
         log_data = {
-            "timestamp": datetime.utcnow().isoformat() + "Z",
+            "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
             "level": record.levelname,
             "logger": record.name,
             "message": record.getMessage(),
@@ -135,7 +135,7 @@ def log_admin_action(user_id, action, resource, details=None):
         "user_id": user_id,
         "action": action,
         "resource": resource,
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 
     if details:
@@ -159,7 +159,7 @@ def log_integration_failure(service, error, context=None):
         "service": service,
         "error_type": type(error).__name__,
         "context": context or {},
-        "timestamp": datetime.utcnow().isoformat() + "Z",
+        "timestamp": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
 
     logger.error(json.dumps(log_data))

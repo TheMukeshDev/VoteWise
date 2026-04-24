@@ -30,7 +30,7 @@ class TestAuthRoutes:
     def test_login_invalid_token(self, client):
         """Test login with invalid token returns error."""
         with patch(
-            "middleware.auth_middleware.verify_firebase_token", return_value=None
+            "routes.auth.verify_firebase_token", return_value=None
         ):
             response = client.post(
                 "/api/auth/login",
@@ -44,7 +44,7 @@ class TestAuthRoutes:
     def test_login_success(self, client, mock_firebase_auth, mock_firestore):
         """Test successful login flow."""
         with (
-            patch("middleware.auth_middleware.verify_firebase_token") as mock_verify,
+            patch("routes.auth.verify_firebase_token") as mock_verify,
             patch(
                 "services.auth_service.user_profile_service.get_user_profile"
             ) as mock_get,
@@ -81,7 +81,7 @@ class TestAuthRoutes:
     def test_register_invalid_token(self, client):
         """Test registration with invalid token."""
         with patch(
-            "middleware.auth_middleware.verify_firebase_token", return_value=None
+            "routes.auth.verify_firebase_token", return_value=None
         ):
             response = client.post(
                 "/api/auth/register",
@@ -107,7 +107,7 @@ class TestAuthRoutes:
     def test_google_signin_invalid_token(self, client):
         """Test Google sign-in with invalid token."""
         with patch(
-            "middleware.auth_middleware.verify_firebase_token", return_value=None
+            "routes.auth.verify_firebase_token", return_value=None
         ):
             response = client.post(
                 "/api/auth/google-signin",
@@ -142,3 +142,68 @@ class TestAuthSecurity:
         response_text = json.dumps(data).lower()
         assert "credential" not in response_text
         assert "api_key" not in response_text
+
+
+class TestTokenVerification:
+    """Test token verification endpoint."""
+
+    def test_verify_token_valid(self, client):
+        """Test token verification with valid token."""
+        with patch("routes.auth.verify_firebase_token") as mock_verify:
+            mock_verify.return_value = {
+                "uid": "test-user-123",
+                "email": "test@example.com",
+                "name": "Test User",
+            }
+            response = client.post(
+                "/api/auth/login",
+                data=json.dumps({"id_token": "valid-firebase-token"}),
+                content_type="application/json",
+            )
+            assert response.status_code == 200
+
+    def test_verify_token_invalid(self, client):
+        """Test token verification with invalid token."""
+        with patch("routes.auth.verify_firebase_token") as mock_verify:
+            mock_verify.return_value = None
+            response = client.post(
+                "/api/auth/login",
+                data=json.dumps({"id_token": "invalid-firebase-token"}),
+                content_type="application/json",
+            )
+            assert response.status_code == 401
+
+    def test_verify_token_missing(self, client):
+        """Test token verification with missing token."""
+        response = client.post(
+            "/api/auth/login",
+            data=json.dumps({}),
+            content_type="application/json",
+        )
+        assert response.status_code == 400
+
+    def test_admin_login_valid(self, client):
+        """Test admin login with valid credentials."""
+        with patch("config.Config.ADMIN_EMAIL", "admin@example.com"):
+            with patch("config.Config.ADMIN_PASSWORD", "adminpassword"):
+                response = client.post(
+                    "/api/auth/admin/login",
+                    data=json.dumps(
+                        {"email": "admin@example.com", "password": "adminpassword"}
+                    ),
+                    content_type="application/json",
+                )
+                assert response.status_code == 200
+
+    def test_admin_login_invalid(self, client):
+        """Test admin login with invalid credentials."""
+        with patch("config.Config.ADMIN_EMAIL", "admin@example.com"):
+            with patch("config.Config.ADMIN_PASSWORD", "adminpassword"):
+                response = client.post(
+                    "/api/auth/admin/login",
+                    data=json.dumps(
+                        {"email": "admin@example.com", "password": "wrongpassword"}
+                    ),
+                    content_type="application/json",
+                )
+                assert response.status_code == 401

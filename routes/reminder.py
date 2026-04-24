@@ -1,32 +1,168 @@
+"""
+User Reminder Routes for VoteWise AI
+
+User reminder endpoints:
+- GET /api/user/reminders - Get user's reminders
+- POST /api/user/reminders - Create reminder
+- PUT /api/user/reminders/<id> - Update reminder
+- DELETE /api/user/reminders/<id> - Delete reminder
+"""
+
 from flask import Blueprint, request, jsonify, Response
-from services.firestore_service import save_reminder
+from flask_jwt_extended import jwt_required, get_jwt_identity
+from utils.response import success_response, error_response
+from utils.validators import validate_required_fields
+from services.firestore_service import (
+    get_reminders,
+    get_reminder,
+    save_reminder as save_reminder_to_db,
+    update_reminder as update_reminder_in_db,
+    delete_reminder as delete_reminder_from_db,
+)
 from services.calendar_service import create_voting_reminder
-from utils.response_helper import success_response, error_response
 
-reminder_bp = Blueprint('reminder', __name__)
+reminder_bp = Blueprint("reminder", __name__)
 
-@reminder_bp.route('/', methods=['POST'])
-def set_reminder():
-    data = request.json or {}
-    user_id = data.get('user_id', 'anonymous')
-    event_name = data.get('event_name')
-    event_date = data.get('event_date')
-    
-    if not all([event_name, event_date]):
-        return jsonify(*error_response("event_name and event_date are required"))
-        
-    # Save to DB if possible (might fail silently if no Firebase creds, handled inside save_reminder)
-    save_reminder(user_id, data)
-    
-    # Generate Calendar Service .ics content
-    ics_content = create_voting_reminder(event_name, event_date)
-    
-    if not ics_content:
-        return jsonify(*error_response("Failed to generate calendar invite"))
-        
-    # Return as downloadable .ics file
-    return Response(
-        ics_content,
-        mimetype="text/calendar",
-        headers={"Content-disposition": f"attachment; filename=votewise_{event_date.replace(' ', '_')}.ics"}
-    )
+ALLOWED_REMINDER_TYPES = ["voting", "registration", "deadline", "event", "custom"]
+
+
+@reminder_bp.route("", methods=["GET"])
+@reminder_bp.route("/", methods=["GET"])
+@jwt_required()
+def get_user_reminders():
+    """Get current user's reminders."""
+    try:
+        identity = get_jwt_identity()
+        user_id = identity.get("user_id")
+
+        reminders = get_reminders(user_id)
+        return jsonify(success_response(data=reminders)), 200
+
+    except Exception as e:
+        return jsonify(error_response(str(e), 500)), 500
+
+
+@reminder_bp.route("/<reminder_id>", methods=["GET"])
+@jwt_required()
+def get_user_reminder(reminder_id):
+    """Get a specific reminder."""
+    try:
+        identity = get_jwt_identity()
+        user_id = identity.get("user_id")
+
+        reminder = get_reminder(user_id, reminder_id)
+        if reminder:
+            return jsonify(success_response(data=reminder)), 200
+        return jsonify(error_response("Reminder not found", 404)), 404
+
+    except Exception as e:
+        return jsonify(error_response(str(e), 500)), 500
+
+
+@reminder_bp.route("", methods=["POST"])
+@reminder_bp.route("/", methods=["POST"])
+@jwt_required()
+def create_user_reminder():
+    """Create a new reminder."""
+    try:
+        identity = get_jwt_identity()
+        user_id = identity.get("user_id")
+        data = request.get_json() or {}
+
+        is_valid, missing = validate_required_fields(data, ["title", "reminder_date"])
+        if not is_valid:
+            return jsonify(
+                error_response(f"Missing required fields: {', '.join(missing)}", 400)
+            ), 400
+
+        reminder_type = data.get("reminder_type", "custom")
+        if reminder_type not in ALLOWED_REMINDER_TYPES:
+            reminder_type = "custom"
+
+        reminder_data = {
+            "user_id": user_id,
+            "title": data.get("title"),
+            "description": data.get("description", ""),
+            "reminder_type": reminder_type,
+            "reminder_date": data.get("reminder_date"),
+            "calendar_synced": False,
+            "status": "pending",
+        }
+
+        reminder_id = save_reminder_to_db(user_id, reminder_data)
+
+        if data.get("generate_ics"):
+            ics_content = create_voting_reminder(
+                data.get("title"), data.get("reminder_date")
+            )
+            if ics_content:
+                return Response(
+                    ics_content,
+                    mimetype="text/calendar",
+                    headers={
+                        "Content-disposition": f"attachment; filename=votewise_reminder.ics"
+                    },
+                )
+
+        return jsonify(
+            success_response(
+                message="Reminder created successfully", data={"id": reminder_id}
+            )
+        ), 201
+
+    except Exception as e:
+        return jsonify(error_response(str(e), 500)), 500
+
+
+@reminder_bp.route("/<reminder_id>", methods=["PUT"])
+@jwt_required()
+def update_user_reminder(reminder_id):
+    """Update a reminder."""
+    try:
+        identity = get_jwt_identity()
+        user_id = identity.get("user_id")
+
+        existing = get_reminder(user_id, reminder_id)
+        if not existing:
+            return jsonify(error_response("Reminder not found", 404)), 404
+
+        data = request.get_json() or {}
+        data.pop("user_id", None)
+        data.pop("id", None)
+
+        updated_id = update_reminder_in_db(user_id, reminder_id, data)
+
+        if updated_id:
+            return jsonify(
+                success_response(message="Reminder updated successfully")
+            ), 200
+
+        return jsonify(error_response("Failed to update reminder", 500)), 500
+
+    except Exception as e:
+        return jsonify(error_response(str(e), 500)), 500
+
+
+@reminder_bp.route("/<reminder_id>", methods=["DELETE"])
+@jwt_required()
+def delete_user_reminder(reminder_id):
+    """Delete a reminder."""
+    try:
+        identity = get_jwt_identity()
+        user_id = identity.get("user_id")
+
+        existing = get_reminder(user_id, reminder_id)
+        if not existing:
+            return jsonify(error_response("Reminder not found", 404)), 404
+
+        success = delete_reminder_from_db(user_id, reminder_id)
+
+        if success:
+            return jsonify(
+                success_response(message="Reminder deleted successfully")
+            ), 200
+
+        return jsonify(error_response("Failed to delete reminder", 500)), 500
+
+    except Exception as e:
+        return jsonify(error_response(str(e), 500)), 500

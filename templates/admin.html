@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="en" class="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - VoteWise AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    
+
     <script>
         tailwind.config = {
             darkMode: 'class',
@@ -34,21 +36,27 @@
             }
         }
     </script>
-    
+
     <link rel="stylesheet" href="/static/css/style.css">
-    
+
     <style>
-        body { font-family: 'Inter', sans-serif; background-color: #020617; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #020617;
+        }
     </style>
 </head>
+
 <body class="text-slate-100 antialiased min-h-screen flex">
 
     <!-- ==================== PREMIUM SIDEBAR ==================== -->
-    <aside id="admin-sidebar" class="w-72 bg-gradient-to-b from-slate-900 to-slate-950 border-r border-white/[0.06] flex flex-col fixed lg:relative inset-y-0 left-0 z-20 transition-transform duration-300 -translate-x-full lg:translate-x-0">
+    <aside id="admin-sidebar"
+        class="w-72 bg-gradient-to-b from-slate-900 to-slate-950 border-r border-white/[0.06] flex flex-col fixed lg:relative inset-y-0 left-0 z-20 transition-transform duration-300 -translate-x-full lg:translate-x-0">
         <!-- Logo -->
         <div class="p-6 border-b border-white/[0.06]">
             <a href="/" class="flex items-center gap-3">
-                <div class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/25">
+                <div
+                    class="w-11 h-11 rounded-xl bg-gradient-to-br from-brand-500 to-purple-600 flex items-center justify-center shadow-lg shadow-brand-500/25">
                     <i class="fa-solid fa-bolt text-white text-lg"></i>
                 </div>
                 <div>
@@ -76,7 +84,8 @@
                 <i class="fa-solid fa-circle-question nav-icon"></i>
                 <span>FAQs</span>
             </button>
-            <button onclick="switchAdminTab('announcements')" id="admin-nav-announcements" class="sidebar-nav-item w-full">
+            <button onclick="switchAdminTab('announcements')" id="admin-nav-announcements"
+                class="sidebar-nav-item w-full">
                 <i class="fa-solid fa-bullhorn nav-icon"></i>
                 <span>Announcements</span>
             </button>
@@ -108,21 +117,25 @@
     </aside>
 
     <!-- Sidebar Overlay (Mobile) -->
-    <div id="admin-sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-10 hidden lg:hidden" onclick="toggleAdminSidebar()"></div>
+    <div id="admin-sidebar-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-10 hidden lg:hidden"
+        onclick="toggleAdminSidebar()"></div>
 
     <!-- ==================== MAIN CONTENT ==================== -->
     <main class="flex-1 flex flex-col overflow-hidden lg:ml-0">
         <!-- Header -->
-        <header class="h-[72px] bg-[rgba(2,6,23,0.85)] backdrop-blur-xl border-b border-white/[0.06] flex items-center justify-between px-6 lg:px-8">
+        <header
+            class="h-[72px] bg-[rgba(2,6,23,0.85)] backdrop-blur-xl border-b border-white/[0.06] flex items-center justify-between px-6 lg:px-8">
             <div>
                 <h1 class="text-xl font-semibold text-white" id="admin-title">Dashboard Overview</h1>
                 <p class="text-sm text-slate-500">Platform management & statistics</p>
             </div>
             <div class="flex items-center gap-3">
-                <button class="w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 hover:text-white transition-colors border border-white/[0.06]">
+                <button
+                    class="w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 hover:text-white transition-colors border border-white/[0.06]">
                     <i class="fa-solid fa-bell"></i>
                 </button>
-                <button onclick="toggleAdminSidebar()" class="lg:hidden w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 border border-white/[0.06]">
+                <button onclick="toggleAdminSidebar()"
+                    class="lg:hidden w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 border border-white/[0.06]">
                     <i class="fa-solid fa-bars"></i>
                 </button>
             </div>
@@ -136,7 +149,8 @@
                     <div class="glass-card p-6">
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-sm font-medium text-slate-400">Total Users</span>
-                            <div class="w-11 h-11 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center">
+                            <div
+                                class="w-11 h-11 rounded-xl bg-brand-500/10 text-brand-400 flex items-center justify-center">
                                 <i class="fa-solid fa-users"></i>
                             </div>
                         </div>
@@ -149,7 +163,8 @@
                     <div class="glass-card p-6">
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-sm font-medium text-slate-400">AI Queries</span>
-                            <div class="w-11 h-11 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
+                            <div
+                                class="w-11 h-11 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center">
                                 <i class="fa-solid fa-robot"></i>
                             </div>
                         </div>
@@ -162,7 +177,8 @@
                     <div class="glass-card p-6">
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-sm font-medium text-slate-400">Reminders Set</span>
-                            <div class="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
+                            <div
+                                class="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center">
                                 <i class="fa-solid fa-bell"></i>
                             </div>
                         </div>
@@ -175,7 +191,8 @@
                     <div class="glass-card p-6">
                         <div class="flex items-center justify-between mb-4">
                             <span class="text-sm font-medium text-slate-400">Avg Session</span>
-                            <div class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
+                            <div
+                                class="w-11 h-11 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center">
                                 <i class="fa-solid fa-clock"></i>
                             </div>
                         </div>
@@ -225,10 +242,12 @@
                                 <td>Jan 15, 2026</td>
                                 <td>
                                     <div class="flex items-center gap-2">
-                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                        <button
+                                            class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
                                             <i class="fa-solid fa-edit text-sm"></i>
                                         </button>
-                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                        <button
+                                            class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
                                             <i class="fa-solid fa-trash text-sm"></i>
                                         </button>
                                     </div>
@@ -241,10 +260,12 @@
                                 <td>Jan 20, 2026</td>
                                 <td>
                                     <div class="flex items-center gap-2">
-                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                        <button
+                                            class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
                                             <i class="fa-solid fa-edit text-sm"></i>
                                         </button>
-                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                        <button
+                                            class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
                                             <i class="fa-solid fa-trash text-sm"></i>
                                         </button>
                                     </div>
@@ -257,10 +278,12 @@
                                 <td>Feb 1, 2026</td>
                                 <td>
                                     <div class="flex items-center gap-2">
-                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                                        <button
+                                            class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
                                             <i class="fa-solid fa-edit text-sm"></i>
                                         </button>
-                                        <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                                        <button
+                                            class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
                                             <i class="fa-solid fa-trash text-sm"></i>
                                         </button>
                                     </div>
@@ -281,44 +304,54 @@
                     </button>
                 </div>
                 <div class="glass-card p-6 space-y-4">
-                    <div class="flex items-start gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
+                    <div
+                        class="flex items-start gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
                         <div class="flex-1">
                             <p class="text-white font-medium mb-1">Who is eligible to vote?</p>
-                            <p class="text-slate-400 text-sm">Any citizen aged 18 years or above is eligible to vote.</p>
+                            <p class="text-slate-400 text-sm">Any citizen aged 18 years or above is eligible to vote.
+                            </p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                            <button
+                                class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
                                 <i class="fa-solid fa-edit text-sm"></i>
                             </button>
-                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                            <button
+                                class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
                                 <i class="fa-solid fa-trash text-sm"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="flex items-start gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
+                    <div
+                        class="flex items-start gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
                         <div class="flex-1">
                             <p class="text-white font-medium mb-1">What ID proofs are accepted?</p>
                             <p class="text-slate-400 text-sm">Voter ID, Aadhar card, Passport, Driving License, etc.</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                            <button
+                                class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
                                 <i class="fa-solid fa-edit text-sm"></i>
                             </button>
-                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                            <button
+                                class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
                                 <i class="fa-solid fa-trash text-sm"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="flex items-start gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
+                    <div
+                        class="flex items-start gap-4 p-4 bg-slate-900/60 rounded-xl border border-slate-800/50 hover:border-slate-700/50 transition-colors group">
                         <div class="flex-1">
                             <p class="text-white font-medium mb-1">How do I check my voter status?</p>
                             <p class="text-slate-400 text-sm">Use the voter status checker in your dashboard.</p>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                            <button
+                                class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
                                 <i class="fa-solid fa-edit text-sm"></i>
                             </button>
-                            <button class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                            <button
+                                class="w-8 h-8 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
                                 <i class="fa-solid fa-trash text-sm"></i>
                             </button>
                         </div>
@@ -336,9 +369,11 @@
                     </button>
                 </div>
                 <div class="space-y-4">
-                    <div class="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div
+                        class="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-5">
-                            <div class="w-16 h-16 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-sm border border-brand-500/30 flex-shrink-0">
+                            <div
+                                class="w-16 h-16 rounded-xl bg-brand-500/20 text-brand-400 flex items-center justify-center font-bold text-sm border border-brand-500/30 flex-shrink-0">
                                 <div class="text-center">
                                     <div class="text-xs uppercase tracking-wider">Mar</div>
                                     <div class="text-lg">15</div>
@@ -350,17 +385,21 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                            <button
+                                class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
                                 <i class="fa-solid fa-edit"></i>
                             </button>
-                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                            <button
+                                class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div
+                        class="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-5">
-                            <div class="w-16 h-16 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/30 flex-shrink-0">
+                            <div
+                                class="w-16 h-16 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center font-bold text-sm border border-purple-500/30 flex-shrink-0">
                                 <div class="text-center">
                                     <div class="text-xs uppercase tracking-wider">Apr</div>
                                     <div class="text-lg">20</div>
@@ -372,17 +411,21 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                            <button
+                                class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
                                 <i class="fa-solid fa-edit"></i>
                             </button>
-                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                            <button
+                                class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                    <div
+                        class="glass-card p-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div class="flex items-center gap-5">
-                            <div class="w-16 h-16 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/30 flex-shrink-0">
+                            <div
+                                class="w-16 h-16 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/30 flex-shrink-0">
                                 <div class="text-center">
                                     <div class="text-xs uppercase tracking-wider">May</div>
                                     <div class="text-lg">02</div>
@@ -394,10 +437,12 @@
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
+                            <button
+                                class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-brand-400 hover:bg-brand-500/10 transition-all">
                                 <i class="fa-solid fa-edit"></i>
                             </button>
-                            <button class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
+                            <button
+                                class="w-9 h-9 rounded-lg bg-slate-800/50 flex items-center justify-center text-slate-400 hover:text-red-400 hover:bg-red-500/10 transition-all">
                                 <i class="fa-solid fa-trash"></i>
                             </button>
                         </div>
@@ -421,7 +466,9 @@
                             <span class="text-slate-500 text-sm">Feb 24, 2026</span>
                         </div>
                         <h4 class="text-white font-semibold text-lg mb-2">Election Schedule Announced!</h4>
-                        <p class="text-slate-400 text-sm leading-relaxed">The election commission has announced the dates for the upcoming general elections. Make sure to check your voter registration status.</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">The election commission has announced the
+                            dates for the upcoming general elections. Make sure to check your voter registration status.
+                        </p>
                     </div>
                     <div class="glass-card p-6 border-l-4 border-slate-600">
                         <div class="flex items-center justify-between mb-2">
@@ -429,7 +476,8 @@
                             <span class="text-slate-500 text-sm">Jan 10, 2026</span>
                         </div>
                         <h4 class="text-white font-semibold text-lg mb-2">New AI Features Released</h4>
-                        <p class="text-slate-400 text-sm leading-relaxed">We've added multilingual support and voice input capabilities to better serve all voters.</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">We've added multilingual support and voice
+                            input capabilities to better serve all voters.</p>
                     </div>
                 </div>
             </div>
@@ -493,7 +541,8 @@
                             <h4 class="text-lg font-semibold text-white">Delhi</h4>
                             <span class="badge badge-success">Active</span>
                         </div>
-                        <p class="text-slate-400 text-sm mb-5">General voting guidelines for Delhi constituency voters.</p>
+                        <p class="text-slate-400 text-sm mb-5">General voting guidelines for Delhi constituency voters.
+                        </p>
                         <div class="flex items-center gap-3">
                             <button class="btn btn-secondary btn-sm">
                                 <i class="fa-solid fa-edit"></i>
@@ -510,7 +559,8 @@
                             <h4 class="text-lg font-semibold text-white">Maharashtra</h4>
                             <span class="badge badge-success">Active</span>
                         </div>
-                        <p class="text-slate-400 text-sm mb-5">Polling booth locations and voting procedures for Maharashtra.</p>
+                        <p class="text-slate-400 text-sm mb-5">Polling booth locations and voting procedures for
+                            Maharashtra.</p>
                         <div class="flex items-center gap-3">
                             <button class="btn btn-secondary btn-sm">
                                 <i class="fa-solid fa-edit"></i>
@@ -527,7 +577,8 @@
                             <h4 class="text-lg font-semibold text-white">Karnataka</h4>
                             <span class="badge badge-success">Active</span>
                         </div>
-                        <p class="text-slate-400 text-sm mb-5">Voting guidelines and booth information for Karnataka.</p>
+                        <p class="text-slate-400 text-sm mb-5">Voting guidelines and booth information for Karnataka.
+                        </p>
                         <div class="flex items-center gap-3">
                             <button class="btn btn-secondary btn-sm">
                                 <i class="fa-solid fa-edit"></i>
@@ -542,7 +593,8 @@
                     <div class="glass-card-hover p-6">
                         <div class="flex items-center justify-between mb-4">
                             <h4 class="text-lg font-semibold text-white">Tamil Nadu</h4>
-                            <span class="badge" style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2);">Draft</span>
+                            <span class="badge"
+                                style="background: rgba(139, 92, 246, 0.1); color: #a78bfa; border: 1px solid rgba(139, 92, 246, 0.2);">Draft</span>
                         </div>
                         <p class="text-slate-400 text-sm mb-5">Polling booth guidance for Tamil Nadu (under review).</p>
                         <div class="flex items-center gap-3">
@@ -562,7 +614,7 @@
             <!-- ==================== ANALYTICS PANEL ==================== -->
             <div id="admin-analytics" class="admin-panel hidden space-y-6 animate-fade-in">
                 <h3 class="text-xl font-semibold text-white">Platform Analytics</h3>
-                
+
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-5">
                     <div class="glass-card p-5 text-center">
                         <div class="text-2xl lg:text-3xl font-bold text-white mb-1">12,847</div>
@@ -671,7 +723,7 @@
             <!-- ==================== SETTINGS PANEL ==================== -->
             <div id="admin-settings" class="admin-panel hidden space-y-6 animate-fade-in">
                 <h3 class="text-xl font-semibold text-white">Admin Settings</h3>
-                
+
                 <div class="grid lg:grid-cols-2 gap-6">
                     <div class="glass-card p-6">
                         <h4 class="text-lg font-semibold text-white mb-5">Profile Settings</h4>
@@ -706,19 +758,22 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="glass-card p-6">
                     <h4 class="text-lg font-semibold text-white mb-5">API Integration Status</h4>
                     <div class="grid sm:grid-cols-3 gap-4">
-                        <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                        <div
+                            class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
                             <span class="text-slate-300">Firestore</span>
                             <span class="badge badge-success">Connected</span>
                         </div>
-                        <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                        <div
+                            class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
                             <span class="text-slate-300">Google Maps</span>
                             <span class="badge badge-success">Connected</span>
                         </div>
-                        <div class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
+                        <div
+                            class="flex items-center justify-between p-4 bg-slate-900/60 rounded-xl border border-slate-800/50">
                             <span class="text-slate-300">Gemini AI</span>
                             <span class="badge badge-success">Connected</span>
                         </div>
@@ -731,12 +786,12 @@
     <script>
         const token = localStorage.getItem('access_token');
         const userRole = localStorage.getItem('user_role');
-        
+
         if (!token || userRole !== 'admin') {
             window.location.href = '/login';
             throw new Error('Access denied');
         }
-        
+
         const adminTitles = {
             'overview': 'Dashboard Overview',
             'content': 'Content Management',
@@ -753,7 +808,7 @@
             document.getElementById('admin-title').textContent = adminTitles[tabName];
 
             document.querySelectorAll('[id^="admin-nav-"]').forEach(btn => {
-                if(btn.id === `admin-nav-${tabName}`) {
+                if (btn.id === `admin-nav-${tabName}`) {
                     btn.className = 'sidebar-nav-item active w-full';
                 } else {
                     btn.className = 'sidebar-nav-item w-full';
@@ -765,7 +820,7 @@
             });
             document.getElementById(`admin-${tabName}`).classList.remove('hidden');
 
-            if(tabName === 'overview') {
+            if (tabName === 'overview') {
                 initCharts();
             }
 
@@ -786,7 +841,7 @@
 
         let chartsInitialized = false;
         function initCharts() {
-            if(chartsInitialized) return;
+            if (chartsInitialized) return;
             chartsInitialized = true;
 
             new Chart(document.getElementById('activityChart'), {
@@ -831,4 +886,5 @@
         switchAdminTab('overview');
     </script>
 </body>
+
 </html>

@@ -11,7 +11,7 @@ Features:
 
 import requests
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any, List
 from config import Config
 
@@ -190,7 +190,7 @@ class CalendarService:
         if not self.access_token:
             return []
 
-        now = datetime.utcnow().isoformat() + "Z"
+        now = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
         headers = {
             "Authorization": f"Bearer {self.access_token}",
             "Content-Type": "application/json",
@@ -274,7 +274,7 @@ PRODID:-//VoteWise AI//Election Guide//EN
 CALSCALE:GREGORIAN
 METHOD:PUBLISH
 BEGIN:VEVENT
-DTSTAMP:{datetime.utcnow().strftime("%Y%m%dT%H%M%SZ")}
+DTSTAMP:{datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")}
 DTSTART:{start_dt.strftime("%Y%m%dT%H%M%S")}
 DTEND:{end_dt.strftime("%Y%m%dT%H%M%S")}
 SUMMARY:{summary}

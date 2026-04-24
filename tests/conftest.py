@@ -59,12 +59,14 @@ def mock_firebase_auth():
 @pytest.fixture
 def mock_firestore():
     """Mock Firestore database."""
-    with patch("services.auth_service.db") as mock:
-        mock.collection.return_value.document.return_value.get.return_value.to_dict.return_value = {
+    with patch("services.auth_service._get_firestore_client") as mock:
+        client_mock = MagicMock()
+        client_mock.collection.return_value.document.return_value.get.return_value.to_dict.return_value = {
             "user_id": "test-user-id",
             "email": "test@example.com",
             "role": "voter",
         }
+        mock.return_value = client_mock
         yield mock
 
 

@@ -10,7 +10,7 @@ def success_response(data=None, message="Success", code=200):
     response = {"success": True, "message": message}
     if data is not None:
         response["data"] = data
-    return response, code
+    return response
 
 
 def error_response(message="Error", code=500, errors=None):
@@ -18,7 +18,7 @@ def error_response(message="Error", code=500, errors=None):
     response = {"success": False, "message": message}
     if errors:
         response["errors"] = errors
-    return response, code
+    return response
 
 
 def paginated_response(items, page, per_page, total, message="Success"):

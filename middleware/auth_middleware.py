@@ -9,6 +9,7 @@ Handles:
 """
 
 from functools import wraps
+import os
 from flask import request, jsonify, g
 from flask_jwt_extended import (
     JWTManager,
@@ -22,6 +23,8 @@ from typing import Callable, Optional, Dict, Any, List
 
 from services.auth_service import firebase_auth_service, user_profile_service
 from config import Config
+
+ALLOWED_ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "").lower()
 
 jwt_manager = JWTManager()
 
@@ -157,10 +160,23 @@ def require_role(allowed_roles: List[str]) -> Callable:
                         }
                     ), 403
 
-                g.current_user = user_profile_service.get_user_profile(
+                user_profile = user_profile_service.get_user_profile(
                     identity["user_id"]
                 )
+                g.current_user = user_profile
                 g.user_role = user_role
+
+                if user_role == "admin":
+                    user_email = user_profile.get("email", "") if user_profile else ""
+                    if user_email.lower() != ALLOWED_ADMIN_EMAIL.lower():
+                        return jsonify(
+                            {
+                                "success": False,
+                                "message": "Admin email not authorized",
+                                "error": "forbidden",
+                            }
+                        ), 403
+
                 return f(*args, **kwargs)
             except Exception as e:
                 return jsonify(

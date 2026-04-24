@@ -92,5 +92,9 @@ def register_error_handlers(app: Flask):
     @app.errorhandler(Exception)
     def handle_unexpected_error(error):
         return jsonify(
-            {"success": False, "message": str(error), "error": "unexpected_error"}
+            {
+                "success": False,
+                "message": "An unexpected error occurred",
+                "error": "unexpected_error",
+            }
         ), 500
