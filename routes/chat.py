@@ -2,7 +2,6 @@ from flask import Blueprint, request, jsonify, current_app
 from utils.response import error_response
 from config import Config
 from google import genai
-import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -61,52 +60,38 @@ def chat():
         ), 200
 
 
-def _generate_ai_response(message, user_prefs):
-    """Generate AI response using Gemini or fallback to default responses."""
+def _detect_intent(message: str) -> str:
+    """Detect user intent from message keywords."""
+    message_lower = message.lower()
 
-    if not client:
-        return _get_fallback_response(message)
+    intent_keywords = {
+        "register": ["register", "voter id", "epic", "enroll"],
+        "document": ["document", "id proof", "aadhaar", "passport", "license"],
+        "booth": ["booth", "polling station", "location", "find"],
+    }
 
-    try:
-        prompt = f"""
-You are VoteWise AI, a neutral, helpful civic assistant for election education.
-Keep responses brief, friendly, and informative.
+    for intent, keywords in intent_keywords.items():
+        if any(kw in message_lower for kw in keywords):
+            return intent
+    return "default"
 
-Respond in this JSON format only:
-{{"intro": "Brief intro", "steps": ["step1", "step2"], "tips": ["tip1"], "actions": ["action1"]}}
 
-User: {message}
-Context: {user_prefs}
-"""
-        response = client.models.generate_content(
-            model="gemini-2.0-flash",
-            contents=prompt,
-        )
+def _generate_ai_response(message: str, user_prefs: dict) -> dict:
+    """Generate AI response using Gemini or fallback to rule-based responses."""
+    intent = _detect_intent(message)
 
-        response_text = response.text if response.text else ""
-        if not response_text:
-            return _get_fallback_response(message)
+    if intent and intent != "default":
+        return _get_fallback_response(intent)
 
-        try:
-            response_data = json.loads(response_text)
-            return {
-                "success": True,
-                "intro": response_data.get("intro", "Here's what you need to know."),
-                "steps": response_data.get("steps", []),
-                "tips": response_data.get("tips", []),
-                "actions": response_data.get("actions", []),
-            }
-        except (json.JSONDecodeError, TypeError):
-            return _get_fallback_response(message)
+    if client:
+        return _call_gemini_api(message, user_prefs)
 
-    except Exception as e:
-        current_app.logger.error(f"AI Error: {e}")
-        return _get_fallback_response(message)
+    return _get_fallback_response(message)
 
 
 def _get_fallback_response(message):
-    """Fallback responses for demo"""
-    message = message.lower()
+    """Fallback responses for unknown messages"""
+    message_lower = message.lower()
 
     responses = {
         "register": {
@@ -142,26 +127,55 @@ def _get_fallback_response(message):
             "tips": ["Visit a day before to familiarize yourself"],
             "actions": ["Find my polling booth"],
         },
-        "default": {
-            "intro": "I'm here to help with election education!",
-            "steps": [
-                "Learn about voter registration",
-                "Find your polling booth",
-                "Understand required documents",
-                "Track election timeline",
-            ],
-            "tips": ["Always verify from official sources"],
-            "actions": ["Ask me about registration", "Ask about documents"],
-        },
     }
 
     for key, resp in responses.items():
-        if key in message:
+        if key in message_lower:
             resp["success"] = True
             return resp
 
-    responses["default"]["success"] = True
-    return responses["default"]
+    default_resp = {
+        "intro": "I'm here to help with election education!",
+        "steps": [
+            "Learn about voter registration",
+            "Find your polling booth",
+            "Understand required documents",
+            "Track election timeline",
+        ],
+        "tips": ["Always verify from official sources"],
+        "actions": ["Ask me about registration", "Ask about documents"],
+    }
+    default_resp["success"] = True
+    return default_resp
+
+
+def _call_gemini_api(message: str, user_prefs: dict) -> dict:
+    """Call Gemini API for AI response."""
+    if not client:
+        return _get_fallback_response(message)
+
+    try:
+        prompt = f"""You are VoteWise AI, a neutral, helpful civic assistant for election education.
+Keep responses brief, friendly, and informative.
+Respond in this JSON format only:
+{{"intro": "Brief intro", "steps": ["step1", "step2"], "tips": ["tip1"], "actions": ["action1"]}}
+
+User: {message}
+Context: {user_prefs}
+"""
+        response = client.models.generate_content(
+            model="gemini-2.0-flash",
+            contents=prompt,
+        )
+        text = response.candidates[0].content.parts[0].text
+        text = text.strip("```json").strip("```").strip()
+        import json
+
+        result = json.loads(text)
+        result["success"] = True
+        return result
+    except Exception:
+        return _get_fallback_response(message)
 
 
 @chat_bp.route("/health", methods=["GET"])

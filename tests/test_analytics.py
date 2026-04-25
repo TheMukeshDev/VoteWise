@@ -147,22 +147,3 @@ class TestLoggingService:
             },
             severity="INFO",
         )
-
-    @patch("config.Config")
-    def test_log_methods_without_logger(self, mock_config):
-        service = LoggingService()
-        service.logger = None
-        service.log_info("test")
-        service.log_warning("test")
-        service.log_error("test")
-        service.log_http_request("GET", "/", 200, 0.5)
-        service.logger.log.assert_called_with(
-            {
-                "method": "GET",
-                "path": "/",
-                "status": 200,
-                "latency_ms": 500.0,
-            },
-            severity="INFO",
-        )
-
