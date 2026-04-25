@@ -4,9 +4,10 @@ Analytics Service for VoteWise AI
 Provides analytics tracking using Firebase Analytics.
 """
 
+import logging
 from typing import Dict, Any, Optional
-from datetime import datetime, timedelta
-import uuid
+
+logger = logging.getLogger(__name__)
 
 
 class AnalyticsService:
@@ -144,19 +145,17 @@ class LoggingService:
         """Initialize Cloud Logging."""
         try:
             from google.cloud import logging as cloud_logging
-            import os
             from config import Config
 
-            if Config.FIREBASE_CREDENTIALS_PATH and os.path.exists(
-                Config.FIREBASE_CREDENTIALS_PATH
-            ):
+            if Config.FIREBASE_ADMIN_JSON:
                 self.client = cloud_logging.Client()
                 self.logger = self.client.logger("votewise-ai")
                 self._initialized = True
             else:
                 self.client = None
                 self.logger = None
-        except ImportError:
+        except Exception as e:
+            logger.warning(f"Failed to initialize Cloud Logging: {e}")
             self.client = None
             self.logger = None
 
@@ -167,7 +166,7 @@ class LoggingService:
                 self.logger.log({"message": message, **kwargs}, severity="INFO")
             except Exception:
                 pass
-        print(f"INFO: {message}")
+        logger.info(message)
 
     def log_warning(self, message: str, **kwargs) -> None:
         """Log warning message."""
@@ -176,7 +175,7 @@ class LoggingService:
                 self.logger.log({"message": message, **kwargs}, severity="WARNING")
             except Exception:
                 pass
-        print(f"WARNING: {message}")
+        logger.warning(message)
 
     def log_error(self, message: str, **kwargs) -> None:
         """Log error message."""
@@ -185,7 +184,7 @@ class LoggingService:
                 self.logger.log({"message": message, **kwargs}, severity="ERROR")
             except Exception:
                 pass
-        print(f"ERROR: {message}")
+        logger.error(message)
 
     def log_http_request(
         self, method: str, path: str, status: int, latency: float

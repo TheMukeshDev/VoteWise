@@ -9,11 +9,12 @@ Features:
 - Reminder status tracking
 """
 
+import logging
 import requests
-import json
 from datetime import datetime, timedelta, timezone
 from typing import Optional, Dict, Any, List
-from config import Config
+
+logger = logging.getLogger(__name__)
 
 
 def create_voting_reminder(event_name: str, event_date_str: str) -> Optional[str]:
@@ -32,7 +33,7 @@ def create_voting_reminder(event_name: str, event_date_str: str) -> Optional[str
         )
         return ics
     except Exception as e:
-        print(f"Error generating reminder: {e}")
+        logger.warning(f"Error generating reminder: {e}")
         return None
 
 
@@ -108,7 +109,7 @@ class CalendarService:
             if response.status_code == 200:
                 return response.json()
         except requests.RequestException as e:
-            print(f"Calendar API Error: {e}")
+            logger.warning(f"Calendar API Error: {e}")
 
         return self._create_local_reminder(summary, start_date, description)
 

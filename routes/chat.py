@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify, current_app
-from utils.response import success_response, error_response
+from utils.response import error_response
 from config import Config
 from google import genai
 import json
@@ -18,43 +18,6 @@ try:
         logger.info("Gemini client initialized")
 except Exception as e:
     logger.warning(f"Failed to initialize Gemini client: {e}")
-
-
-def rate_limit(max_requests=30, window_seconds=60):
-    """Simple rate limiting decorator"""
-
-    def decorator(f):
-        @wraps(f)
-        def decorated_function(*args, **kwargs):
-            # Get client IP
-            ip = request.remote_addr or "unknown"
-            current_time = time.time()
-
-            # Clean old entries
-            if ip in rate_limit_store:
-                rate_limit_store[ip] = [
-                    t for t in rate_limit_store[ip] if current_time - t < window_seconds
-                ]
-            else:
-                rate_limit_store[ip] = []
-
-            # Check limit
-            if len(rate_limit_store[ip]) >= max_requests:
-                return jsonify(
-                    {
-                        "success": False,
-                        "error": "Too many requests. Please try again later.",
-                        "code": "RATE_LIMITED",
-                    }
-                ), 429
-
-            # Add this request
-            rate_limit_store[ip].append(current_time)
-            return f(*args, **kwargs)
-
-        return decorated_function
-
-    return decorator
 
 
 @chat_bp.route("/chat", methods=["POST"])
@@ -107,7 +70,7 @@ def _generate_ai_response(message, user_prefs):
     try:
         prompt = f"""
 You are VoteWise AI, a neutral, helpful civic assistant for election education.
-Keep responses brief, friendly, and informative. 
+Keep responses brief, friendly, and informative.
 
 Respond in this JSON format only:
 {{"intro": "Brief intro", "steps": ["step1", "step2"], "tips": ["tip1"], "actions": ["action1"]}}

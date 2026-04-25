@@ -10,10 +10,9 @@ Public and admin FAQ management endpoints:
 """
 
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import jwt_required, get_jwt_identity
 from middleware.auth_middleware import require_admin
 from utils.response import success_response, error_response
-from utils.validators import validate_required_fields, sanitize_string
+from utils.validators import validate_required_fields
 from services.faq_service import FAQService
 
 faq_bp = Blueprint("faq", __name__)

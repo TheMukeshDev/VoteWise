@@ -4,7 +4,6 @@ FAQ Service for VoteWise AI
 Real Firestore CRUD operations for FAQs with caching.
 """
 
-import firebase_admin
 from firebase_admin import firestore
 from typing import Optional, List, Dict, Any
 

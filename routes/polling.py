@@ -5,6 +5,16 @@ from utils.response import success_response, error_response
 polling_bp = Blueprint("polling", __name__)
 
 
+def _validate_coordinates(lat, lng):
+    """Validate latitude and longitude are within valid ranges."""
+    try:
+        lat_float = float(lat)
+        lng_float = float(lng)
+        return -90 <= lat_float <= 90 and -180 <= lng_float <= 180
+    except (TypeError, ValueError):
+        return False
+
+
 @polling_bp.route("", methods=["GET"])
 def get_polling_booth():
     lat = request.args.get("lat")
@@ -13,6 +23,14 @@ def get_polling_booth():
     if not lat or not lng:
         return jsonify(
             error_response("lat and lng are required query parameters", 400)
+        ), 400
+
+    if not _validate_coordinates(lat, lng):
+        return jsonify(
+            error_response(
+                "Invalid coordinates. Lat must be -90 to 90, Lng must be -180 to 180",
+                400,
+            )
         ), 400
 
     try:

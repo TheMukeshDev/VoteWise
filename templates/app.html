@@ -3,6 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="VoteWise AI - Your Smart Guide to Elections. Get instant answers about voter registration, polling locations, and election dates." />
     <title>Dashboard - VoteWise AI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link
@@ -71,10 +72,16 @@
   <body
     class="text-slate-100 font-sans h-screen flex overflow-hidden antialiased"
   >
+    <!-- Skip link for accessibility -->
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:p-4 focus:bg-brand-600 focus:text-white">
+      Skip to main content
+    </a>
     <!-- ==================== PREMIUM SIDEBAR ==================== -->
     <aside
       id="sidebar"
       class="sidebar flex-shrink-0 flex flex-col h-full z-20 fixed md:relative transition-transform duration-300 -translate-x-full md:translate-x-0"
+      role="complementary"
+      aria-label="Sidebar navigation"
     >
       <!-- Logo -->
       <div class="p-5 border-b border-white/[0.06]">
@@ -93,69 +100,78 @@
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 p-3 space-y-1 overflow-y-auto custom-scroll">
+      <nav class="flex-1 p-3 space-y-1 overflow-y-auto custom-scroll" role="navigation" aria-label="Main navigation">
         <button
           onclick="switchView('home')"
           id="nav-home"
           class="sidebar-nav-item active w-full"
+          aria-label="Dashboard"
+          aria-current="page"
         >
-          <i class="fa-solid fa-house nav-icon text-brand-400"></i>
+          <i class="fa-solid fa-house nav-icon text-brand-400" aria-hidden="true"></i>
           <span>Dashboard</span>
         </button>
         <button
           onclick="switchView('process')"
           id="nav-process"
           class="sidebar-nav-item w-full"
+          aria-label="Election Process"
         >
-          <i class="fa-solid fa-list-check nav-icon"></i>
+          <i class="fa-solid fa-list-check nav-icon" aria-hidden="true"></i>
           <span>Election Process</span>
         </button>
         <button
           onclick="switchView('timeline')"
           id="nav-timeline"
           class="sidebar-nav-item w-full"
+          aria-label="Timeline"
         >
-          <i class="fa-solid fa-calendar-days nav-icon"></i>
+          <i class="fa-solid fa-calendar-days nav-icon" aria-hidden="true"></i>
           <span>Timeline</span>
         </button>
         <button
           onclick="switchView('polling')"
           id="nav-polling"
           class="sidebar-nav-item w-full"
+          aria-label="Polling Booth"
         >
-          <i class="fa-solid fa-map-location-dot nav-icon"></i>
+          <i class="fa-solid fa-map-location-dot nav-icon" aria-hidden="true"></i>
           <span>Polling Booth</span>
         </button>
         <button
           onclick="switchView('reminders')"
           id="nav-reminders"
           class="sidebar-nav-item w-full"
+          aria-label="Reminders"
         >
-          <i class="fa-solid fa-bell nav-icon"></i>
+          <i class="fa-solid fa-bell nav-icon" aria-hidden="true"></i>
           <span>Reminders</span>
         </button>
         <button
           onclick="switchView('documents')"
           id="nav-documents"
           class="sidebar-nav-item w-full"
+          aria-label="Documents"
         >
-          <i class="fa-solid fa-file-lines nav-icon"></i>
+          <i class="fa-solid fa-file-lines nav-icon" aria-hidden="true"></i>
           <span>Documents</span>
         </button>
         <button
           onclick="switchView('chat')"
           id="nav-chat"
           class="sidebar-nav-item w-full"
+          aria-label="AI Assistant"
         >
-          <i class="fa-solid fa-robot nav-icon"></i>
+          <i class="fa-solid fa-robot nav-icon" aria-hidden="true"></i>
           <span>AI Assistant</span>
         </button>
         <button
           onclick="switchView('faq')"
           id="nav-faq"
           class="sidebar-nav-item w-full"
+          aria-label="FAQ"
         >
-          <i class="fa-solid fa-circle-question nav-icon"></i>
+          <i class="fa-solid fa-circle-question nav-icon" aria-hidden="true"></i>
           <span>FAQ</span>
         </button>
       </nav>
@@ -226,39 +242,43 @@
       id="sidebar-overlay"
       class="fixed inset-0 bg-black/60 backdrop-blur-sm z-10 hidden md:hidden"
       onclick="toggleSidebarMobile()"
+      aria-hidden="true"
     ></div>
 
     <!-- ==================== MAIN CONTENT ==================== -->
-    <main class="flex-1 flex flex-col overflow-hidden">
+    <main class="flex-1 flex flex-col overflow-hidden" role="main">
       <!-- Top Header -->
       <header
         class="h-[72px] border-b border-white/[0.06] flex items-center justify-between px-6 lg:px-8 bg-[rgba(2,6,23,0.8)] backdrop-blur-xl"
+        role="banner"
       >
         <div>
-          <h1 class="text-xl font-semibold text-white" id="page-title">
+          <h1 class="text-xl font-semibold text-white" id="page-title" tabindex="-1">
             Dashboard
           </h1>
-          <p class="text-sm text-slate-500">
+          <p class="text-sm text-slate-500" id="page-subtitle">
             Welcome back, here's your election guidance
           </p>
         </div>
         <div class="flex items-center gap-3">
           <button
             class="w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 hover:text-white transition-colors border border-white/[0.06]"
+            aria-label="Notifications"
           >
-            <i class="fa-solid fa-bell"></i>
+            <i class="fa-solid fa-bell" aria-hidden="true"></i>
           </button>
           <button
             onclick="toggleSidebarMobile()"
             class="md:hidden w-10 h-10 rounded-xl bg-white/[0.03] hover:bg-white/[0.06] flex items-center justify-center text-slate-400 border border-white/[0.06]"
+            aria-label="Toggle menu"
           >
-            <i class="fa-solid fa-bars"></i>
+            <i class="fa-solid fa-bars" aria-hidden="true"></i>
           </button>
         </div>
       </header>
 
       <!-- Content Area -->
-      <div class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-8">
+      <div id="main-content" class="flex-1 overflow-y-auto custom-scroll p-6 lg:p-8" role="region" aria-label="Main content area">
         <!-- ==================== HOME VIEW ==================== -->
         <div id="view-home" class="space-y-6 animate-fade-in">
           <!-- Quick Action Cards -->

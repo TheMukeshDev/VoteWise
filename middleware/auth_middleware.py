@@ -20,12 +20,10 @@ from flask_jwt_extended import (
     create_refresh_token,
     verify_jwt_in_request,
     get_jwt_identity,
-    get_jwt,
 )
 from typing import Callable, Optional, Dict, Any, List
 
 from services.auth_service import firebase_auth_service, user_profile_service
-from config import Config
 
 ALLOWED_ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "").lower()
 

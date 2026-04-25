@@ -2,7 +2,6 @@
 Firestore Health Check Service for VoteWise AI
 """
 
-import firebase_admin
 from firebase_admin import firestore
 
 
@@ -15,7 +14,7 @@ class FirestoreHealthCheck:
         try:
             db = firestore.client()
             if db:
-                doc = db.collection("_health_check").document("test").get()
+                db.collection("_health_check").document("test").get()
                 return {
                     "connected": True,
                     "message": "Firestore is connected and working",

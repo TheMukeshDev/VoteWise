@@ -9,10 +9,11 @@ Features:
 - Fallback for API unavailability
 """
 
-import requests
-import json
+import logging
 from typing import Optional, Dict, Any, List
 from config import Config
+
+logger = logging.getLogger(__name__)
 
 
 class TranslateService:
@@ -53,7 +54,7 @@ class TranslateService:
             else:
                 self.client = None
         except Exception as e:
-            print(f"Translation API init error: {e}")
+            logger.warning(f"Translation API init error: {e}")
             self.client = None
 
     def translate(
@@ -100,7 +101,7 @@ class TranslateService:
                     "target_language": target_language,
                 }
             except Exception as e:
-                print(f"Translation error: {e}")
+                logger.warning(f"Translation error: {e}")
 
         return self._mock_translate(text, target_language, source_language)
 

@@ -10,10 +10,11 @@ Features:
 """
 
 import base64
-import json
-import requests
+import logging
 from typing import Optional, Dict, Any
 from config import Config
+
+logger = logging.getLogger(__name__)
 
 
 class SpeechToTextService:
@@ -30,15 +31,17 @@ class SpeechToTextService:
             from google.cloud import speech
             import os
 
-            if Config.FIREBASE_CREDENTIALS_PATH and os.path.exists(
-                Config.FIREBASE_CREDENTIALS_PATH
-            ):
+            credentials_path = os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
+            if credentials_path and os.path.exists(credentials_path):
+                self.client = speech.SpeechClient()
+                self._initialized = True
+            elif Config.FIREBASE_ADMIN_JSON:
                 self.client = speech.SpeechClient()
                 self._initialized = True
             else:
                 self.client = None
         except Exception as e:
-            print(f"Speech-to-text init error: {e}")
+            logger.warning(f"Speech-to-text init error: {e}")
             self.client = None
 
     def recognize(
@@ -60,6 +63,8 @@ class SpeechToTextService:
         """
         if self.client and self._initialized:
             try:
+                from google.cloud import speech
+
                 audio = speech.RecognitionAudio(content=audio_content)
                 config = speech.RecognitionConfig(
                     encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
@@ -75,7 +80,7 @@ class SpeechToTextService:
                     if result.alternatives:
                         return result.alternatives[0].transcript
             except Exception as e:
-                print(f"Speech recognition error: {e}")
+                logger.warning(f"Speech recognition error: {e}")
 
         return None
 
@@ -96,7 +101,7 @@ class SpeechToTextService:
             audio_content = base64.b64decode(base64_audio)
             return self.recognize(audio_content, language_code)
         except Exception as e:
-            print(f"Base64 decode error: {e}")
+            logger.warning(f"Base64 decode error: {e}")
             return self._mock_recognize()
 
     def transcribe_streaming(
@@ -114,6 +119,8 @@ class SpeechToTextService:
         """
         if self.client and self._initialized:
             try:
+                from google.cloud import speech
+
                 config = speech.RecognitionConfig(
                     encoding=speech.RecognitionConfig.AudioEncoding.LINEAR16,
                     language_code=language_code,
@@ -137,7 +144,7 @@ class SpeechToTextService:
                         if result.alternatives:
                             return result.alternatives[0].transcript
             except Exception as e:
-                print(f"Streaming recognition error: {e}")
+                logger.warning(f"Streaming recognition error: {e}")
 
         return self._mock_recognize()
 

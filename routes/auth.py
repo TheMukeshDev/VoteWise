@@ -13,14 +13,11 @@ Uses Firebase Authentication with JWT tokens.
 
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import (
-    create_access_token,
-    create_refresh_token,
     jwt_required,
     get_jwt_identity,
 )
 from utils.response import success_response, error_response
-from utils.validators import validate_email
-from services.auth_service import firebase_auth_service, user_profile_service
+from services.auth_service import user_profile_service
 from middleware.auth_middleware import generate_tokens, verify_firebase_token
 from config import Config
 import logging

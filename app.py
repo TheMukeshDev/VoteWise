@@ -12,8 +12,7 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 from config import get_config
-from utils.logging_config import setup_logging, log_request
-from utils.response import success_response
+from utils.logging_config import setup_logging
 
 from routes.auth import auth_bp
 from routes.chat import chat_bp
@@ -63,6 +62,15 @@ def create_app(config_class=None):
         },
     )
 
+    @app.after_request
+    def add_security_headers(response):
+        """Add security headers to all responses."""
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["X-XSS-Protection"] = "1; mode=block"
+        response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+        return response
+
     setup_logging(app)
     register_error_handlers(app)
     setup_auth_middleware(app)
@@ -91,7 +99,6 @@ def create_app(config_class=None):
         """Test Firestore connection with write/read/delete operations."""
         from services.firestore_service import (
             verify_firestore_connection,
-            get_db,
             save_user,
             get_user,
         )

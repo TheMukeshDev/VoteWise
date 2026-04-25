@@ -27,6 +27,7 @@ secrets/
 # Python
 __pycache__/
 
+
 # Tests (but keep test files in git)
 .pytest_cache/
 coverage/

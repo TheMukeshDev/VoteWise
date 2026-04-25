@@ -13,7 +13,6 @@ from firebase_admin import auth, credentials
 import datetime
 from typing import Optional, Dict, Any
 from config import Config
-import os
 import logging
 
 from services.firestore_service import get_firestore_client
@@ -44,7 +43,7 @@ def _ensure_firebase_initialized():
                     cred, {"projectId": Config.FIREBASE_PROJECT_ID}
                 )
             except Exception as e:
-                print(f"Firebase initialization warning: {e}")
+                logger.warning(f"Firebase initialization warning: {e}")
                 try:
                     firebase_admin.initialize_app()
                 except Exception:
@@ -53,7 +52,7 @@ def _ensure_firebase_initialized():
             try:
                 firebase_admin.initialize_app()
             except Exception as e:
-                print(f"Firebase initialization warning: {e}")
+                logger.warning(f"Firebase initialization warning: {e}")
 
     _firebase_initialized = True
     return _firebase_initialized

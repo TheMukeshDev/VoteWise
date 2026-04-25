@@ -14,7 +14,6 @@ from middleware.auth_middleware import require_admin
 from utils.response import success_response, error_response
 from utils.validators import validate_required_fields
 from services.announcement_service import announcement_service
-from config import Config
 
 announcement_bp = Blueprint("announcement", __name__)
 

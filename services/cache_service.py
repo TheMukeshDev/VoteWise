@@ -147,6 +147,7 @@ def get_cache_service() -> CacheService:
     """Get the global cache service instance."""
     return _cache_service
 
+
 # Backward compatibility aliases
 get_cached = cache_get
 set_cached = cache_set

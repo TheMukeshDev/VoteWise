@@ -9,11 +9,12 @@ Features:
 - MP3 audio output
 """
 
+import logging
 import base64
-import requests
-import json
 from typing import Optional, Dict, Any, List
 from config import Config
+
+logger = logging.getLogger(__name__)
 
 
 class TextToSpeechService:
@@ -51,7 +52,7 @@ class TextToSpeechService:
             else:
                 self.client = None
         except Exception as e:
-            print(f"Text-to-speech init error: {e}")
+            logger.warning(f"Text-to-speech init error: {e}")
             self.client = None
 
     def synthesize(
@@ -79,6 +80,8 @@ class TextToSpeechService:
         """
         if self.client and self._initialized:
             try:
+                from google.cloud import texttospeech
+
                 voice = self._get_voice_config(language, voice_gender)
                 audio_config = self._get_audio_config(
                     audio_format, speaking_rate, pitch
@@ -98,7 +101,7 @@ class TextToSpeechService:
                     "text": text,
                 }
             except Exception as e:
-                print(f"Synthesis error: {e}")
+                logger.warning(f"Synthesis error: {e}")
 
         return self._mock_synthesize(text, language, audio_format)
 
@@ -136,7 +139,7 @@ class TextToSpeechService:
                     "language": language,
                 }
             except Exception as e:
-                print(f"SSML synthesis error: {e}")
+                logger.warning(f"SSML synthesis error: {e}")
 
         return None
 

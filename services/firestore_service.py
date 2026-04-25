@@ -1,7 +1,6 @@
 import firebase_admin
 from firebase_admin import credentials, firestore
 from config import Config
-import os
 import json
 import logging
 from datetime import datetime

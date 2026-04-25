@@ -4,7 +4,6 @@ Announcement Service for VoteWise AI
 Real Firestore CRUD operations for Announcements.
 """
 
-import firebase_admin
 from firebase_admin import firestore
 from typing import Optional, List, Dict, Any
 
@@ -68,7 +67,7 @@ class AnnouncementService:
                 results = []
                 for doc in docs:
                     data = doc.to_dict()
-                    if data.get("is_deleted") == True or data.get("is_active") != True:
+                    if data.get("is_deleted") or not data.get("is_active"):
                         continue
                     if region and data.get("region") != region:
                         continue
@@ -97,7 +96,7 @@ class AnnouncementService:
             doc = coll.document(announcement_id).get()
             if doc.exists:
                 data = doc.to_dict()
-                if data.get("is_deleted") == True:
+                if data.get("is_deleted"):
                     return None
                 return {"id": doc.id, **data}
             return None

@@ -124,7 +124,7 @@ def create_user_reminder():
                     ics_content,
                     mimetype="text/calendar",
                     headers={
-                        "Content-disposition": f"attachment; filename=votewise_reminder.ics"
+                        "Content-disposition": "attachment; filename=votewise_reminder.ics"
                     },
                 )
 

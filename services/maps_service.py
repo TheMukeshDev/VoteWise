@@ -10,10 +10,12 @@ Features:
 - Location-based election help
 """
 
+import logging
 import requests
-import json
 from typing import Optional, Dict, Any, List
 from config import Config
+
+logger = logging.getLogger(__name__)
 
 
 def get_nearby_polling_booths(lat, lng):
@@ -67,7 +69,7 @@ class MapsService:
 
             return self._mock_polling_booth(lat, lng)
         except requests.RequestException as e:
-            print(f"Maps API Error: {e}")
+            logger.warning(f"Maps API Error: {e}")
             return self._mock_polling_booth(lat, lng)
 
     def find_multiple_booths(
@@ -107,7 +109,7 @@ class MapsService:
 
             return booths if booths else [self._mock_polling_booth(lat, lng)]
         except requests.RequestException as e:
-            print(f"Maps API Error: {e}")
+            logger.warning(f"Maps API Error: {e}")
             return [self._mock_polling_booth(lat, lng)]
 
     def geocode(self, address: str) -> Optional[Dict[str, Any]]:

@@ -102,3 +102,42 @@ def sample_reminder_data():
         "reminder_date": "2026-03-15",
         "description": "Last date to register for elections",
     }
+
+
+@pytest.fixture
+def mock_google_translate():
+    with patch("services.translate_service.translate_service.translate") as mock:
+        mock.return_value = {"translatedText": "Translated mock text", "detectedSourceLanguage": "en"}
+        yield mock
+
+
+@pytest.fixture
+def mock_google_tts():
+    with patch("services.tts_service.text_to_speech_service.synthesize") as mock:
+        mock.return_value = {"audioContent": "mock-audio-base64-string", "format": "MP3"}
+        yield mock
+
+
+@pytest.fixture
+def mock_google_speech():
+    with patch("services.speech_service.speech_to_text_service.recognize_audio") as mock:
+        mock.return_value = {"transcript": "mock transcript", "confidence": 0.95}
+        yield mock
+
+
+@pytest.fixture
+def mock_google_maps():
+    with patch("services.maps_service.maps_service.find_polling_booth") as mock:
+        mock.return_value = {
+            "name": "Mock Polling Booth",
+            "address": "123 Mock St",
+            "location": {"lat": 28.6139, "lng": 77.2090},
+            "distance_km": 1.5
+        }
+        yield mock
+
+
+@pytest.fixture
+def mock_all_google_services(mock_firebase_auth, mock_firestore, mock_google_translate, mock_google_tts, mock_google_speech, mock_google_maps):
+    """Fixture that mocks all external Google Services to prevent API calls during tests."""
+    pass

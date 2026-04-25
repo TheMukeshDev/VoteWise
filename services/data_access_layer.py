@@ -18,8 +18,6 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 from typing import List, Optional, Dict, Any
 from datetime import datetime
-from config import Config
-import os
 
 
 class FirestoreDB:
@@ -32,11 +30,16 @@ class FirestoreDB:
     def _init_firebase(self):
         """Initialize Firebase Admin SDK."""
         if not firebase_admin._apps:
-            cred_path = Config.FIREBASE_CREDENTIALS_PATH
-            if cred_path and os.path.exists(cred_path):
-                cred = credentials.Certificate(cred_path)
-                firebase_admin.initialize_app(cred)
-                self._initialized = True
+            from config import Config
+            firebase_json = Config.FIREBASE_ADMIN_JSON
+            project_id = Config.FIREBASE_PROJECT_ID
+            if firebase_json and project_id:
+                try:
+                    cred = credentials.Certificate(firebase_json)
+                    firebase_admin.initialize_app(cred, {"projectId": project_id})
+                    self._initialized = True
+                except Exception:
+                    pass
 
     @property
     def db(self):
