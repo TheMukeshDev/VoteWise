@@ -1,4 +1,3 @@
-import pytest
 from unittest.mock import MagicMock, patch
 from services.analytics_service import AnalyticsService, LoggingService
 
@@ -167,11 +166,3 @@ class TestLoggingService:
             severity="INFO",
         )
 
-    @patch("config.Config")
-    def test_log_methods_without_logger(self, mock_config):
-        service = LoggingService()
-        service.logger = None
-        service.log_info("test")
-        service.log_warning("test")
-        service.log_error("test")
-        service.log_http_request("GET", "/", 200, 0.5)

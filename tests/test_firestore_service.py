@@ -71,7 +71,7 @@ class TestFirestoreService:
         db_mock = MagicMock()
         mock_get_client.return_value = db_mock
         
-        result = create_or_update_user_profile("u1", "test@test.com")
+        create_or_update_user_profile("u1", "test@test.com")
         db_mock.collection().document().set.assert_called_once()
 
     @patch('services.firestore_service.get_firestore_client')

@@ -2,9 +2,8 @@
 Tests for authentication routes.
 """
 
-import pytest
 import json
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 
 class TestAuthRoutes:

@@ -3,7 +3,6 @@ Tests for polling routes.
 """
 
 import pytest
-import json
 
 pytestmark = pytest.mark.unit
 

@@ -2,9 +2,8 @@
 Tests for chat routes.
 """
 
-import pytest
 import json
-from unittest.mock import patch, MagicMock, Mock
+from unittest.mock import patch
 
 
 class TestChatRoutes:

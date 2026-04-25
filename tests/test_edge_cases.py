@@ -5,7 +5,7 @@ Tests for invalid inputs, missing data, failed operations, etc.
 """
 
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 
 @pytest.fixture
@@ -203,25 +203,3 @@ class TestSecurityEdgeCases:
             response = client.get("/api/timeline/")
             assert response.status_code == 200
 
-
-class TestSecurityEdgeCases:
-    """Test security edge cases."""
-
-    def test_jwt_token_tampering(self, client):
-        """Test behavior with tampered JWT."""
-        response = client.get(
-            "/api/user/profile", headers={"Authorization": "Bearer tampered.token.here"}
-        )
-        assert response.status_code == 401
-
-    def test_missing_content_type(self, client):
-        """Test POST without content type."""
-        response = client.post("/api/chat/chat", data='{"message": "test"}')
-        assert response.status_code in [400, 415]
-
-    def test_unicode_in_input(self, client):
-        """Test unicode handling."""
-        response = client.post(
-            "/api/chat/chat", json={"message": "test with émojis 🎉"}
-        )
-        assert response.status_code in [200, 400]

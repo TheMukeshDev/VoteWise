@@ -2,7 +2,6 @@
 Tests for FAQ routes.
 """
 
-import pytest
 import json
 from unittest.mock import patch
 

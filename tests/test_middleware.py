@@ -3,7 +3,6 @@ from unittest.mock import MagicMock, patch
 from flask import Flask, jsonify
 from middleware.auth_middleware import (
     check_rate_limit,
-    rate_limit_key_func,
     setup_auth_middleware,
     generate_tokens,
     verify_firebase_token,
@@ -17,7 +16,6 @@ from middleware.auth_middleware import (
 
 class TestAuthMiddleware:
     def test_check_rate_limit(self):
-        import time
         key = "test_key"
         
         # Should allow 2 requests
