@@ -1,15 +1,16 @@
-", ", "
+"""
 Polling Guidance Service for VoteWise AI.
 
 Real Firestore CRUD operations using BaseService.
-", ", "
+"""
+
+from typing import Any, List, Optional
 
 from services.base_service import BaseService
-from typing import Optional, Any, List
 
 
 class PollingGuidanceService(BaseService):
-    ", ", "Service for Polling Guidance CRUD operations in Firestore.", ", "
+    """Service for Polling Guidance CRUD operations in Firestore."""
 
     collection_name = "polling_guidance"
     soft_delete_field = "is_deleted"
@@ -18,14 +19,14 @@ class PollingGuidanceService(BaseService):
         self,
         region: Optional[str] = None,
     ) -> List[dict]:
-        ", ", "Get polling guidances with filters.", ", "
+        """Get polling guidances with filters."""
         filters = {}
         if region:
             filters["region"] = region
         return super().get_all(filters=filters)
 
     def get_by_id(self, guidance_id: str) -> Optional[dict]:
-        ", ", "Get polling guidance by ID.", ", "
+        """Get polling guidance by ID."""
         return super().get_by_id(guidance_id)
 
     def create(
@@ -36,7 +37,7 @@ class PollingGuidanceService(BaseService):
         help_links: Optional[list] = None,
         is_active: bool = True,
     ) -> Optional[dict]:
-        ", ", "Create polling guidance.", ", "
+        """Create polling guidance."""
         data = {
             "region": region,
             "title": title,
@@ -51,15 +52,15 @@ class PollingGuidanceService(BaseService):
         guidance_id: str,
         data: dict,
     ) -> Optional[dict]:
-        ", ", "Update polling guidance.", ", "
+        """Update polling guidance."""
         return super().update(guidance_id, data)
 
     def delete(self, guidance_id: str, soft: bool = True) -> bool:
-        ", ", "Delete polling guidance.", ", "
+        """Delete polling guidance."""
         return super().delete(guidance_id, soft=soft)
 
     def get_all_for_admin(self) -> List[dict]:
-        ", ", "Get all including soft-deleted.", ", "
+        """Get all including soft-deleted."""
         return super().get_all_for_admin()
 
 

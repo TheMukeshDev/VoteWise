@@ -1,4 +1,4 @@
-", ", "Chat routes for VoteWise AI.", ", "
+"""Chat routes for VoteWise AI."""
 
 import json
 import logging
@@ -7,7 +7,7 @@ from typing import Any, Optional
 from flask import Blueprint, current_app, jsonify, request
 
 from config import Config
-from utils.response import success_response, error_response
+from utils.response import error_response, success_response
 
 logger = logging.getLogger(__name__)
 
@@ -87,18 +87,19 @@ DEFAULT_RESPONSE = {
 
 @chat_bp.route("/chat", methods=["POST"])
 def chat() -> tuple:
-    ", ", "AI Chat endpoint with Gemini integration.", ", "
+    """AI Chat endpoint with Gemini integration."""
     data: dict[str, Any] = request.get_json(silent=True) or {}
-    message: str = data.get("message", ", ")
+    message: str = data.get("message")
     user_prefs: dict[str, Any] = data.get("user_prefs", {})
 
     if not message:
         return jsonify(error_response("Message is required", 400)), 400
 
     if len(message) > 1000:
-        return jsonify(
-            error_response("Message too long. Maximum 1000 characters.", 400)
-        ), 400
+        return (
+            jsonify(error_response("Message too long. Maximum 1000 characters.", 400)),
+            400,
+        )
 
     try:
         result = _generate_ai_response(message, user_prefs)
@@ -106,23 +107,26 @@ def chat() -> tuple:
 
     except (RuntimeError, ConnectionError, ValueError):
         current_app.logger.error("Chat error occurred")
-        return jsonify(
-            {
-                "success": True,
-                "intro": "I'm here to help with your election questions!",
-                "steps": [
-                    "Visit the Election Commission website",
-                    "Check your voter ID status",
-                    "Locate your polling booth",
-                ],
-                "tips": ["Always verify from official sources"],
-                "actions": [],
-            }
-        ), 200
+        return (
+            jsonify(
+                {
+                    "success": True,
+                    "intro": "I'm here to help with your election questions!",
+                    "steps": [
+                        "Visit the Election Commission website",
+                        "Check your voter ID status",
+                        "Locate your polling booth",
+                    ],
+                    "tips": ["Always verify from official sources"],
+                    "actions": [],
+                }
+            ),
+            200,
+        )
 
 
 def _detect_intent(message: str) -> str:
-    ", ", "Detect user intent from message keywords.", ", "
+    """Detect user intent from message keywords."""
     message_lower: str = message.lower()
     for intent, keywords in INTENT_KEYWORDS.items():
         if any(kw in message_lower for kw in keywords):
@@ -131,7 +135,7 @@ def _detect_intent(message: str) -> str:
 
 
 def _generate_ai_response(message: str, user_prefs: dict) -> dict:
-    ", ", "Generate AI response using Gemini or fallback to rule-based responses.", ", "
+    """Generate AI response using Gemini or fallback to rule-based responses."""
     intent: str = _detect_intent(message)
     if intent != "default":
         return _get_fallback_response(intent)
@@ -141,7 +145,7 @@ def _generate_ai_response(message: str, user_prefs: dict) -> dict:
 
 
 def _get_fallback_response(message: str) -> dict:
-    ", ", "Return fallback response for known intents or default.", ", "
+    """Return fallback response for known intents or default."""
     message_lower: str = message.lower()
     for key, resp in FALLBACK_RESPONSES.items():
         if key in message_lower:
@@ -150,15 +154,15 @@ def _get_fallback_response(message: str) -> dict:
 
 
 def _call_gemini_api(message: str, user_prefs: dict) -> dict:
-    ", ", "Call Gemini API for AI response.", ", "
+    """Call Gemini API for AI response."""
     if not _client:
         return _get_fallback_response(message)
 
     try:
         prompt: str = (
             "You are VoteWise AI, a neutral, helpful civic assistant for election education.\n"
-            , "Keep responses brief, friendly, and informative.\n"
-            , "Respond in this JSON format only:\n"
+            "Keep responses brief, friendly, and informative.\n"
+            "Respond in this JSON format only:\n"
             '{"intro": "Brief intro", "steps": ["step1", "step2"], "tips": ["tip1"], "actions": ["action1"]}\n\n'
             f"User: {message}\nContext: {user_prefs}\n"
         )
@@ -178,13 +182,16 @@ def _call_gemini_api(message: str, user_prefs: dict) -> dict:
 
 @chat_bp.route("/health", methods=["GET"])
 def health():
-    ", ", "Health check for chat service.", ", "
-    return jsonify(
-        success_response(
-            data={
-                "status": "healthy",
-                "ai_available": _client is not None,
-                "rate_limited": False,
-            }
-        )
-    ), 200
+    """Health check for chat service."""
+    return (
+        jsonify(
+            success_response(
+                data={
+                    "status": "healthy",
+                    "ai_available": _client is not None,
+                    "rate_limited": False,
+                }
+            )
+        ),
+        200,
+    )

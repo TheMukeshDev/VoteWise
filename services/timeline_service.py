@@ -1,15 +1,16 @@
-", ", "
+"""
 Timeline Service for VoteWise AI.
 
 Real Firestore CRUD operations for Timelines using BaseService.
-", ", "
+"""
+
+from typing import Any, Dict, List, Optional
 
 from services.base_service import BaseService
-from typing import Optional, Any, List, Dict
 
 
 class TimelineService(BaseService):
-    ", ", "Service for Timeline CRUD operations in Firestore.", ", "
+    """Service for Timeline CRUD operations in Firestore."""
 
     collection_name = "timelines"
     soft_delete_field = "is_deleted"
@@ -20,7 +21,7 @@ class TimelineService(BaseService):
         status: Optional[str] = None,
         region: Optional[str] = None,
     ) -> List[Dict[str, Any]]:
-        ", ", "Get all timelines with filters.", ", "
+        """Get all timelines with filters."""
         filters = {}
         if election_type:
             filters["election_type"] = election_type
@@ -30,10 +31,10 @@ class TimelineService(BaseService):
             filters["region"] = region
 
         results = super().get_all(filters=filters, order_by="polling_date")
-        return sorted(results, key=lambda x: x.get("polling_date", ", "), reverse=True)
+        return sorted(results, key=lambda x: x.get("polling_date" ""), reverse=True)
 
     def get_by_id(self, timeline_id: str) -> Optional[Dict[str, Any]]:
-        ", ", "Get timeline by ID.", ", "
+        """Get timeline by ID."""
         return super().get_by_id(timeline_id)
 
     def create(
@@ -45,7 +46,7 @@ class TimelineService(BaseService):
         result_date: Optional[str] = None,
         status: str = "upcoming",
     ) -> Optional[Dict[str, Any]]:
-        ", ", "Create timeline.", ", "
+        """Create timeline."""
         data = {
             "election_type": election_type,
             "region": region,
@@ -59,15 +60,15 @@ class TimelineService(BaseService):
     def update(
         self, timeline_id: str, data: Dict[str, Any]
     ) -> Optional[Dict[str, Any]]:
-        ", ", "Update timeline.", ", "
+        """Update timeline."""
         return super().update(timeline_id, data)
 
     def delete(self, timeline_id: str, soft: bool = True) -> bool:
-        ", ", "Delete timeline.", ", "
+        """Delete timeline."""
         return super().delete(timeline_id, soft=soft)
 
     def get_all_for_admin(self) -> List[Dict[str, Any]]:
-        ", ", "Get all including soft-deleted.", ", "
+        """Get all including soft-deleted."""
         return super().get_all_for_admin()
 
 

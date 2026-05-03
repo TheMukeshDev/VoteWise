@@ -1,14 +1,15 @@
-", ", "Tests for uncovered modules to boost coverage to 85%+.", ", "
+"""Tests for uncovered modules to boost coverage to 85%+."""
 
 from unittest.mock import MagicMock, patch
 
 
 class TestErrorHandler:
-    ", ", "Test error handler middleware.", ", "
+    """Test error handler middleware."""
 
     def test_error_handler_404(self):
-        from middleware.error_handler import register_error_handlers
         from flask import Flask
+
+        from middleware.error_handler import register_error_handlers
 
         app = Flask(__name__)
         app.config["TESTING"] = True
@@ -19,8 +20,9 @@ class TestErrorHandler:
             assert response.status_code == 404
 
     def test_error_handler_500(self):
-        from middleware.error_handler import register_error_handlers
         from flask import Flask
+
+        from middleware.error_handler import register_error_handlers
 
         app = Flask(__name__)
         app.config["TESTING"] = True
@@ -36,7 +38,7 @@ class TestErrorHandler:
 
 
 class TestRateLimiter:
-    ", ", "Test rate limiter middleware.", ", "
+    """Test rate limiter middleware."""
 
     def test_rate_limiter_init(self):
         from middleware.rate_limiter import RateLimiter
@@ -62,8 +64,9 @@ class TestRateLimiter:
         assert limiter.check_limit(key, max_requests=3, window_seconds=60) is False
 
     def test_rate_limiter_decorator(self):
-        from middleware.rate_limiter import rate_limit
         from flask import Flask
+
+        from middleware.rate_limiter import rate_limit
 
         app = Flask(__name__)
         app.config["TESTING"] = True
@@ -80,14 +83,14 @@ class TestRateLimiter:
             assert res.status_code == 429
 
     def test_get_rate_limiter(self):
-        from middleware.rate_limiter import get_rate_limiter, RateLimiter
+        from middleware.rate_limiter import RateLimiter, get_rate_limiter
 
         limiter = get_rate_limiter()
         assert isinstance(limiter, RateLimiter)
 
 
 class TestDataModels:
-    ", ", "Test data models.", ", "
+    """Test data models."""
 
     def test_user_profile_model(self):
         from models.data_models import UserProfile
@@ -184,7 +187,7 @@ class TestDataModels:
 
 
 class TestGoogleServicesHub:
-    ", ", "Test Google services hub.", ", "
+    """Test Google services hub."""
 
     def test_google_services_hub_imports(self):
         from services import google_services_hub
@@ -193,7 +196,7 @@ class TestGoogleServicesHub:
 
 
 class TestFirestoreValidation:
-    ", ", "Test document ID validation.", ", "
+    """Test document ID validation."""
 
     def test_valid_id(self):
         from services.firestore_service import validate_document_id
@@ -211,7 +214,7 @@ class TestFirestoreValidation:
 
 
 class TestConfigSecretKey:
-    ", ", "Test config security.", ", "
+    """Test config security."""
 
     def test_config_has_secret_key(self):
         from config import TestConfig
@@ -221,7 +224,7 @@ class TestConfigSecretKey:
 
 
 class TestValidators:
-    ", ", "Test validators module directly.", ", "
+    """Test validators module directly."""
 
     def test_validate_email_valid(self):
         from utils.validators import validate_email
@@ -245,7 +248,7 @@ class TestValidators:
 
 
 class TestConstants:
-    ", ", "Test constants module.", ", "
+    """Test constants module."""
 
     def test_constants_exist(self):
         from utils import constants

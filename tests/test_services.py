@@ -1,30 +1,36 @@
+from unittest.mock import MagicMock, PropertyMock, patch
+
 import pytest
-from unittest.mock import MagicMock, patch, PropertyMock
+
 from services.data_access_layer import FirestoreDB
+
 
 @pytest.fixture
 def mock_db_property():
-    with patch("services.data_access_layer.FirestoreDB.db", new_callable=PropertyMock) as mock_db:
+    with patch(
+        "services.data_access_layer.FirestoreDB.db", new_callable=PropertyMock
+    ) as mock_db:
         yield mock_db
+
 
 class TestFirestoreDB:
     def test_create_user_success(self, mock_db_property):
         db_mock = MagicMock()
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
-        
+
         result = dal.create_user("test_user_id", {"name": "Test"})
         assert result is True
         db_mock.collection.assert_called_with("users")
         db_mock.collection().document.assert_called_with("test_user_id")
         db_mock.collection().document().set.assert_called_once()
-        
+
     def test_create_user_failure(self, mock_db_property):
         db_mock = MagicMock()
         db_mock.collection().document().set.side_effect = Exception("DB Error")
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
-        
+
         result = dal.create_user("test_user_id", {"name": "Test"})
         assert result is False
 
@@ -37,7 +43,7 @@ class TestFirestoreDB:
         db_mock.collection().document().get.return_value = doc_mock
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
-        
+
         result = dal.get_user("test_user_id")
         assert result == {"id": "test_user_id", "name": "Test"}
 
@@ -48,7 +54,7 @@ class TestFirestoreDB:
         db_mock.collection().document().get.return_value = doc_mock
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
-        
+
         result = dal.get_user("test_user_id")
         assert result is None
 
@@ -56,7 +62,7 @@ class TestFirestoreDB:
         db_mock = MagicMock()
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
-        
+
         result = dal.update_user("test_user_id", {"name": "Test2"})
         assert result is True
         db_mock.collection().document().update.assert_called_once()
@@ -65,7 +71,7 @@ class TestFirestoreDB:
         db_mock = MagicMock()
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
-        
+
         result = dal.delete_user("test_user_id")
         assert result is True
         db_mock.collection().document().delete.assert_called_once()
@@ -78,11 +84,11 @@ class TestFirestoreDB:
         doc_mock2 = MagicMock()
         doc_mock2.id = "u2"
         doc_mock2.to_dict.return_value = {"name": "User 2"}
-        
+
         db_mock.collection().limit().stream.return_value = [doc_mock1, doc_mock2]
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
-        
+
         result = dal.get_all_users()
         assert len(result) == 2
         assert result[0] == {"id": "u1", "name": "User 1"}
@@ -213,7 +219,9 @@ class TestFirestoreDB:
         doc_mock.exists = True
         doc_mock.id = "rem1"
         doc_mock.to_dict.return_value = {"msg": "Hi"}
-        db_mock.collection().document().collection().document().get.return_value = doc_mock
+        db_mock.collection().document().collection().document().get.return_value = (
+            doc_mock
+        )
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
         assert dal.get_reminder("u1", "rem1")["msg"] == "Hi"
@@ -310,6 +318,7 @@ class TestFirestoreDB:
 
     def test_increment_analytics(self, mock_db_property):
         import datetime
+
         db_mock = MagicMock()
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
@@ -386,8 +395,9 @@ class TestFirestoreDB:
         doc_mock.exists = True
         doc_mock.id = "main"
         doc_mock.to_dict.return_value = {"p": "v"}
-        db_mock.collection().document().collection().document().get.return_value = doc_mock
+        db_mock.collection().document().collection().document().get.return_value = (
+            doc_mock
+        )
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
         assert dal.get_preferences("u1")["p"] == "v"
-

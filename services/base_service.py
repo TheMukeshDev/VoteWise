@@ -1,17 +1,18 @@
-", ", "
+"""
 Base Service for VoteWise AI.
 
 Generic CRUD operations to eliminate code duplication.
-", ", "
+"""
+
+from typing import Optional
 
 from firebase_admin import firestore
-from typing import Optional, Any, List, Dict
 
 
 class BaseService:
-    ", ", "Base class for Firestore CRUD operations.", ", "
+    """Base class for Firestore CRUD operations."""
 
-    collection_name: str = ", "
+    collection_name: str = ""
     soft_delete_field: str = "is_deleted"
 
     def __init__(self):
@@ -19,7 +20,7 @@ class BaseService:
 
     @property
     def db(self):
-        ", ", "Get Firestore client.", ", "
+        """Get Firestore client."""
         if not self._db:
             try:
                 self._db = firestore.client()
@@ -28,11 +29,11 @@ class BaseService:
         return self._db
 
     def _get_collection(self):
-        ", ", "Get collection reference.", ", "
+        """Get collection reference."""
         return self.db.collection(self.collection_name) if self.db else None
 
     def get_all(self, filters=None, order_by=None):
-        ", ", "Get all documents from collection.", ", "
+        """Get all documents from collection."""
         coll = self._get_collection()
         if not coll:
             return []
@@ -60,7 +61,7 @@ class BaseService:
             return self._get_all_fallback(filters)
 
     def _get_all_fallback(self, filters=None):
-        ", ", "Fallback: get all and filter in memory.", ", "
+        """Fallback: get all and filter in memory."""
         coll = self._get_collection()
         if not coll:
             return []
@@ -87,7 +88,7 @@ class BaseService:
             return []
 
     def get_by_id(self, doc_id: str):
-        ", ", "Get a specific document by ID.", ", "
+        """Get a specific document by ID."""
         coll = self._get_collection()
         if not coll:
             return None
@@ -105,7 +106,7 @@ class BaseService:
             return None
 
     def create(self, data, doc_id=None):
-        ", ", "Create a new document.", ", "
+        """Create a new document."""
         coll = self._get_collection()
         if not coll:
             return None
@@ -129,7 +130,7 @@ class BaseService:
             return None
 
     def update(self, doc_id: str, data):
-        ", ", "Update a document.", ", "
+        """Update a document."""
         coll = self._get_collection()
         if not coll:
             return None
@@ -155,7 +156,7 @@ class BaseService:
             return None
 
     def delete(self, doc_id: str, soft: bool = True):
-        ", ", "Delete a document (soft delete by default).", ", "
+        """Delete a document (soft delete by default)."""
         coll = self._get_collection()
         if not coll:
             return False
@@ -184,7 +185,7 @@ class BaseService:
             return False
 
     def get_all_for_admin(self):
-        ", ", "Get all documents including soft-deleted (for admin).", ", "
+        """Get all documents including soft-deleted (for admin)."""
         coll = self._get_collection()
         if not coll:
             return []

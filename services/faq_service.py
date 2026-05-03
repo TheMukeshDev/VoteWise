@@ -1,31 +1,27 @@
-", ", "
+"""
 FAQ Service for VoteWise AI
 
 Real Firestore CRUD operations for FAQs with caching.
-", ", "
+"""
+
+from typing import Any, Optional
 
 from firebase_admin import firestore
-from typing import Optional, Any
 
-from services.cache_service import (
-    get_cached,
-    set_cached,
-    delete_cached,
-    CACHE_KEYS,
-    TTL_VALUES,
-)
-from utils.constants import SUPPORTED_LANGUAGES, FAQ_CATEGORIES
+from services.cache_service import (CACHE_KEYS, TTL_VALUES, delete_cached,
+                                    get_cached, set_cached)
+from utils.constants import FAQ_CATEGORIES, SUPPORTED_LANGUAGES
 
 
 class FAQService:
-    ", ", "Service for FAQ CRUD operations in Firestore.", ", "
+    """Service for FAQ CRUD operations in Firestore."""
 
     def __init__(self) -> None:
         self._db = None
 
     @property
     def db(self):
-        ", ", "Get Firestore client.", ", "
+        """Get Firestore client."""
         if not self._db:
             try:
                 self._db = firestore.client()
@@ -34,13 +30,13 @@ class FAQService:
         return self._db
 
     def _get_collection(self):
-        ", ", "Get FAQs collection reference.", ", "
+        """Get FAQs collection reference."""
         return self.db.collection("faqs") if self.db else None
 
     def get_all(
         self, category: Optional[str] = None, language: Optional[str] = None
     ) -> list[dict[str, Any]]:
-        ", ", "Get all FAQs from Firestore with caching.", ", "
+        """Get all FAQs from Firestore with caching."""
         cache_key: str = f"{CACHE_KEYS['faqs']}:{category}:{language}"
         cached = get_cached(cache_key)
         if cached is not None:
@@ -58,7 +54,7 @@ class FAQService:
         page: int = 1,
         limit: int = 20,
     ) -> tuple:
-        ", ", "Get FAQs with pagination.", ", "
+        """Get FAQs with pagination."""
         all_faqs: list[dict[str, Any]] = self._get_all_no_cache(category, language)
         total: int = len(all_faqs) if all_faqs else 0
         start: int = (page - 1) * limit
@@ -68,7 +64,7 @@ class FAQService:
     def _get_all_no_cache(
         self, category: Optional[str] = None, language: Optional[str] = None
     ) -> list[dict[str, Any]]:
-        ", ", "Get all FAQs without caching.", ", "
+        """Get all FAQs without caching."""
         coll = self._get_collection()
         if not coll:
             return []
@@ -89,7 +85,7 @@ class FAQService:
             return []
 
     def get_by_id(self, faq_id: str) -> Optional[dict[str, Any]]:
-        ", ", "Get a specific FAQ by ID.", ", "
+        """Get a specific FAQ by ID."""
         coll = self._get_collection()
         if not coll:
             return None
@@ -110,7 +106,7 @@ class FAQService:
         language: str = "en",
         is_published: bool = True,
     ) -> Optional[dict[str, Any]]:
-        ", ", "Create a new FAQ and invalidate cache.", ", "
+        """Create a new FAQ and invalidate cache."""
         coll = self._get_collection()
         if not coll:
             return None
@@ -140,7 +136,7 @@ class FAQService:
             return None
 
     def update(self, faq_id: str, data: dict[str, Any]) -> Optional[dict[str, Any]]:
-        ", ", "Update an FAQ.", ", "
+        """Update an FAQ."""
         coll = self._get_collection()
         if not coll:
             return None
@@ -159,7 +155,7 @@ class FAQService:
             return None
 
     def delete(self, faq_id: str, soft: bool = True) -> bool:
-        ", ", "Delete an FAQ (soft delete by default).", ", "
+        """Delete an FAQ (soft delete by default)."""
         coll = self._get_collection()
         if not coll:
             return False

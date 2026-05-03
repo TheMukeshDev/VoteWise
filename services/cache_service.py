@@ -1,21 +1,22 @@
-", ", "
+"""
 Redis Caching Service for VoteWise AI
 
 Provides distributed caching using Redis.
 Falls back to in-memory if Redis is unavailable.
-", ", "
+"""
 
 import json
 import logging
-from typing import Any, Optional, Callable
 from functools import wraps
+from typing import Any, Callable, Optional
+
 from config import Config
 
 logger = logging.getLogger(__name__)
 
 
 class CacheService:
-    ", ", "Caching service with Redis backend and in-memory fallback.", ", "
+    """Caching service with Redis backend and in-memory fallback."""
 
     def __init__(self, redis_url: Optional[str] = None):
         self.redis_url: Optional[str] = redis_url or Config.REDIS_URL
@@ -37,7 +38,7 @@ class CacheService:
         self._memory_cache: dict[str, Any] = {}
 
     def get(self, key: str) -> Optional[Any]:
-        ", ", "Get value from cache.", ", "
+        """Get value from cache."""
         if self._use_redis and self._redis_client:
             try:
                 value: Optional[str] = self._redis_client.get(key)
@@ -48,7 +49,7 @@ class CacheService:
         return self._memory_cache.get(key)
 
     def set(self, key: str, value: Any, ttl: int = 300) -> bool:
-        ", ", "Set value in cache with TTL in seconds.", ", "
+        """Set value in cache with TTL in seconds."""
         if self._use_redis and self._redis_client:
             try:
                 serialized: str = json.dumps(value)
@@ -61,7 +62,7 @@ class CacheService:
         return True
 
     def delete(self, key: str) -> bool:
-        ", ", "Delete key from cache.", ", "
+        """Delete key from cache."""
         if self._use_redis and self._redis_client:
             try:
                 self._redis_client.delete(key)
@@ -73,7 +74,7 @@ class CacheService:
         return True
 
     def clear_pattern(self, pattern: str) -> int:
-        ", ", "Clear all keys matching pattern.", ", "
+        """Clear all keys matching pattern."""
         count: int = 0
         if self._use_redis and self._redis_client:
             try:
@@ -99,29 +100,29 @@ _cache_service = CacheService()
 
 
 def cache_get(key: str) -> Optional[Any]:
-    ", ", "Get value from cache.", ", "
+    """Get value from cache."""
     return _cache_service.get(key)
 
 
 def cache_set(key: str, value: Any, ttl: int = 300) -> bool:
-    ", ", "Set value in cache.", ", "
+    """Set value in cache."""
     return _cache_service.set(key, value, ttl)
 
 
 def cache_delete(key: str) -> bool:
-    ", ", "Delete key from cache.", ", "
+    """Delete key from cache."""
     return _cache_service.delete(key)
 
 
 def cached(ttl: int = 300, key_func: Optional[Callable] = None):
-    ", ", "
+    """
     Caching decorator.
 
     Usage:
         @cached(ttl=60, key_func=lambda args: f"user:{args[0]}")
         def get_user(user_id):
             ...
-    ", ", "
+    """
 
     def decorator(f: Callable) -> Callable:
         @wraps(f)
@@ -144,7 +145,7 @@ def cached(ttl: int = 300, key_func: Optional[Callable] = None):
 
 
 def get_cache_service() -> CacheService:
-    ", ", "Get the global cache service instance.", ", "
+    """Get the global cache service instance."""
     return _cache_service
 
 

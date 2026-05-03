@@ -1,4 +1,4 @@
-", ", "Timeline public routes for VoteWise AI.", ", "
+"""Timeline public routes for VoteWise AI."""
 
 import logging
 from typing import Any, Optional
@@ -16,7 +16,7 @@ timeline_public_bp = Blueprint("timeline_public", __name__)
 @timeline_public_bp.route(", ", methods=["GET"])
 @timeline_public_bp.route("/", methods=["GET"])
 def get_timelines() -> tuple:
-    ", ", "Get all active timelines (public).", ", "
+    """Get all active timelines (public)."""
     try:
         election_type: Optional[str] = request.args.get("election_type")
         status: Optional[str] = request.args.get("status")
@@ -33,7 +33,7 @@ def get_timelines() -> tuple:
 
 @timeline_public_bp.route("/<timeline_id>", methods=["GET"])
 def get_timeline(timeline_id: str) -> tuple:
-    ", ", "Get a specific active timeline (public).", ", "
+    """Get a specific active timeline (public)."""
     try:
         timeline: Optional[dict[str, Any]] = timeline_service.get_by_id(timeline_id)
         if not timeline:

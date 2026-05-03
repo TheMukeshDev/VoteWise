@@ -1,4 +1,4 @@
-", ", "
+"""
 Timeline Admin Routes for VoteWise AI
 
 Admin timeline management endpoints:
@@ -7,14 +7,16 @@ Admin timeline management endpoints:
 - POST /api/admin/timelines - Create timeline (admin)
 - PUT /api/admin/timelines/<id> - Update timeline (admin)
 - DELETE /api/admin/timelines/<id> - Delete timeline (admin)
-", ", "
+"""
 
-from flask import Blueprint, request, jsonify
+from typing import Any, Optional
+
+from flask import Blueprint, jsonify, request
+
 from middleware.auth_middleware import require_admin
-from utils.response import success_response, error_response
-from utils.validators import validate_required_fields
 from services.timeline_service import timeline_service
-from typing import Optional, Any
+from utils.response import error_response, success_response
+from utils.validators import validate_required_fields
 
 timeline_admin_bp = Blueprint("timeline_admin", __name__)
 
@@ -32,7 +34,7 @@ ALLOWED_STATUSES: list[str] = ["upcoming", "ongoing", "completed", "cancelled"]
 @timeline_admin_bp.route("/", methods=["GET"])
 @require_admin
 def get_timelines() -> tuple:
-    ", ", "Get all timelines with optional filters (admin).", ", "
+    """Get all timelines with optional filters (admin)."""
     election_type: Optional[str] = request.args.get("election_type")
     status: Optional[str] = request.args.get("status")
 
@@ -49,7 +51,7 @@ def get_timelines() -> tuple:
 @timeline_admin_bp.route("/<timeline_id>", methods=["GET"])
 @require_admin
 def get_timeline(timeline_id: str) -> tuple:
-    ", ", "Get a specific timeline by ID (admin).", ", "
+    """Get a specific timeline by ID (admin)."""
     timeline: Optional[dict[str, Any]] = timeline_service.get_by_id(timeline_id)
 
     if not timeline:
@@ -62,33 +64,42 @@ def get_timeline(timeline_id: str) -> tuple:
 @timeline_admin_bp.route("/", methods=["POST"])
 @require_admin
 def create_timeline() -> tuple:
-    ", ", "Create a new timeline (admin only).", ", "
+    """Create a new timeline (admin only)."""
     data: dict[str, Any] = request.get_json() or {}
 
     is_valid, missing = validate_required_fields(
         data, ["election_type", "region", "polling_date"]
     )
     if not is_valid:
-        return jsonify(
-            error_response(f"Missing required fields: {', '.join(missing)}", 400)
-        ), 400
+        return (
+            jsonify(
+                error_response(f"Missing required fields: {', '.join(missing)}", 400)
+            ),
+            400,
+        )
 
     election_type: str = data.get("election_type")
     if election_type not in ALLOWED_ELECTION_TYPES:
-        return jsonify(
-            error_response(
-                f"Invalid election_type. Allowed: {', '.join(ALLOWED_ELECTION_TYPES)}",
-                400,
-            )
-        ), 400
+        return (
+            jsonify(
+                error_response(
+                    f"Invalid election_type. Allowed: {', '.join(ALLOWED_ELECTION_TYPES)}",
+                    400,
+                )
+            ),
+            400,
+        )
 
     status: str = data.get("status", "upcoming")
     if status not in ALLOWED_STATUSES:
-        return jsonify(
-            error_response(
-                f"Invalid status. Allowed: {', '.join(ALLOWED_STATUSES)}", 400
-            )
-        ), 400
+        return (
+            jsonify(
+                error_response(
+                    f"Invalid status. Allowed: {', '.join(ALLOWED_STATUSES)}", 400
+                )
+            ),
+            400,
+        )
 
     timeline: Optional[dict[str, Any]] = timeline_service.create(
         election_type=election_type,
@@ -99,46 +110,58 @@ def create_timeline() -> tuple:
         status=status,
     )
 
-    return jsonify(
-        success_response(message="Timeline created successfully", data=timeline)
-    ), 201
+    return (
+        jsonify(
+            success_response(message="Timeline created successfully", data=timeline)
+        ),
+        201,
+    )
 
 
 @timeline_admin_bp.route("/<timeline_id>", methods=["PUT"])
 @require_admin
 def update_timeline(timeline_id: str) -> tuple:
-    ", ", "Update a timeline (admin only).", ", "
+    """Update a timeline (admin only)."""
     data: dict[str, Any] = request.get_json() or {}
 
     if "election_type" in data and data["election_type"] not in ALLOWED_ELECTION_TYPES:
-        return jsonify(
-            error_response(
-                f"Invalid election_type. Allowed: {', '.join(ALLOWED_ELECTION_TYPES)}",
-                400,
-            )
-        ), 400
+        return (
+            jsonify(
+                error_response(
+                    f"Invalid election_type. Allowed: {', '.join(ALLOWED_ELECTION_TYPES)}",
+                    400,
+                )
+            ),
+            400,
+        )
 
     if "status" in data and data["status"] not in ALLOWED_STATUSES:
-        return jsonify(
-            error_response(
-                f"Invalid status. Allowed: {', '.join(ALLOWED_STATUSES)}", 400
-            )
-        ), 400
+        return (
+            jsonify(
+                error_response(
+                    f"Invalid status. Allowed: {', '.join(ALLOWED_STATUSES)}", 400
+                )
+            ),
+            400,
+        )
 
     timeline: Optional[dict[str, Any]] = timeline_service.update(timeline_id, data)
 
     if not timeline:
         return jsonify(error_response("Timeline not found", 404)), 404
 
-    return jsonify(
-        success_response(message="Timeline updated successfully", data=timeline)
-    ), 200
+    return (
+        jsonify(
+            success_response(message="Timeline updated successfully", data=timeline)
+        ),
+        200,
+    )
 
 
 @timeline_admin_bp.route("/<timeline_id>", methods=["DELETE"])
 @require_admin
 def delete_timeline(timeline_id: str) -> tuple:
-    ", ", "Delete a timeline (admin only).", ", "
+    """Delete a timeline (admin only)."""
     success: bool = timeline_service.delete(timeline_id)
 
     if not success:

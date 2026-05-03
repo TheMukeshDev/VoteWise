@@ -1,7 +1,8 @@
-", ", "Additional service tests to push coverage to 85%+.", ", "
+"""Additional service tests to push coverage to 85%+."""
+
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch
 
 
 class TestTimelineServiceExtended:

@@ -1,15 +1,15 @@
-", ", "
+"""
 Tests for updated firestore_service.py with improved logging and type hints.
-", ", "
+"""
 
 from unittest.mock import MagicMock, patch
 
 
 class TestSaveUserUpdated:
-    ", ", "Test save_user with improved logging.", ", "
+    """Test save_user with improved logging."""
 
     def test_save_user_success(self):
-        ", ", "Test successful user save.", ", "
+        """Test successful user save."""
         with patch("services.firestore_service.get_firestore_client") as mock_get_db:
             db_mock = MagicMock()
             mock_get_db.return_value = db_mock
@@ -22,7 +22,7 @@ class TestSaveUserUpdated:
             db_mock.collection().document().set.assert_called_once()
 
     def test_save_user_no_db(self):
-        ", ", "Test save_user with no database.", ", "
+        """Test save_user with no database."""
         with patch(
             "services.firestore_service.get_firestore_client", return_value=None
         ):
@@ -32,7 +32,7 @@ class TestSaveUserUpdated:
             assert result is None
 
     def test_save_user_exception(self):
-        ", ", "Test save_user with database exception.", ", "
+        """Test save_user with database exception."""
         with patch("services.firestore_service.get_firestore_client") as mock_get_db:
             db_mock = MagicMock()
             db_mock.collection().document().set.side_effect = RuntimeError("DB Error")
@@ -45,10 +45,10 @@ class TestSaveUserUpdated:
 
 
 class TestGetUserUpdated:
-    ", ", "Test get_user with improved logging.", ", "
+    """Test get_user with improved logging."""
 
     def test_get_user_success(self):
-        ", ", "Test successful user retrieval.", ", "
+        """Test successful user retrieval."""
         with patch("services.firestore_service.get_firestore_client") as mock_get_db:
             db_mock = MagicMock()
             doc_mock = MagicMock()
@@ -64,7 +64,7 @@ class TestGetUserUpdated:
             assert result == {"name": "Test"}
 
     def test_get_user_not_found(self):
-        ", ", "Test user not found.", ", "
+        """Test user not found."""
         with patch("services.firestore_service.get_firestore_client") as mock_get_db:
             db_mock = MagicMock()
             doc_mock = MagicMock()
@@ -78,7 +78,7 @@ class TestGetUserUpdated:
             assert result is None
 
     def test_get_user_no_db(self):
-        ", ", "Test get_user with no database.", ", "
+        """Test get_user with no database."""
         with patch(
             "services.firestore_service.get_firestore_client", return_value=None
         ):
@@ -89,10 +89,10 @@ class TestGetUserUpdated:
 
 
 class TestCreateOrUpdateUserProfileUpdated:
-    ", ", "Test create_or_update_user_profile with fixed datetime.utcnow().", ", "
+    """Test create_or_update_user_profile with fixed datetime.utcnow()."""
 
     def test_create_new_profile(self):
-        ", ", "Test creating a new user profile.", ", "
+        """Test creating a new user profile."""
         with patch("services.firestore_service.get_firestore_client") as mock_get_db:
             db_mock = MagicMock()
             doc_mock_new = MagicMock()
@@ -111,7 +111,8 @@ class TestCreateOrUpdateUserProfileUpdated:
             ]
             mock_get_db.return_value = db_mock
 
-            from services.firestore_service import create_or_update_user_profile
+            from services.firestore_service import \
+                create_or_update_user_profile
 
             result = create_or_update_user_profile(
                 firebase_uid="user1",
@@ -122,7 +123,7 @@ class TestCreateOrUpdateUserProfileUpdated:
             assert result is not None
 
     def test_update_existing_profile(self):
-        ", ", "Test updating an existing user profile.", ", "
+        """Test updating an existing user profile."""
         with patch("services.firestore_service.get_firestore_client") as mock_get_db:
             db_mock = MagicMock()
             doc_mock = MagicMock()
@@ -134,7 +135,8 @@ class TestCreateOrUpdateUserProfileUpdated:
             db_mock.collection().document().get.return_value = doc_mock
             mock_get_db.return_value = db_mock
 
-            from services.firestore_service import create_or_update_user_profile
+            from services.firestore_service import \
+                create_or_update_user_profile
 
             result = create_or_update_user_profile(
                 firebase_uid="user1",
@@ -145,11 +147,12 @@ class TestCreateOrUpdateUserProfileUpdated:
             assert result is not None
 
     def test_no_db(self):
-        ", ", "Test with no database available.", ", "
+        """Test with no database available."""
         with patch(
             "services.firestore_service.get_firestore_client", return_value=None
         ):
-            from services.firestore_service import create_or_update_user_profile
+            from services.firestore_service import \
+                create_or_update_user_profile
 
             result = create_or_update_user_profile(
                 firebase_uid="user1", email="test@example.com"
@@ -158,10 +161,10 @@ class TestCreateOrUpdateUserProfileUpdated:
 
 
 class TestReminderOperationsUpdated:
-    ", ", "Test reminder operations with improved logging.", ", "
+    """Test reminder operations with improved logging."""
 
     def test_save_reminder_success(self):
-        ", ", "Test successful reminder save.", ", "
+        """Test successful reminder save."""
         with patch("services.firestore_service.get_firestore_client") as mock_get_db:
             db_mock = MagicMock()
             doc_ref_mock = MagicMock()
@@ -178,7 +181,7 @@ class TestReminderOperationsUpdated:
             assert result == "reminder1"
 
     def test_save_reminder_no_db(self):
-        ", ", "Test save_reminder with no database.", ", "
+        """Test save_reminder with no database."""
         with patch(
             "services.firestore_service.get_firestore_client", return_value=None
         ):
@@ -189,10 +192,10 @@ class TestReminderOperationsUpdated:
 
 
 class TestBookmarkOperationsUpdated:
-    ", ", "Test bookmark operations with improved logging.", ", "
+    """Test bookmark operations with improved logging."""
 
     def test_save_bookmark_success(self):
-        ", ", "Test successful bookmark save.", ", "
+        """Test successful bookmark save."""
         with patch("services.firestore_service.get_firestore_client") as mock_get_db:
             db_mock = MagicMock()
             doc_ref_mock = MagicMock()
@@ -209,7 +212,7 @@ class TestBookmarkOperationsUpdated:
             assert result == "bookmark1"
 
     def test_get_bookmarks_success(self):
-        ", ", "Test successful bookmarks retrieval.", ", "
+        """Test successful bookmarks retrieval."""
         with patch("services.firestore_service.get_firestore_client") as mock_get_db:
             db_mock = MagicMock()
             doc_mock = MagicMock()
@@ -229,11 +232,12 @@ class TestBookmarkOperationsUpdated:
 
 
 class TestDatetimeFix:
-    ", ", "Test that datetime.utcnow() is fixed.", ", "
+    """Test that datetime.utcnow() is fixed."""
 
     def test_datetime_timezone_utc_used(self):
-        ", ", "Verify that datetime.now(timezone.utc) is used instead of datetime.utcnow().", ", "
+        """Verify that datetime.now(timezone.utc) is used instead of datetime.utcnow()."""
         import inspect
+
         from services import firestore_service
 
         source = inspect.getsource(firestore_service.create_or_update_user_profile)

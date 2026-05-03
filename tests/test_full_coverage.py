@@ -1,11 +1,12 @@
-", ", "Comprehensive tests to push coverage toward 100%.", ", "
+"""Comprehensive tests to push coverage toward 100%."""
 
 from unittest.mock import MagicMock, patch
+
 from flask import Flask, jsonify
 
 
 class TestErrorHandlerFull:
-    ", ", "Complete error handler coverage.", ", "
+    """Complete error handler coverage."""
 
     def test_api_error_default(self):
         from middleware.error_handler import APIError
@@ -56,7 +57,7 @@ class TestErrorHandlerFull:
         assert err.status_code == 409
 
     def test_register_handlers(self):
-        from middleware.error_handler import register_error_handlers, APIError
+        from middleware.error_handler import APIError, register_error_handlers
 
         app = Flask(__name__)
         app.config["TESTING"] = True
@@ -103,7 +104,7 @@ class TestErrorHandlerFull:
 
 
 class TestRateLimiterFull:
-    ", ", "Complete rate limiter coverage.", ", "
+    """Complete rate limiter coverage."""
 
     def test_redis_failure_fallback(self):
         from middleware.rate_limiter import RateLimiter
@@ -134,7 +135,7 @@ class TestRateLimiterFull:
         assert limiter.check_limit("fail_key", 5, 60) is True
 
     def test_rate_limit_decorator(self):
-        from middleware.rate_limiter import rate_limit, _rate_limit_store
+        from middleware.rate_limiter import _rate_limit_store, rate_limit
 
         app = Flask(__name__)
         app.config["TESTING"] = True
@@ -154,7 +155,7 @@ class TestRateLimiterFull:
 
 
 class TestDataModelsFull:
-    ", ", "Cover all to_dict methods.", ", "
+    """Cover all to_dict methods."""
 
     def test_election_process_to_dict(self):
         from models.data_models import ElectionProcess
@@ -213,8 +214,8 @@ class TestDataModelsFull:
         assert d["metric_type"] == "page_view"
 
     def test_enums(self):
-        from models.data_models import UserRole, ReminderType, ReminderStatus
-        from models.data_models import AnnouncementPriority, ResourceType
+        from models.data_models import (AnnouncementPriority, ReminderStatus,
+                                        ReminderType, ResourceType, UserRole)
 
         assert UserRole.VOTER.value == "voter"
         assert UserRole.ADMIN.value == "admin"
@@ -225,7 +226,7 @@ class TestDataModelsFull:
 
 
 class TestDocsRoutes:
-    ", ", "Test docs routes.", ", "
+    """Test docs routes."""
 
     def test_openapi_spec(self, client):
         response = client.get("/api/openapi.json")
@@ -237,7 +238,7 @@ class TestDocsRoutes:
 
 
 class TestSpeechRoutes:
-    ", ", "Test speech routes.", ", "
+    """Test speech routes."""
 
     def test_text_to_speech_missing_text(self, client):
         r = client.post("/api/speech/text-to-speech", json={})
@@ -284,7 +285,7 @@ class TestSpeechRoutes:
 
 
 class TestTimelineRoutes:
-    ", ", "Test timeline routes.", ", "
+    """Test timeline routes."""
 
     def test_get_timeline(self, client):
         with patch("routes.timeline.timeline_service") as mock_svc:
@@ -300,7 +301,7 @@ class TestTimelineRoutes:
 
 
 class TestPollingGuidanceRoutes:
-    ", ", "Test polling guidance routes.", ", "
+    """Test polling guidance routes."""
 
     def test_get_polling_guidance(self, client):
         with patch("routes.polling_guidance.polling_guidance_service") as mock_svc:
@@ -322,7 +323,7 @@ class TestPollingGuidanceRoutes:
 
 
 class TestElectionProcessRoutes:
-    ", ", "Test election process admin routes.", ", "
+    """Test election process admin routes."""
 
     def test_get_election_processes_admin(self, client):
         with patch("routes.election_process.election_process_service") as mock_svc:
@@ -372,7 +373,7 @@ class TestElectionProcessRoutes:
 
 
 class TestTimelineAdminRoutes:
-    ", ", "Test timeline admin routes.", ", "
+    """Test timeline admin routes."""
 
     def test_get_timelines_admin(self, client):
         with patch("routes.timeline_admin.timeline_service") as mock_svc:
@@ -435,7 +436,7 @@ class TestTimelineAdminRoutes:
 
 
 class TestAnnouncementRoutesFull:
-    ", ", "Complete announcement admin route coverage.", ", "
+    """Complete announcement admin route coverage."""
 
     def test_get_announcements_admin(self, client):
         with patch("routes.announcement.announcement_service") as mock_svc:
@@ -484,7 +485,7 @@ class TestAnnouncementRoutesFull:
 
 
 class TestBookmarkRoutesFull:
-    ", ", "Complete bookmark route coverage.", ", "
+    """Complete bookmark route coverage."""
 
     def test_get_bookmarks(self, client):
         with patch("routes.bookmark.get_bookmarks") as mock_gb:
@@ -535,7 +536,7 @@ class TestBookmarkRoutesFull:
 
 
 class TestChatRoutesFull:
-    ", ", "Complete chat route coverage.", ", "
+    """Complete chat route coverage."""
 
     def test_chat_missing_message(self, client):
         r = client.post("/api/chat/chat", json={})
@@ -578,7 +579,7 @@ class TestChatRoutesFull:
 
 
 class TestReminderRoutes:
-    ", ", "Test reminder routes.", ", "
+    """Test reminder routes."""
 
     def test_get_reminders(self, client):
         with patch("routes.reminder.get_reminders") as mock_gr:
@@ -669,7 +670,7 @@ class TestReminderRoutes:
 
 
 class TestGoogleServicesHubFull:
-    ", ", "Test Google services hub methods.", ", "
+    """Test Google services hub methods."""
 
     def test_hub_verify_token(self):
         from services.google_services_hub import GoogleServicesHub
@@ -823,7 +824,7 @@ class TestGoogleServicesHubFull:
 
 
 class TestAppEndpoints:
-    ", ", "Test app.py endpoints.", ", "
+    """Test app.py endpoints."""
 
     def test_app_redirect(self, client):
         r = client.get("/app")
@@ -861,7 +862,7 @@ class TestAppEndpoints:
 
 
 class TestConfigFull:
-    ", ", "Complete config coverage.", ", "
+    """Complete config coverage."""
 
     def test_invalid_firebase_json(self):
         import os
@@ -945,7 +946,7 @@ class TestConfigFull:
         orig = os.environ.get("FLASK_ENV")
         try:
             os.environ["FLASK_ENV"] = "development"
-            from config import get_config, DevelopmentConfig
+            from config import DevelopmentConfig, get_config
 
             assert get_config() == DevelopmentConfig
         finally:
@@ -956,7 +957,7 @@ class TestConfigFull:
 
 
 class TestAuthRoutesFull:
-    ", ", "Complete auth route coverage.", ", "
+    """Complete auth route coverage."""
 
     def test_google_signin_success(self, client):
         with patch("routes.auth.verify_firebase_token") as mock_verify:
@@ -1174,7 +1175,7 @@ class TestAuthRoutesFull:
 
 
 class TestCacheServiceFull:
-    ", ", "Complete cache service coverage.", ", "
+    """Complete cache service coverage."""
 
     def test_redis_init_failure(self):
         from services.cache_service import CacheService
@@ -1210,7 +1211,7 @@ class TestCacheServiceFull:
         assert svc.delete("key") is True
 
     def test_cached_decorator(self):
-        from services.cache_service import cached, _cache_service
+        from services.cache_service import _cache_service, cached
 
         _cache_service._memory_cache.clear()
         call_count = 0
@@ -1226,14 +1227,14 @@ class TestCacheServiceFull:
         assert call_count == 1
 
     def test_get_cache_service(self):
-        from services.cache_service import get_cache_service, CacheService
+        from services.cache_service import CacheService, get_cache_service
 
         svc = get_cache_service()
         assert isinstance(svc, CacheService)
 
 
 class TestCalendarServiceFull:
-    ", ", "Complete calendar service coverage.", ", "
+    """Complete calendar service coverage."""
 
     def test_create_polling_reminder(self):
         from services.calendar_service import CalendarService
@@ -1257,7 +1258,7 @@ class TestCalendarServiceFull:
 
 
 class TestMapsServiceFull:
-    ", ", "Complete maps service coverage.", ", "
+    """Complete maps service coverage."""
 
     def test_find_polling_booth_error_status(self):
         from services.maps_service import MapsService
@@ -1271,8 +1272,9 @@ class TestMapsServiceFull:
             assert result is not None
 
     def test_get_directions_api_error(self):
-        from services.maps_service import MapsService
         import requests
+
+        from services.maps_service import MapsService
 
         svc = MapsService()
         svc.api_key = "key"
@@ -1293,7 +1295,7 @@ class TestMapsServiceFull:
 
 
 class TestTranslateServiceFull:
-    ", ", "Complete translate service coverage.", ", "
+    """Complete translate service coverage."""
 
     def test_translate_batch_initialized(self):
         from services.translate_service import TranslateService
@@ -1328,7 +1330,7 @@ class TestTranslateServiceFull:
 
 
 class TestSpeechServiceFull:
-    ", ", "Complete speech service coverage.", ", "
+    """Complete speech service coverage."""
 
     def test_recognize_not_initialized(self):
         from services.speech_service import SpeechToTextService
@@ -1356,8 +1358,9 @@ class TestSpeechServiceFull:
         assert result is not None
 
     def test_voice_input_handler_process(self):
-        from services.speech_service import VoiceInputHandler
         import base64
+
+        from services.speech_service import VoiceInputHandler
 
         handler = VoiceInputHandler()
         handler.service = MagicMock()
@@ -1394,7 +1397,7 @@ class TestSpeechServiceFull:
 
 
 class TestTTSServiceFull:
-    ", ", "Complete TTS service coverage.", ", "
+    """Complete TTS service coverage."""
 
     def test_synthesize_with_api(self):
         from services.tts_service import TextToSpeechService
@@ -1437,7 +1440,7 @@ class TestTTSServiceFull:
 
 
 class TestAnalyticsServiceFull:
-    ", ", "Complete analytics service coverage.", ", "
+    """Complete analytics service coverage."""
 
     def test_log_event_no_client_fallback(self):
         from services.analytics_service import AnalyticsService
@@ -1570,7 +1573,7 @@ class TestAnalyticsServiceFull:
 
 
 class TestElectionServiceFull:
-    ", ", "Complete election service coverage.", ", "
+    """Complete election service coverage."""
 
     def test_get_election_process(self):
         from services.election_service import get_election_process
@@ -1626,7 +1629,7 @@ class TestElectionServiceFull:
 
 
 class TestFirestoreServiceFull:
-    ", ", "Complete firestore service coverage.", ", "
+    """Complete firestore service coverage."""
 
     def test_save_user_exception(self):
         from services.firestore_service import save_user
@@ -1663,7 +1666,7 @@ class TestFirestoreServiceFull:
 
 
 class TestPollingGuidanceServiceFull:
-    ", ", "Complete polling guidance service coverage.", ", "
+    """Complete polling guidance service coverage."""
 
     def test_get_all_no_db(self):
         from services.polling_guidance_service import PollingGuidanceService
@@ -1824,7 +1827,7 @@ class TestPollingGuidanceServiceFull:
 
 
 class TestAnnouncementServiceFull:
-    ", ", "Complete announcement service coverage.", ", "
+    """Complete announcement service coverage."""
 
     def test_get_all_no_db(self):
         from services.announcement_service import AnnouncementService
@@ -1983,7 +1986,7 @@ class TestAnnouncementServiceFull:
 
 
 class TestUserRoutes:
-    ", ", "Test user routes with JWT.", ", "
+    """Test user routes with JWT."""
 
     def test_get_profile_not_found(self, client):
         with patch("routes.user.get_user", return_value=None):
@@ -2080,7 +2083,7 @@ class TestUserRoutes:
 
 
 class TestValidatorsFull:
-    ", ", "Complete validator coverage.", ", "
+    """Complete validator coverage."""
 
     def test_validate_email_valid(self):
         from utils.validators import validate_email
@@ -2156,7 +2159,7 @@ class TestValidatorsFull:
 
 
 class TestResponseFull:
-    ", ", "Complete response utility coverage.", ", "
+    """Complete response utility coverage."""
 
     def test_success_response_with_data(self):
         from utils.response import success_response
@@ -2200,7 +2203,7 @@ class TestResponseFull:
 
 
 class TestBaseServiceFull:
-    ", ", "Complete base service coverage.", ", "
+    """Complete base service coverage."""
 
     def test_db_property_exception(self):
         from services.base_service import BaseService
@@ -2393,8 +2396,9 @@ class TestBaseServiceFull:
         assert svc.get_all_for_admin() == []
 
     def test_create_with_doc_id(self):
-        from services.base_service import BaseService
         from firebase_admin import firestore
+
+        from services.base_service import BaseService
 
         class TestService(BaseService):
             collection_name = "test"
@@ -2477,7 +2481,7 @@ class TestBaseServiceFull:
 
 
 class TestDataAccessLayerFull:
-    ", ", "Complete data access layer coverage.", ", "
+    """Complete data access layer coverage."""
 
     def test_db_not_initialized(self):
         from services.data_access_layer import FirestoreDB
@@ -2770,8 +2774,9 @@ class TestDataAccessLayerFull:
             assert db.get_user_bookmarks("u1") == []
 
     def test_analytics_crud_no_db(self):
-        from services.data_access_layer import FirestoreDB
         from datetime import datetime
+
+        from services.data_access_layer import FirestoreDB
 
         db = FirestoreDB()
         db._initialized = True
@@ -2791,8 +2796,9 @@ class TestDataAccessLayerFull:
             assert db.get_analytics() == []
 
     def test_increment_analytics_exception(self):
-        from services.data_access_layer import FirestoreDB
         from datetime import datetime
+
+        from services.data_access_layer import FirestoreDB
 
         db = FirestoreDB()
         db._initialized = True
@@ -2894,7 +2900,7 @@ class TestDataAccessLayerFull:
 
 
 class TestFirestoreHealthFull:
-    ", ", "Complete firestore health check coverage.", ", "
+    """Complete firestore health check coverage."""
 
     def test_check_connection_no_client(self):
         from services.firestore_health import FirestoreHealthCheck
@@ -2926,7 +2932,7 @@ class TestFirestoreHealthFull:
 
 
 class TestDocsRoutesFull:
-    ", ", "Test docs routes with blueprint registration.", ", "
+    """Test docs routes with blueprint registration."""
 
     def test_openapi_spec_structure(self):
         from routes.docs import docs_bp

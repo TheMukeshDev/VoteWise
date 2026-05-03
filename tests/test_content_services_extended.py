@@ -1,7 +1,8 @@
-", ", "Comprehensive tests to improve coverage for announcement, polling_guidance, and election_process services.", ", "
+"""Comprehensive tests to improve coverage for announcement, polling_guidance, and election_process services."""
+
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch
 
 
 class TestAnnouncementServiceExtended:

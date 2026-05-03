@@ -1,4 +1,4 @@
-", ", "Root conftest to mock firebase_admin before any imports.", ", "
+"""Root conftest to mock firebase_admin before any imports."""
 
 import sys
 from unittest.mock import MagicMock

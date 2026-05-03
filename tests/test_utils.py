@@ -1,25 +1,14 @@
-import logging
 import json
+import logging
 from unittest.mock import MagicMock, patch
 
-from utils.response import success_response, error_response, paginated_response
-from utils.validators import (
-    validate_email,
-    validate_password,
-    validate_required_fields,
-    validate_user_id,
-    validate_faq_id,
-    validate_timeline_id,
-    sanitize_string,
-)
-from utils.logging_config import (
-    setup_logging,
-    log_request,
-    log_admin_action,
-    log_integration_failure,
-    JSONFormatter,
-    StandardFormatter,
-)
+from utils.logging_config import (JSONFormatter, StandardFormatter,
+                                  log_admin_action, log_integration_failure,
+                                  log_request, setup_logging)
+from utils.response import error_response, paginated_response, success_response
+from utils.validators import (sanitize_string, validate_email, validate_faq_id,
+                              validate_password, validate_required_fields,
+                              validate_timeline_id, validate_user_id)
 
 
 class TestResponseUtils:

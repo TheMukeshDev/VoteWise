@@ -1,29 +1,32 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from services.election_process_service import ElectionProcessService
 from services.faq_service import FAQService
 from services.polling_guidance_service import PollingGuidanceService
 from services.timeline_service import TimelineService
 
+
 class TestContentServices:
     @pytest.fixture
     def mock_db(self):
-        with patch('services.election_process_service.firestore.client') as mock:
+        with patch("services.election_process_service.firestore.client") as mock:
             yield mock
 
     @pytest.fixture
     def mock_faq_db(self):
-        with patch('services.faq_service.firestore.client') as mock:
+        with patch("services.faq_service.firestore.client") as mock:
             yield mock
 
     @pytest.fixture
     def mock_polling_db(self):
-        with patch('services.polling_guidance_service.firestore.client') as mock:
+        with patch("services.polling_guidance_service.firestore.client") as mock:
             yield mock
 
     @pytest.fixture
     def mock_timeline_db(self):
-        with patch('services.timeline_service.firestore.client') as mock:
+        with patch("services.timeline_service.firestore.client") as mock:
             yield mock
 
     # --- ElectionProcessService ---

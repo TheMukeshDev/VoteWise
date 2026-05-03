@@ -1,4 +1,4 @@
-", ", "Configuration management for VoteWise AI.", ", "
+"""Configuration management for VoteWise AI."""
 
 import json
 import logging
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 def _get_firebase_admin_json() -> dict[str, Any] | None:
-    ", ", "Get Firebase Admin JSON from env or construct from individual fields.", ", "
+    """Get Firebase Admin JSON from env or construct from individual fields."""
     firebase_json_str = os.environ.get("FIREBASE_ADMIN_JSON")
 
     if firebase_json_str:
@@ -25,7 +25,7 @@ def _get_firebase_admin_json() -> dict[str, Any] | None:
                 "FIREBASE_ADMIN_JSON environment variable is not valid JSON"
             ) from e
 
-    private_key = os.environ.get("FIREBASE_PRIVATE_KEY", ", ")
+    private_key = os.environ.get("FIREBASE_PRIVATE_KEY")
     if private_key:
         private_key = private_key.replace("\\n", "\n")
 
@@ -47,7 +47,7 @@ def _get_firebase_admin_json() -> dict[str, Any] | None:
 
 
 def _resolve_cors_origins(env: str) -> str:
-    ", ", "Resolve CORS origins based on environment.", ", "
+    """Resolve CORS origins based on environment."""
     cors = os.environ.get("CORS_ORIGINS")
     if env == "production":
         return cors if cors and cors != "*" else ", "
@@ -55,7 +55,7 @@ def _resolve_cors_origins(env: str) -> str:
 
 
 class Config:
-    ", ", "Base configuration.", ", "
+    """Base configuration."""
 
     SECRET_KEY = os.environ.get("SECRET_KEY") or (
         "dev-only-insecure-key-do-not-use-in-prod"
@@ -93,7 +93,7 @@ class Config:
 
 
 class DevelopmentConfig(Config):
-    ", ", "Development configuration with relaxed settings.", ", "
+    """Development configuration with relaxed settings."""
 
     DEBUG = True
     ENV = "development"
@@ -102,7 +102,7 @@ class DevelopmentConfig(Config):
 
 
 class ProductionConfig(Config):
-    ", ", "Production configuration.", ", "
+    """Production configuration."""
 
     DEBUG = False
     ENV = "production"
@@ -111,7 +111,7 @@ class ProductionConfig(Config):
 
 
 class TestConfig(Config):
-    ", ", "Test configuration with mock values.", ", "
+    """Test configuration with mock values."""
 
     TESTING = True
     DEBUG = True
@@ -132,6 +132,6 @@ config_by_name: dict[str, type[Config]] = {
 
 
 def get_config() -> type[Config]:
-    ", ", "Get configuration class based on FLASK_ENV.", ", "
+    """Get configuration class based on FLASK_ENV."""
     env = os.environ.get("FLASK_ENV", "production")
     return config_by_name.get(env, ProductionConfig)

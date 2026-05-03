@@ -1,6 +1,6 @@
-", ", "
+"""
 Pytest configuration and fixtures for VoteWise AI tests.
-", ", "
+"""
 
 import os
 from functools import wraps
@@ -64,14 +64,16 @@ _auth_mw.require_role = lambda roles: lambda f: f
 _auth_mw.require_admin = lambda f: f
 _auth_mw.require_voter = lambda f: f
 
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
+
 from middleware.auth_middleware import RateLimitStore
 
 
 @pytest.fixture(autouse=True)
 def reset_rate_limit_store():
-    ", ", "Reset rate limit store before each test to prevent interference.", ", "
+    """Reset rate limit store before each test to prevent interference."""
     RateLimitStore.clear()
     yield
     RateLimitStore.clear()
@@ -79,7 +81,7 @@ def reset_rate_limit_store():
 
 @pytest.fixture
 def app():
-    ", ", "Create application for testing.", ", "
+    """Create application for testing."""
     from app import create_app
     from config import TestConfig
 
@@ -90,13 +92,13 @@ def app():
 
 @pytest.fixture
 def client(app):
-    ", ", "Create test client.", ", "
+    """Create test client."""
     return app.test_client()
 
 
 @pytest.fixture
 def auth_headers():
-    ", ", "Mock authentication headers.", ", "
+    """Mock authentication headers."""
     return {
         "Authorization": "Bearer test-access-token",
         "Content-Type": "application/json",
@@ -105,7 +107,7 @@ def auth_headers():
 
 @pytest.fixture
 def mock_firebase_auth():
-    ", ", "Mock Firebase authentication.", ", "
+    """Mock Firebase authentication."""
     with patch("services.auth_service.firebase_admin") as mock:
         mock.initialize_app.return_value = None
         mock.auth.verify_id_token.return_value = {
@@ -118,7 +120,7 @@ def mock_firebase_auth():
 
 @pytest.fixture
 def mock_firestore():
-    ", ", "Mock Firestore database.", ", "
+    """Mock Firestore database."""
     with patch("services.auth_service._get_firestore_client") as mock:
         client_mock = MagicMock()
         client_mock.collection.return_value.document.return_value.get.return_value.to_dict.return_value = {
@@ -132,7 +134,7 @@ def mock_firestore():
 
 @pytest.fixture
 def sample_user_data():
-    ", ", "Sample user data for tests.", ", "
+    """Sample user data for tests."""
     return {
         "user_id": "test-user-id",
         "email": "test@example.com",
@@ -145,7 +147,7 @@ def sample_user_data():
 
 @pytest.fixture
 def sample_faq_data():
-    ", ", "Sample FAQ data for tests.", ", "
+    """Sample FAQ data for tests."""
     return {
         "question": "Who is eligible to vote?",
         "answer": "Any Indian citizen aged 18 years or above.",
@@ -156,7 +158,7 @@ def sample_faq_data():
 
 @pytest.fixture
 def sample_reminder_data():
-    ", ", "Sample reminder data for tests.", ", "
+    """Sample reminder data for tests."""
     return {
         "title": "Voter Registration Deadline",
         "reminder_date": "2026-03-15",
@@ -214,5 +216,5 @@ def mock_all_google_services(
     mock_google_speech,
     mock_google_maps,
 ):
-    ", ", "Fixture that mocks all external Google Services to prevent API calls during tests.", ", "
+    """Fixture that mocks all external Google Services to prevent API calls during tests."""
     pass

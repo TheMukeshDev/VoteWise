@@ -1,47 +1,38 @@
-", ", "
+"""
 VoteWise AI Backend - Flask Application Factory
 
 A production-ready Flask backend for a civic-tech platform
 providing election education, voter guidance, and admin management.
-", ", "
+"""
 
 import logging
 import os
 import time
 import uuid
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 
-from flask import (
-    Blueprint,
-    Flask,
-    g,
-    jsonify,
-    redirect,
-    render_template,
-    request,
-)
-from flask_cors import CORS
 from dotenv import load_dotenv
+from flask import (Blueprint, Flask, g, jsonify, redirect, render_template,
+                   request)
+from flask_cors import CORS
 
 from config import get_config
-from utils.logging_config import setup_logging
-
+from middleware.auth_middleware import setup_auth_middleware
+from middleware.error_handler import register_error_handlers
+from routes.announcement import announcement_bp
 from routes.auth import auth_bp
+from routes.bookmark import bookmark_bp
 from routes.chat import chat_bp
 from routes.election import election_bp
+from routes.election_process import election_process_bp
+from routes.faq import faq_bp
+from routes.polling import polling_bp
+from routes.polling_guidance import polling_guidance_bp
+from routes.reminder import reminder_bp
 from routes.timeline import timeline_public_bp
 from routes.timeline_admin import timeline_admin_bp
-from routes.faq import faq_bp
-from routes.reminder import reminder_bp
-from routes.polling import polling_bp
 from routes.user import user_bp
-from routes.announcement import announcement_bp
-from routes.election_process import election_process_bp
-from routes.polling_guidance import polling_guidance_bp
-from routes.bookmark import bookmark_bp
-
-from middleware.error_handler import register_error_handlers
-from middleware.auth_middleware import setup_auth_middleware
+from utils.logging_config import setup_logging
 
 logger = logging.getLogger(__name__)
 
@@ -62,10 +53,10 @@ FRONTEND_ROUTES_WITH_FIREBASE_CONFIG: list[tuple[str, str]] = [
 
 
 def create_app(config_class: type | None = None) -> Flask:
-    ", ", "
+    """
     Application factory pattern for creating Flask app instances.
     Supports configuration injection for testing and deployment.
-    ", ", "
+    """
     if config_class is None:
         config_class = get_config()
 
@@ -88,16 +79,16 @@ def create_app(config_class: type | None = None) -> Flask:
 
 
 def _configure_cors(app: Flask) -> None:
-    ", ", "Configure CORS settings.", ", "
+    """Configure CORS settings."""
     cors_origins = app.config.get("CORS_ORIGINS", "*")
     if app.config.get("ENV") == "production" and cors_origins == "*":
-        cors_origins = ", "
+        cors_origins = ""
 
     CORS(
         app,
         resources={
             r"/api/*": {
-                "origins": cors_origins,
+                "origins": cors_origins if cors_origins else "*",
                 "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
                 "allow_headers": ["Content-Type", "Authorization"],
             }
@@ -106,7 +97,7 @@ def _configure_cors(app: Flask) -> None:
 
 
 def _register_security_headers(app: Flask) -> None:
-    ", ", "Add security headers to all responses.", ", "
+    """Add security headers to all responses."""
 
     @app.after_request
     def add_security_headers(response):
@@ -118,7 +109,7 @@ def _register_security_headers(app: Flask) -> None:
 
 
 def _register_blueprints(app: Flask) -> None:
-    ", ", "Register all API blueprints with URL prefixes.", ", "
+    """Register all API blueprints with URL prefixes."""
     from routes.speech import speech_bp
 
     blueprints: list[tuple[str, Blueprint]] = [
@@ -143,7 +134,7 @@ def _register_blueprints(app: Flask) -> None:
 
 
 def _get_firebase_config(app: Flask) -> dict[str, str | None]:
-    ", ", "Generate Firebase config for frontend.", ", "
+    """Generate Firebase config for frontend."""
     return {
         "apiKey": app.config.get("FIREBASE_API_KEY"),
         "authDomain": app.config.get("FIREBASE_AUTH_DOMAIN"),
@@ -155,7 +146,7 @@ def _get_firebase_config(app: Flask) -> dict[str, str | None]:
 
 
 def _register_frontend_routes(app: Flask) -> None:
-    ", ", "Register all frontend page routes.", ", "
+    """Register all frontend page routes."""
     firebase_config = _get_firebase_config(app)
 
     for path, template in FRONTEND_ROUTES:
@@ -182,7 +173,7 @@ def _register_frontend_routes(app: Flask) -> None:
 
 
 def _register_health_endpoint(app: Flask) -> None:
-    ", ", "Register health check endpoint.", ", "
+    """Register health check endpoint."""
 
     @app.route("/api/health")
     def health():
@@ -198,16 +189,13 @@ def _register_health_endpoint(app: Flask) -> None:
 
 
 def _register_test_firestore_endpoint(app: Flask) -> None:
-    ", ", "Register test Firestore endpoint (development only).", ", "
-    from services.firestore_service import (
-        verify_firestore_connection,
-        save_user,
-        get_user,
-    )
+    """Register test Firestore endpoint (development only)."""
+    from services.firestore_service import (get_user, save_user,
+                                            verify_firestore_connection)
 
     @app.route("/api/test-firestore", methods=["GET", "POST"])
     def test_firestore():
-        ", ", "Test Firestore connection with write/read/delete operations.", ", "
+        """Test Firestore connection with write/read/delete operations."""
         result: dict[str, dict | bool] = {
             "connection": verify_firestore_connection(),
         }
@@ -223,7 +211,7 @@ def _run_firestore_write_read_test(
     save_user_func,
     get_user_func,
 ) -> None:
-    ", ", "Execute Firestore write/read test operations.", ", "
+    """Execute Firestore write/read test operations."""
     test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
     test_data = {
         "email": f"test_{test_user_id}@example.com",
@@ -246,7 +234,7 @@ def _run_firestore_write_read_test(
 
 
 def _register_request_logging(app: Flask) -> None:
-    ", ", "Register request/response logging hooks.", ", "
+    """Register request/response logging hooks."""
 
     @app.before_request
     def before_request():

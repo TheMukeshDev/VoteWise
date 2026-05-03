@@ -1,15 +1,17 @@
-", ", "
+"""
 Rate Limiting Middleware for VoteWise AI
 
 Provides distributed rate limiting using Redis.
 Falls back to in-memory if Redis is unavailable.
-", ", "
+"""
 
-import time
 import logging
+import time
 from functools import wraps
 from typing import Callable, Optional
-from flask import request, jsonify
+
+from flask import jsonify, request
+
 from config import Config
 
 logger = logging.getLogger(__name__)
@@ -19,7 +21,7 @@ _rate_limit_store: dict = {}
 
 
 class RateLimiter:
-    ", ", "Rate limiter with Redis backend and in-memory fallback.", ", "
+    """Rate limiter with Redis backend and in-memory fallback."""
 
     def __init__(self, redis_url: Optional[str] = None):
         self.redis_url = redis_url or Config.REDIS_URL
@@ -38,7 +40,7 @@ class RateLimiter:
                 self._use_redis = False
 
     def check_limit(self, key: str, max_requests: int, window_seconds: int) -> bool:
-        ", ", "Check if key is within rate limit.", ", "
+        """Check if key is within rate limit."""
         now = time.time()
 
         if self._use_redis and self._redis_client:
@@ -62,7 +64,7 @@ class RateLimiter:
         return self._check_memory(key, max_requests, window_seconds)
 
     def _check_memory(self, key: str, max_requests: int, window_seconds: int) -> bool:
-        ", ", "In-memory rate limit check.", ", "
+        """In-memory rate limit check."""
         now = time.time()
 
         if key not in _rate_limit_store:
@@ -85,14 +87,14 @@ _rate_limiter = RateLimiter()
 
 
 def rate_limit(max_requests: int = 30, window_seconds: int = 60):
-    ", ", "
+    """
     Rate limiting decorator.
 
     Usage:
         @rate_limit(max_requests=10, window_seconds=60)
         def my_endpoint():
             ...
-    ", ", "
+    """
 
     def decorator(f: Callable) -> Callable:
         @wraps(f)
@@ -100,14 +102,17 @@ def rate_limit(max_requests: int = 30, window_seconds: int = 60):
             key = f"ip:{request.remote_addr}:{request.endpoint}"
 
             if not _rate_limiter.check_limit(key, max_requests, window_seconds):
-                return jsonify(
-                    {
-                        "success": False,
-                        "message": "Too many requests. Please try again later.",
-                        "error": "rate_limit_exceeded",
-                        "retry_after": window_seconds,
-                    }
-                ), 429
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": "Too many requests. Please try again later.",
+                            "error": "rate_limit_exceeded",
+                            "retry_after": window_seconds,
+                        }
+                    ),
+                    429,
+                )
 
             return f(*args, **kwargs)
 
@@ -117,5 +122,5 @@ def rate_limit(max_requests: int = 30, window_seconds: int = 60):
 
 
 def get_rate_limiter() -> RateLimiter:
-    ", ", "Get the global rate limiter instance.", ", "
+    """Get the global rate limiter instance."""
     return _rate_limiter

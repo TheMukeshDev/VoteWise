@@ -1,4 +1,4 @@
-", ", "
+"""
 Announcement Routes for VoteWise AI
 
 Admin announcement management endpoints:
@@ -7,14 +7,16 @@ Admin announcement management endpoints:
 - POST /api/admin/announcements - Create announcement (admin)
 - PUT /api/admin/announcements/<id> - Update announcement (admin)
 - DELETE /api/admin/announcements/<id> - Delete announcement (admin)
-", ", "
+"""
 
-from flask import Blueprint, request, jsonify
+from typing import Any, Optional
+
+from flask import Blueprint, jsonify, request
+
 from middleware.auth_middleware import require_admin
-from utils.response import success_response, error_response
-from utils.validators import validate_required_fields
 from services.announcement_service import announcement_service
-from typing import Optional, Any
+from utils.response import error_response, success_response
+from utils.validators import validate_required_fields
 
 announcement_bp = Blueprint("announcement", __name__)
 
@@ -25,7 +27,7 @@ ALLOWED_PRIORITIES: list[str] = ["low", "normal", "high", "urgent"]
 @announcement_bp.route("/", methods=["GET"])
 @require_admin
 def get_announcements() -> tuple:
-    ", ", "Get all announcements with optional filters (admin).", ", "
+    """Get all announcements with optional filters (admin)."""
     region: Optional[str] = request.args.get("region")
     priority: Optional[str] = request.args.get("priority")
 
@@ -42,7 +44,7 @@ def get_announcements() -> tuple:
 @announcement_bp.route("/<announcement_id>", methods=["GET"])
 @require_admin
 def get_announcement(announcement_id: str) -> tuple:
-    ", ", "Get a specific announcement by ID (admin).", ", "
+    """Get a specific announcement by ID (admin)."""
     announcement: Optional[dict[str, Any]] = announcement_service.get_by_id(
         announcement_id
     )
@@ -57,22 +59,28 @@ def get_announcement(announcement_id: str) -> tuple:
 @announcement_bp.route("/", methods=["POST"])
 @require_admin
 def create_announcement() -> tuple:
-    ", ", "Create a new announcement (admin only).", ", "
+    """Create a new announcement (admin only)."""
     data: dict[str, Any] = request.get_json() or {}
 
     is_valid, missing = validate_required_fields(data, ["title", "message"])
     if not is_valid:
-        return jsonify(
-            error_response(f"Missing required fields: {', '.join(missing)}", 400)
-        ), 400
+        return (
+            jsonify(
+                error_response(f"Missing required fields: {', '.join(missing)}", 400)
+            ),
+            400,
+        )
 
     priority: str = data.get("priority", "normal")
     if priority not in ALLOWED_PRIORITIES:
-        return jsonify(
-            error_response(
-                f"Invalid priority. Allowed: {', '.join(ALLOWED_PRIORITIES)}", 400
-            )
-        ), 400
+        return (
+            jsonify(
+                error_response(
+                    f"Invalid priority. Allowed: {', '.join(ALLOWED_PRIORITIES)}", 400
+                )
+            ),
+            400,
+        )
 
     announcement: Optional[dict[str, Any]] = announcement_service.create(
         title=data["title"],
@@ -82,23 +90,31 @@ def create_announcement() -> tuple:
         is_active=data.get("is_active", True),
     )
 
-    return jsonify(
-        success_response(message="Announcement created successfully", data=announcement)
-    ), 201
+    return (
+        jsonify(
+            success_response(
+                message="Announcement created successfully", data=announcement
+            )
+        ),
+        201,
+    )
 
 
 @announcement_bp.route("/<announcement_id>", methods=["PUT"])
 @require_admin
 def update_announcement(announcement_id: str) -> tuple:
-    ", ", "Update an announcement (admin only).", ", "
+    """Update an announcement (admin only)."""
     data: dict[str, Any] = request.get_json() or {}
 
     if "priority" in data and data["priority"] not in ALLOWED_PRIORITIES:
-        return jsonify(
-            error_response(
-                f"Invalid priority. Allowed: {', '.join(ALLOWED_PRIORITIES)}", 400
-            )
-        ), 400
+        return (
+            jsonify(
+                error_response(
+                    f"Invalid priority. Allowed: {', '.join(ALLOWED_PRIORITIES)}", 400
+                )
+            ),
+            400,
+        )
 
     announcement: Optional[dict[str, Any]] = announcement_service.update(
         announcement_id, data
@@ -107,15 +123,20 @@ def update_announcement(announcement_id: str) -> tuple:
     if not announcement:
         return jsonify(error_response("Announcement not found", 404)), 404
 
-    return jsonify(
-        success_response(message="Announcement updated successfully", data=announcement)
-    ), 200
+    return (
+        jsonify(
+            success_response(
+                message="Announcement updated successfully", data=announcement
+            )
+        ),
+        200,
+    )
 
 
 @announcement_bp.route("/<announcement_id>", methods=["DELETE"])
 @require_admin
 def delete_announcement(announcement_id: str) -> tuple:
-    ", ", "Delete an announcement (admin only).", ", "
+    """Delete an announcement (admin only)."""
     success: bool = announcement_service.delete(announcement_id)
 
     if not success:

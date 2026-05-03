@@ -1,11 +1,12 @@
-import pytest
-from unittest.mock import patch
 import json
+from unittest.mock import patch
+
+import pytest
 
 
 @pytest.fixture(autouse=True)
 def mock_jwt():
-    ", ", "Mock JWT for all protected routes.", ", "
+    """Mock JWT for all protected routes."""
     with (
         patch(
             "flask_jwt_extended.view_decorators.verify_jwt_in_request"
@@ -71,7 +72,7 @@ class TestAnnouncementAdminRoutes:
             patch(
                 "middleware.auth_middleware.user_profile_service.get_user_profile"
             ) as mock_profile,
-            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ", "),
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
             mock_profile.return_value = {"email": ", "}
@@ -89,7 +90,7 @@ class TestAnnouncementAdminRoutes:
             patch(
                 "middleware.auth_middleware.user_profile_service.get_user_profile"
             ) as mock_profile,
-            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ", "),
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
             mock_profile.return_value = {"email": ", "}
@@ -113,7 +114,7 @@ class TestElectionProcessAdminRoutes:
             patch(
                 "middleware.auth_middleware.user_profile_service.get_user_profile"
             ) as mock_profile,
-            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ", "),
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
             mock_profile.return_value = {"email": ", "}
@@ -133,7 +134,7 @@ class TestPollingGuidanceAdminRoutes:
             patch(
                 "middleware.auth_middleware.user_profile_service.get_user_profile"
             ) as mock_profile,
-            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ", "),
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
             mock_profile.return_value = {"email": ", "}
@@ -159,7 +160,7 @@ class TestTimelineAdminRoutes:
             patch(
                 "middleware.auth_middleware.user_profile_service.get_user_profile"
             ) as mock_profile,
-            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ", "),
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
             mock_profile.return_value = {"email": ", "}

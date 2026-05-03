@@ -1,4 +1,4 @@
-", ", "
+"""
 Firestore Data Models for VoteWise AI
 
 Defines schemas for all collections:
@@ -12,12 +12,12 @@ Defines schemas for all collections:
 8. analytics
 9. polling_guidance
 10. settings
-", ", "
+"""
 
-from dataclasses import dataclass, field, asdict
-from typing import  Optional, Any
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from enum import Enum
+from typing import Any, Optional
 
 
 class UserRole(str, Enum):
@@ -54,15 +54,15 @@ class ResourceType(str, Enum):
 
 @dataclass
 class UserProfile:
-    ", ", "User profile model.", ", "
+    """User profile model."""
 
     uid: str
     email: str
     role: str = "voter"
-    full_name: str = ", "
+    full_name: str = ""
     language_preference: str = "en"
-    state: str = ", "
-    city: str = ", "
+    state: str = ""
+    city: str = ""
     first_time_voter: bool = False
     profile_completed: bool = False
     created_at: Optional[datetime] = None
@@ -70,7 +70,7 @@ class UserProfile:
     last_login: Optional[datetime] = None
 
     def to_dict(self) -> dict[str, Any]:
-        ", ", "Convert to dictionary for Firestore.", ", "
+        """Convert to dictionary for Firestore."""
         data = asdict(self)
         data = {k: v for k, v in data.items() if v is not None}
         return data
@@ -78,12 +78,12 @@ class UserProfile:
 
 @dataclass
 class ElectionProcess:
-    ", ", "Election process content model.", ", "
+    """Election process content model."""
 
     title: str
     category: str
     language: str = "en"
-    intro: str = ", "
+    intro: str = ""
     steps: list[dict[str, str]] = field(default_factory=list)
     tips: list[str] = field(default_factory=list)
     actions: list[str] = field(default_factory=list)
@@ -100,7 +100,7 @@ class ElectionProcess:
 
 @dataclass
 class ElectionTimeline:
-    ", ", "Election timeline model.", ", "
+    """Election timeline model."""
 
     election_type: str
     region: str
@@ -122,7 +122,7 @@ class ElectionTimeline:
 
 @dataclass
 class FAQ:
-    ", ", "FAQ model.", ", "
+    """FAQ model."""
 
     question: str
     answer: str
@@ -142,12 +142,12 @@ class FAQ:
 
 @dataclass
 class Reminder:
-    ", ", "Reminder model.", ", "
+    """Reminder model."""
 
     user_id: str
     reminder_type: str
     title: str
-    description: str = ", "
+    description: str = ""
     reminder_date: Optional[datetime] = None
     calendar_synced: bool = False
     status: str = "pending"
@@ -161,13 +161,13 @@ class Reminder:
 
 @dataclass
 class Announcement:
-    ", ", "Announcement model.", ", "
+    """Announcement model."""
 
     title: str
     message: str
     category: str
     priority: str = "medium"
-    region: str = ", "
+    region: str = ""
     published_by: Optional[str] = None
     published_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
@@ -180,7 +180,7 @@ class Announcement:
 
 @dataclass
 class Bookmark:
-    ", ", "Bookmark model.", ", "
+    """Bookmark model."""
 
     user_id: str
     resource_type: str
@@ -195,11 +195,11 @@ class Bookmark:
 
 @dataclass
 class PollingGuidance:
-    ", ", "Polling guidance model.", ", "
+    """Polling guidance model."""
 
     region: str
     title: str
-    description: str = ", "
+    description: str = ""
     map_enabled: bool = False
     contact_info: dict[str, str] = field(default_factory=dict)
     help_links: list[dict[str, str]] = field(default_factory=list)
@@ -214,7 +214,7 @@ class PollingGuidance:
 
 @dataclass
 class Analytics:
-    ", ", "Analytics model.", ", "
+    """Analytics model."""
 
     metric_type: str
     metric_value: int
@@ -228,7 +228,7 @@ class Analytics:
 
 @dataclass
 class Setting:
-    ", ", "Settings model.", ", "
+    """Settings model."""
 
     key: str
     value: Any
@@ -241,14 +241,14 @@ class Setting:
 
 @dataclass
 class VoterPreference:
-    ", ", "Voter preference model.", ", "
+    """Voter preference model."""
 
     user_id: str
     language: str = "en"
     notifications_enabled: bool = True
     calendar_sync_enabled: bool = False
-    preferred_state: str = ", "
-    preferred_constituency: str = ", "
+    preferred_state: str = ""
+    preferred_constituency: str = ""
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

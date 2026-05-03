@@ -1,4 +1,4 @@
-", ", "
+"""
 Comprehensive Firestore Data Access Layer for VoteWise AI
 
 Provides CRUD operations for all collections:
@@ -12,26 +12,27 @@ Provides CRUD operations for all collections:
 - analytics
 - polling_guidance
 - settings
-", ", "
+"""
+
+import logging
+from datetime import datetime
+from typing import Any, Optional
 
 import firebase_admin
 from firebase_admin import credentials, firestore
-from typing import Optional, Any
-from datetime import datetime
-import logging
 
 logger = logging.getLogger(__name__)
 
 
 class FirestoreDB:
-    ", ", "Comprehensive Firestore database access layer.", ", "
+    """Comprehensive Firestore database access layer."""
 
     def __init__(self):
         self._initialized = False
         self._init_firebase()
 
     def _init_firebase(self) -> None:
-        ", ", "Initialize Firebase Admin SDK.", ", "
+        """Initialize Firebase Admin SDK."""
         if not firebase_admin._apps:
             from config import Config
 
@@ -47,7 +48,7 @@ class FirestoreDB:
 
     @property
     def db(self) -> Optional[Any]:
-        ", ", "Get Firestore client.", ", "
+        """Get Firestore client."""
         if not self._initialized:
             self._init_firebase()
         try:
@@ -61,7 +62,7 @@ class FirestoreDB:
     # ==========================================
 
     def create_user(self, user_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Create a new user document.", ", "
+        """Create a new user document."""
         db = self.db
         if not db:
             return False
@@ -78,7 +79,7 @@ class FirestoreDB:
             return False
 
     def get_user(self, user_id: str) -> Optional[dict[str, Any]]:
-        ", ", "Get user by ID.", ", "
+        """Get user by ID."""
         db = self.db
         if not db:
             return None
@@ -93,7 +94,7 @@ class FirestoreDB:
             return None
 
     def update_user(self, user_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Update user document.", ", "
+        """Update user document."""
         db = self.db
         if not db:
             return False
@@ -108,7 +109,7 @@ class FirestoreDB:
             return False
 
     def delete_user(self, user_id: str) -> bool:
-        ", ", "Delete user document.", ", "
+        """Delete user document."""
         db = self.db
         if not db:
             return False
@@ -121,7 +122,7 @@ class FirestoreDB:
             return False
 
     def get_all_users(self, limit: int = 100) -> list[dict[str, Any]]:
-        ", ", "Get all users (admin only).", ", "
+        """Get all users (admin only)."""
         db = self.db
         if not db:
             return []
@@ -137,7 +138,7 @@ class FirestoreDB:
     # ==========================================
 
     def create_election_process(self, process_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Create election process content.", ", "
+        """Create election process content."""
         db = self.db
         if not db:
             return False
@@ -153,7 +154,7 @@ class FirestoreDB:
             return False
 
     def get_election_process(self, process_id: str) -> Optional[dict[str, Any]]:
-        ", ", "Get election process by ID.", ", "
+        """Get election process by ID."""
         db = self.db
         if not db:
             return None
@@ -170,7 +171,7 @@ class FirestoreDB:
     def get_all_election_processes(
         self, language: Optional[str] = None
     ) -> list[dict[str, Any]]:
-        ", ", "Get all election processes.", ", "
+        """Get all election processes."""
         db = self.db
         if not db:
             return []
@@ -185,7 +186,7 @@ class FirestoreDB:
             return []
 
     def update_election_process(self, process_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Update election process.", ", "
+        """Update election process."""
         db = self.db
         if not db:
             return False
@@ -200,7 +201,7 @@ class FirestoreDB:
             return False
 
     def delete_election_process(self, process_id: str) -> bool:
-        ", ", "Delete election process.", ", "
+        """Delete election process."""
         db = self.db
         if not db:
             return False
@@ -217,7 +218,7 @@ class FirestoreDB:
     # ==========================================
 
     def create_timeline(self, timeline_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Create timeline.", ", "
+        """Create timeline."""
         db = self.db
         if not db:
             return False
@@ -233,7 +234,7 @@ class FirestoreDB:
             return False
 
     def get_timeline(self, timeline_id: str) -> Optional[dict[str, Any]]:
-        ", ", "Get timeline by ID.", ", "
+        """Get timeline by ID."""
         db = self.db
         if not db:
             return None
@@ -250,7 +251,7 @@ class FirestoreDB:
     def get_timelines(
         self, election_type: Optional[str] = None, region: Optional[str] = None
     ) -> list[dict[str, Any]]:
-        ", ", "Get timelines with filters.", ", "
+        """Get timelines with filters."""
         db = self.db
         if not db:
             return []
@@ -267,7 +268,7 @@ class FirestoreDB:
             return []
 
     def update_timeline(self, timeline_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Update timeline.", ", "
+        """Update timeline."""
         db = self.db
         if not db:
             return False
@@ -282,7 +283,7 @@ class FirestoreDB:
             return False
 
     def delete_timeline(self, timeline_id: str) -> bool:
-        ", ", "Delete timeline.", ", "
+        """Delete timeline."""
         db = self.db
         if not db:
             return False
@@ -299,7 +300,7 @@ class FirestoreDB:
     # ==========================================
 
     def create_faq(self, faq_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Create FAQ.", ", "
+        """Create FAQ."""
         db = self.db
         if not db:
             return False
@@ -315,7 +316,7 @@ class FirestoreDB:
             return False
 
     def get_faq(self, faq_id: str) -> Optional[dict[str, Any]]:
-        ", ", "Get FAQ by ID.", ", "
+        """Get FAQ by ID."""
         db = self.db
         if not db:
             return None
@@ -332,7 +333,7 @@ class FirestoreDB:
     def get_faqs(
         self, category: Optional[str] = None, language: Optional[str] = None
     ) -> list[dict[str, Any]]:
-        ", ", "Get FAQs with filters.", ", "
+        """Get FAQs with filters."""
         db = self.db
         if not db:
             return []
@@ -349,7 +350,7 @@ class FirestoreDB:
             return []
 
     def update_faq(self, faq_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Update FAQ.", ", "
+        """Update FAQ."""
         db = self.db
         if not db:
             return False
@@ -364,7 +365,7 @@ class FirestoreDB:
             return False
 
     def delete_faq(self, faq_id: str) -> bool:
-        ", ", "Delete FAQ.", ", "
+        """Delete FAQ."""
         db = self.db
         if not db:
             return False
@@ -383,7 +384,7 @@ class FirestoreDB:
     def create_reminder(
         self, user_id: str, reminder_id: str, data: dict[str, Any]
     ) -> bool:
-        ", ", "Create reminder for user.", ", "
+        """Create reminder for user."""
         db = self.db
         if not db:
             return False
@@ -401,7 +402,7 @@ class FirestoreDB:
             return False
 
     def get_reminder(self, user_id: str, reminder_id: str) -> Optional[dict[str, Any]]:
-        ", ", "Get reminder by ID.", ", "
+        """Get reminder by ID."""
         db = self.db
         if not db:
             return None
@@ -424,7 +425,7 @@ class FirestoreDB:
     def get_user_reminders(
         self, user_id: str, status: Optional[str] = None
     ) -> list[dict[str, Any]]:
-        ", ", "Get all reminders for a user.", ", "
+        """Get all reminders for a user."""
         db = self.db
         if not db:
             return []
@@ -441,7 +442,7 @@ class FirestoreDB:
     def update_reminder(
         self, user_id: str, reminder_id: str, data: dict[str, Any]
     ) -> bool:
-        ", ", "Update reminder.", ", "
+        """Update reminder."""
         db = self.db
         if not db:
             return False
@@ -458,7 +459,7 @@ class FirestoreDB:
             return False
 
     def delete_reminder(self, user_id: str, reminder_id: str) -> bool:
-        ", ", "Delete reminder.", ", "
+        """Delete reminder."""
         db = self.db
         if not db:
             return False
@@ -477,7 +478,7 @@ class FirestoreDB:
     # ==========================================
 
     def create_announcement(self, announcement_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Create announcement.", ", "
+        """Create announcement."""
         db = self.db
         if not db:
             return False
@@ -493,7 +494,7 @@ class FirestoreDB:
             return False
 
     def get_announcement(self, announcement_id: str) -> Optional[dict[str, Any]]:
-        ", ", "Get announcement by ID.", ", "
+        """Get announcement by ID."""
         db = self.db
         if not db:
             return None
@@ -508,7 +509,7 @@ class FirestoreDB:
             return None
 
     def get_announcements(self, region: Optional[str] = None) -> list[dict[str, Any]]:
-        ", ", "Get active announcements.", ", "
+        """Get active announcements."""
         db = self.db
         if not db:
             return []
@@ -525,7 +526,7 @@ class FirestoreDB:
             return []
 
     def update_announcement(self, announcement_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Update announcement.", ", "
+        """Update announcement."""
         db = self.db
         if not db:
             return False
@@ -540,7 +541,7 @@ class FirestoreDB:
             return False
 
     def delete_announcement(self, announcement_id: str) -> bool:
-        ", ", "Delete announcement.", ", "
+        """Delete announcement."""
         db = self.db
         if not db:
             return False
@@ -559,7 +560,7 @@ class FirestoreDB:
     def create_bookmark(
         self, user_id: str, bookmark_id: str, data: dict[str, Any]
     ) -> bool:
-        ", ", "Create bookmark for user.", ", "
+        """Create bookmark for user."""
         db = self.db
         if not db:
             return False
@@ -576,7 +577,7 @@ class FirestoreDB:
             return False
 
     def get_user_bookmarks(self, user_id: str) -> list[dict[str, Any]]:
-        ", ", "Get all bookmarks for a user.", ", "
+        """Get all bookmarks for a user."""
         db = self.db
         if not db:
             return []
@@ -593,7 +594,7 @@ class FirestoreDB:
             return []
 
     def delete_bookmark(self, user_id: str, bookmark_id: str) -> bool:
-        ", ", "Delete bookmark.", ", "
+        """Delete bookmark."""
         db = self.db
         if not db:
             return False
@@ -612,7 +613,7 @@ class FirestoreDB:
     # ==========================================
 
     def create_analytics(self, analytics_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Create analytics record.", ", "
+        """Create analytics record."""
         db = self.db
         if not db:
             return False
@@ -627,7 +628,7 @@ class FirestoreDB:
     def get_analytics(
         self, metric_type: Optional[str] = None, start_date: Optional[datetime] = None
     ) -> list[dict[str, Any]]:
-        ", ", "Get analytics data.", ", "
+        """Get analytics data."""
         db = self.db
         if not db:
             return []
@@ -642,7 +643,7 @@ class FirestoreDB:
             return []
 
     def increment_analytics(self, metric_type: str, date: datetime) -> bool:
-        ", ", "Increment analytics metric.", ", "
+        """Increment analytics metric."""
         db = self.db
         if not db:
             return False
@@ -671,7 +672,7 @@ class FirestoreDB:
     # ==========================================
 
     def create_polling_guidance(self, guidance_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Create polling guidance.", ", "
+        """Create polling guidance."""
         db = self.db
         if not db:
             return False
@@ -686,7 +687,7 @@ class FirestoreDB:
             return False
 
     def get_polling_guidance(self, guidance_id: str) -> Optional[dict[str, Any]]:
-        ", ", "Get polling guidance by ID.", ", "
+        """Get polling guidance by ID."""
         db = self.db
         if not db:
             return None
@@ -703,7 +704,7 @@ class FirestoreDB:
     def get_polling_guidances(
         self, region: Optional[str] = None
     ) -> list[dict[str, Any]]:
-        ", ", "Get active polling guidances.", ", "
+        """Get active polling guidances."""
         db = self.db
         if not db:
             return []
@@ -718,7 +719,7 @@ class FirestoreDB:
             return []
 
     def update_polling_guidance(self, guidance_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Update polling guidance.", ", "
+        """Update polling guidance."""
         db = self.db
         if not db:
             return False
@@ -737,7 +738,7 @@ class FirestoreDB:
     # ==========================================
 
     def create_setting(self, key: str, value: Any) -> bool:
-        ", ", "Create or update setting.", ", "
+        """Create or update setting."""
         db = self.db
         if not db:
             return False
@@ -752,7 +753,7 @@ class FirestoreDB:
             return False
 
     def get_setting(self, key: str) -> Optional[Any]:
-        ", ", "Get setting value.", ", "
+        """Get setting value."""
         db = self.db
         if not db:
             return None
@@ -767,7 +768,7 @@ class FirestoreDB:
             return None
 
     def get_all_settings(self) -> dict[str, Any]:
-        ", ", "Get all settings.", ", "
+        """Get all settings."""
         db = self.db
         if not db:
             return {}
@@ -783,7 +784,7 @@ class FirestoreDB:
     # ==========================================
 
     def create_or_update_preferences(self, user_id: str, data: dict[str, Any]) -> bool:
-        ", ", "Create or update voter preferences.", ", "
+        """Create or update voter preferences."""
         db = self.db
         if not db:
             return False
@@ -804,7 +805,7 @@ class FirestoreDB:
             return False
 
     def get_preferences(self, user_id: str) -> Optional[dict[str, Any]]:
-        ", ", "Get voter preferences.", ", "
+        """Get voter preferences."""
         db = self.db
         if not db:
             return None

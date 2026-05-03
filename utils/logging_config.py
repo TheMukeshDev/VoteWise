@@ -1,15 +1,15 @@
-", ", "
+"""
 Logging configuration for VoteWise AI.
-", ", "
+"""
 
+import json
 import logging
 import sys
 from datetime import datetime, timezone
-import json
 
 
 class JSONFormatter(logging.Formatter):
-    ", ", "Format logs as JSON for structured logging.", ", "
+    """Format logs as JSON for structured logging."""
 
     def format(self, record):
         log_data = {
@@ -32,7 +32,7 @@ class JSONFormatter(logging.Formatter):
 
 
 class StandardFormatter(logging.Formatter):
-    ", ", "Standard log format for development.", ", "
+    """Standard log format for development."""
 
     grey = "\x1b[38;21m"
     blue = "\x1b[38;5;39m"
@@ -65,12 +65,12 @@ class StandardFormatter(logging.Formatter):
 
 
 def setup_logging(app):
-    ", ", "
+    """
     Configure application logging.
 
     Args:
         app: Flask application instance
-    ", ", "
+    """
     env = app.config.get("ENV", "production")
 
     if env == "production":
@@ -93,14 +93,14 @@ def setup_logging(app):
 
 
 def log_request(request, response=None, error=None):
-    ", ", "
+    """
     Log an HTTP request.
 
     Args:
         request: Flask request object
         response: Flask response object (optional)
         error: Exception object (optional)
-    ", ", "
+    """
     logger = logging.getLogger("votewise.request")
 
     log_data = {
@@ -120,7 +120,7 @@ def log_request(request, response=None, error=None):
 
 
 def log_admin_action(user_id, action, resource, details=None):
-    ", ", "
+    """
     Log an admin action.
 
     Args:
@@ -128,7 +128,7 @@ def log_admin_action(user_id, action, resource, details=None):
         action: Action performed (create, update, delete)
         resource: Resource type
         details: Additional details (optional)
-    ", ", "
+    """
     logger = logging.getLogger("votewise.admin")
 
     log_data = {
@@ -145,14 +145,14 @@ def log_admin_action(user_id, action, resource, details=None):
 
 
 def log_integration_failure(service, error, context=None):
-    ", ", "
+    """
     Log a Google integration failure safely.
 
     Args:
         service: Service name (maps, calendar, translate, etc.)
         error: Exception object
         context: Additional context (optional)
-    ", ", "
+    """
     logger = logging.getLogger("votewise.integrations")
 
     log_data = {

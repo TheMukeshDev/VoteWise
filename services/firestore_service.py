@@ -1,14 +1,16 @@
-", ", "Firestore Service for VoteWise AI", ", "
+"""Firestore Service for VoteWise AI"""
 
-import firebase_admin
-from firebase_admin import credentials, firestore
-from config import Config
 import json
 import logging
 import re
 from datetime import datetime, timezone
-from typing import Optional, Any
+from typing import Any, Optional
+
+import firebase_admin
+from firebase_admin import credentials, firestore
 from google.cloud import firestore as gcfirestore
+
+from config import Config
 
 logger = logging.getLogger(__name__)
 
@@ -17,10 +19,10 @@ _firebase_initialized: bool = False
 
 
 def validate_document_id(doc_id: str) -> bool:
-    ", ", "Validate document ID to prevent path traversal attacks.
+    """Validate document ID to prevent path traversal attacks.
 
     Only allows alphanumeric characters, underscores, and hyphens.
-    ", ", "
+    """
     if not doc_id or not isinstance(doc_id, str):
         return False
     if ".." in doc_id or "/" in doc_id or "\\" in doc_id:
@@ -29,7 +31,7 @@ def validate_document_id(doc_id: str) -> bool:
 
 
 def init_firebase() -> bool:
-    ", ", "Initialize Firebase Admin SDK using FIREBASE_ADMIN_JSON from Secret Manager.", ", "
+    """Initialize Firebase Admin SDK using FIREBASE_ADMIN_JSON from Secret Manager."""
     global _firebase_initialized
 
     if _firebase_initialized and firebase_admin._apps:
@@ -66,7 +68,7 @@ def init_firebase() -> bool:
 
 
 def get_firestore_client() -> Optional[gcfirestore.Client]:
-    ", ", "Get Firestore client singleton.", ", "
+    """Get Firestore client singleton."""
     global _firestore_client
 
     if _firestore_client is not None:
@@ -79,8 +81,8 @@ def get_firestore_client() -> Optional[gcfirestore.Client]:
     try:
         firebase_json = Config.FIREBASE_ADMIN_JSON
         if firebase_json:
-            import tempfile
             import os
+            import tempfile
 
             with tempfile.NamedTemporaryFile(
                 mode="w", suffix=".json", delete=False
@@ -99,12 +101,12 @@ def get_firestore_client() -> Optional[gcfirestore.Client]:
 
 
 def get_db() -> Optional[gcfirestore.Client]:
-    ", ", "Alias for get_firestore_client() for backward compatibility.", ", "
+    """Alias for get_firestore_client() for backward compatibility."""
     return get_firestore_client()
 
 
 def verify_firestore_connection() -> dict[str, Any]:
-    ", ", "Verify Firestore connection with a test write/read operation.", ", "
+    """Verify Firestore connection with a test write/read operation."""
     db = get_firestore_client()
     if not db:
         return {
@@ -139,22 +141,16 @@ def verify_firestore_connection() -> dict[str, Any]:
             "message": "Could not read test document",
         }
     except (RuntimeError, ConnectionError, ValueError) as e:
-        logger.error("Failed to save user %s: %s", user_id, e)
-        return None
-
-    try:
-        data["updated_at"] = firestore.SERVER_TIMESTAMP
-        doc_ref = db.collection("users").document(user_id)
-        doc_ref.set(data, merge=True)
-        logger.info("User %s saved successfully", user_id)
-        return user_id
-    except (RuntimeError, ConnectionError, ValueError) as e:
-        logger.error("Failed to save user %s: %s", user_id, e)
-        return None
+        logger.error("Failed to verify Firestore connection: %s", e)
+        return {
+            "success": False,
+            "connected": False,
+            "message": f"Connection error: {e}",
+        }
 
 
 def get_user(user_id: str) -> Optional[dict[str, Any]]:
-    ", ", "Get user data from Firestore.", ", "
+    """Get user data from Firestore."""
     db = get_firestore_client()
     if not db:
         logger.warning("Failed to get user %s: Firestore not available", user_id)
@@ -179,7 +175,7 @@ def create_or_update_user_profile(
     auth_provider: str = "firebase",
     email_verified: bool = False,
 ) -> Optional[dict[str, Any]]:
-    ", ", "Create or update user profile with all required fields.", ", "
+    """Create or update user profile with all required fields."""
     db = get_firestore_client()
     if not db:
         logger.error(
@@ -194,8 +190,8 @@ def create_or_update_user_profile(
         profile_data: dict[str, Any] = {
             "firebase_uid": firebase_uid,
             "email": email,
-            "name": name or email.split("@")[0] or "User",
-            "photo_url": photo_url or ", ",
+            "name": name or email.split("@")[0] if email else "User",
+            "photo_url": photo_url or "",
             "role": role,
             "auth_provider": auth_provider,
             "email_verified": email_verified,
@@ -231,7 +227,7 @@ def create_or_update_user_profile(
 
 
 def get_election_process_data() -> list[dict[str, Any]]:
-    ", ", "Get election process steps from Firestore.", ", "
+    """Get election process steps from Firestore."""
     db = get_firestore_client()
     if not db:
         logger.warning("Firestore not available for election process data")
@@ -251,7 +247,7 @@ def get_election_process_data() -> list[dict[str, Any]]:
 
 
 def get_faqs_data() -> list[dict[str, Any]]:
-    ", ", "Get FAQs from Firestore.", ", "
+    """Get FAQs from Firestore."""
     db = get_firestore_client()
     if not db:
         return []
@@ -264,7 +260,7 @@ def get_faqs_data() -> list[dict[str, Any]]:
 
 
 def get_timeline_data() -> list[dict[str, Any]]:
-    ", ", "Get timeline data from Firestore.", ", "
+    """Get timeline data from Firestore."""
     db = get_firestore_client()
     if not db:
         return []
@@ -280,7 +276,7 @@ def get_timeline_data() -> list[dict[str, Any]]:
 
 
 def save_reminder(user_id: str, reminder_data: dict[str, Any]) -> Optional[str]:
-    ", ", "Save reminder for user.", ", "
+    """Save reminder for user."""
     db = get_firestore_client()
     if not db:
         return None
@@ -296,7 +292,7 @@ def save_reminder(user_id: str, reminder_data: dict[str, Any]) -> Optional[str]:
 
 
 def get_reminders(user_id: str) -> list[dict[str, Any]]:
-    ", ", "Get all reminders for user.", ", "
+    """Get all reminders for user."""
     db = get_firestore_client()
     if not db:
         return []
@@ -309,7 +305,7 @@ def get_reminders(user_id: str) -> list[dict[str, Any]]:
 
 
 def get_reminder(user_id: str, reminder_id: str) -> Optional[dict[str, Any]]:
-    ", ", "Get specific reminder.", ", "
+    """Get specific reminder."""
     db = get_firestore_client()
     if not db:
         return None
@@ -332,7 +328,7 @@ def get_reminder(user_id: str, reminder_id: str) -> Optional[dict[str, Any]]:
 def update_reminder(
     user_id: str, reminder_id: str, data: dict[str, Any]
 ) -> Optional[str]:
-    ", ", "Update reminder.", ", "
+    """Update reminder."""
     db = get_firestore_client()
     if not db:
         return None
@@ -351,7 +347,7 @@ def update_reminder(
 
 
 def delete_reminder(user_id: str, reminder_id: str) -> bool:
-    ", ", "Delete reminder.", ", "
+    """Delete reminder."""
     db = get_firestore_client()
     if not db:
         return False
@@ -369,7 +365,7 @@ def delete_reminder(user_id: str, reminder_id: str) -> bool:
 
 
 def save_bookmark(user_id: str, bookmark_data: dict[str, Any]) -> Optional[str]:
-    ", ", "Save bookmark for user.", ", "
+    """Save bookmark for user."""
     db = get_firestore_client()
     if not db:
         return None
@@ -386,7 +382,7 @@ def save_bookmark(user_id: str, bookmark_data: dict[str, Any]) -> Optional[str]:
 
 
 def get_bookmarks(user_id: str) -> list[dict[str, Any]]:
-    ", ", "Get all bookmarks for user.", ", "
+    """Get all bookmarks for user."""
     db = get_firestore_client()
     if not db:
         return []
@@ -401,7 +397,7 @@ def get_bookmarks(user_id: str) -> list[dict[str, Any]]:
 def get_bookmark_by_resource(
     user_id: str, resource_type: str, resource_id: str
 ) -> Optional[dict[str, Any]]:
-    ", ", "Get bookmark by resource type and ID.", ", "
+    """Get bookmark by resource type and ID."""
     db = get_firestore_client()
     if not db:
         return None
@@ -423,7 +419,7 @@ def get_bookmark_by_resource(
 
 
 def delete_bookmark(user_id: str, bookmark_id: str) -> bool:
-    ", ", "Delete bookmark.", ", "
+    """Delete bookmark."""
     db = get_firestore_client()
     if not db:
         return False

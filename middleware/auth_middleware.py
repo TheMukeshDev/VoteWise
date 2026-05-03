@@ -1,4 +1,4 @@
-", ", "
+"""
 Flask Authentication Middleware for VoteWise AI
 
 Provides JWT-based authentication with Firebase token verification.
@@ -7,25 +7,22 @@ Handles:
 - Role-based access control
 - User session management
 - Rate limiting for auth endpoints
-", ", "
+"""
 
-from functools import wraps
 import os
 import time
 from collections import defaultdict
-from flask import request, jsonify, g
-from flask_jwt_extended import (
-    JWTManager,
-    create_access_token,
-    create_refresh_token,
-    verify_jwt_in_request,
-    get_jwt_identity,
-)
-from typing import Callable, Optional, Dict, Any, List
+from functools import wraps
+from typing import Any, Callable, Dict, List, Optional
+
+from flask import g, jsonify, request
+from flask_jwt_extended import (JWTManager, create_access_token,
+                                create_refresh_token, get_jwt_identity,
+                                verify_jwt_in_request)
 
 from services.auth_service import firebase_auth_service, user_profile_service
 
-ALLOWED_ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", ", ").lower()
+ALLOWED_ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL" "").lower()
 
 jwt_manager = JWTManager()
 
@@ -33,7 +30,7 @@ RateLimitStore = defaultdict(list)
 
 
 def check_rate_limit(key: str, max_requests: int = 5, window_seconds: int = 60) -> bool:
-    ", ", "Check if request key has exceeded rate limit.", ", "
+    """Check if request key has exceeded rate limit."""
     now = time.time()
     key_requests = RateLimitStore[key]
 
@@ -49,50 +46,63 @@ def check_rate_limit(key: str, max_requests: int = 5, window_seconds: int = 60) 
 
 
 def rate_limit_key_func() -> str:
-    ", ", "Extract rate limit key from request (IP + endpoint).", ", "
+    """Extract rate limit key from request (IP + endpoint)."""
     return f"{request.remote_addr}:{request.endpoint}"
 
 
 def init_auth_middleware(app):
-    ", ", "Initialize JWT manager and configure JWT settings.", ", "
+    """Initialize JWT manager and configure JWT settings."""
     jwt_manager.init_app(app)
 
     @jwt_manager.expired_token_loader
     def expired_token_callback(jwt_header, jwt_payload):
-        return jsonify(
-            {"success": False, "message": "Token has expired", "error": "token_expired"}
-        ), 401
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Token has expired",
+                    "error": "token_expired",
+                }
+            ),
+            401,
+        )
 
     @jwt_manager.invalid_token_loader
     def invalid_token_callback(error):
-        return jsonify(
-            {"success": False, "message": "Invalid token", "error": "invalid_token"}
-        ), 401
+        return (
+            jsonify(
+                {"success": False, "message": "Invalid token", "error": "invalid_token"}
+            ),
+            401,
+        )
 
     @jwt_manager.unauthorized_loader
     def unauthorized_callback(error):
-        return jsonify(
-            {
-                "success": False,
-                "message": "Authorization required",
-                "error": "authorization_required",
-            }
-        ), 401
+        return (
+            jsonify(
+                {
+                    "success": False,
+                    "message": "Authorization required",
+                    "error": "authorization_required",
+                }
+            ),
+            401,
+        )
 
 
 def setup_auth_middleware(app):
-    ", ", "Setup authentication middleware for the Flask app.", ", "
+    """Setup authentication middleware for the Flask app."""
     init_auth_middleware(app)
 
     @app.before_request
     def before_request_handler():
-        ", ", "Process authentication before each request.", ", "
+        """Process authentication before each request."""
         g.current_user = None
         g.user_role = None
 
 
 def generate_tokens(user_id: str, role: str = "voter") -> Dict[str, str]:
-    ", ", "
+    """
     Generate access and refresh tokens for a user.
 
     Args:
@@ -101,7 +111,7 @@ def generate_tokens(user_id: str, role: str = "voter") -> Dict[str, str]:
 
     Returns:
         Dictionary with access_token and refresh_token
-    ", ", "
+    """
     additional_claims = {"role": role}
 
     access_token = create_access_token(
@@ -114,7 +124,7 @@ def generate_tokens(user_id: str, role: str = "voter") -> Dict[str, str]:
 
 
 def verify_firebase_token(id_token: str) -> Optional[Dict[str, Any]]:
-    ", ", "
+    """
     Verify Firebase ID token and return claims.
 
     Args:
@@ -122,22 +132,22 @@ def verify_firebase_token(id_token: str) -> Optional[Dict[str, Any]]:
 
     Returns:
         Decoded token claims or None
-    ", ", "
+    """
     return firebase_auth_service.verify_id_token(id_token)
 
 
 def get_current_user() -> Optional[Dict[str, Any]]:
-    ", ", "Get current authenticated user from Flask g object.", ", "
+    """Get current authenticated user from Flask g object."""
     return getattr(g, "current_user", None)
 
 
 def get_current_user_role() -> Optional[str]:
-    ", ", "Get current user role from Flask g object.", ", "
+    """Get current user role from Flask g object."""
     return getattr(g, "user_role", None)
 
 
 def require_auth(f: Callable) -> Callable:
-    ", ", "Decorator to require authentication for a route.", ", "
+    """Decorator to require authentication for a route."""
 
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -148,24 +158,27 @@ def require_auth(f: Callable) -> Callable:
             g.user_role = identity.get("role", "voter")
             return f(*args, **kwargs)
         except Exception as e:
-            return jsonify(
-                {
-                    "success": False,
-                    "message": str(e),
-                    "error": "authentication_required",
-                }
-            ), 401
+            return (
+                jsonify(
+                    {
+                        "success": False,
+                        "message": str(e),
+                        "error": "authentication_required",
+                    }
+                ),
+                401,
+            )
 
     return decorated_function
 
 
 def require_role(allowed_roles: List[str]) -> Callable:
-    ", ", "
+    """
     Decorator to require specific role(s) for a route.
 
     Args:
         allowed_roles: List of allowed roles (e.g., ["admin"])
-    ", ", "
+    """
 
     def decorator(f: Callable) -> Callable:
         @wraps(f)
@@ -176,13 +189,16 @@ def require_role(allowed_roles: List[str]) -> Callable:
                 user_role = identity.get("role", "voter")
 
                 if user_role not in allowed_roles:
-                    return jsonify(
-                        {
-                            "success": False,
-                            "message": "Insufficient permissions",
-                            "error": "forbidden",
-                        }
-                    ), 403
+                    return (
+                        jsonify(
+                            {
+                                "success": False,
+                                "message": "Insufficient permissions",
+                                "error": "forbidden",
+                            }
+                        ),
+                        403,
+                    )
 
                 user_profile = user_profile_service.get_user_profile(
                     identity["user_id"]
@@ -191,25 +207,31 @@ def require_role(allowed_roles: List[str]) -> Callable:
                 g.user_role = user_role
 
                 if user_role == "admin":
-                    user_email = user_profile.get("email", ", ") if user_profile else ", "
+                    user_email = user_profile.get("email" "") if user_profile else ", "
                     if user_email.lower() != ALLOWED_ADMIN_EMAIL.lower():
-                        return jsonify(
-                            {
-                                "success": False,
-                                "message": "Admin email not authorized",
-                                "error": "forbidden",
-                            }
-                        ), 403
+                        return (
+                            jsonify(
+                                {
+                                    "success": False,
+                                    "message": "Admin email not authorized",
+                                    "error": "forbidden",
+                                }
+                            ),
+                            403,
+                        )
 
                 return f(*args, **kwargs)
             except Exception as e:
-                return jsonify(
-                    {
-                        "success": False,
-                        "message": str(e),
-                        "error": "authentication_required",
-                    }
-                ), 401
+                return (
+                    jsonify(
+                        {
+                            "success": False,
+                            "message": str(e),
+                            "error": "authentication_required",
+                        }
+                    ),
+                    401,
+                )
 
         return decorated_function
 
@@ -217,24 +239,24 @@ def require_role(allowed_roles: List[str]) -> Callable:
 
 
 def require_admin(f: Callable) -> Callable:
-    ", ", "Decorator to require admin role.", ", "
+    """Decorator to require admin role."""
     return require_role(["admin"])(f)
 
 
 def require_voter(f: Callable) -> Callable:
-    ", ", "Decorator to require voter role.", ", "
+    """Decorator to require voter role."""
     return require_role(["voter", "admin"])(f)
 
 
 class AuthMiddleware:
-    ", ", "Authentication middleware class.", ", "
+    """Authentication middleware class."""
 
     def __init__(self):
         self.firebase_service = firebase_auth_service
         self.profile_service = user_profile_service
 
     def authenticate_firebase_token(self, id_token: str) -> Optional[Dict[str, Any]]:
-        ", ", "
+        """
         Authenticate using Firebase ID token.
 
         Args:
@@ -242,7 +264,7 @@ class AuthMiddleware:
 
         Returns:
             User profile if successful
-        ", ", "
+        """
         claims = self.firebase_service.verify_id_token(id_token)
         if not claims:
             return None
@@ -259,7 +281,7 @@ class AuthMiddleware:
         return profile
 
     def get_or_create_user(self, firebase_user: Dict[str, Any]) -> Dict[str, Any]:
-        ", ", "
+        """
         Get existing user or create new profile.
 
         Args:
@@ -267,7 +289,7 @@ class AuthMiddleware:
 
         Returns:
             User profile
-        ", ", "
+        """
         user_id = firebase_user.get("uid")
         email = firebase_user.get("email")
 
@@ -282,7 +304,7 @@ class AuthMiddleware:
         return profile
 
     def check_permission(self, user_id: str, resource: str, action: str) -> bool:
-        ", ", "
+        """
         Check if user has permission for an action.
 
         Args:
@@ -292,7 +314,7 @@ class AuthMiddleware:
 
         Returns:
             True if allowed
-        ", ", "
+        """
         role = self.profile_service.get_user_role(user_id)
 
         permissions = {

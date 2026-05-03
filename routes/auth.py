@@ -1,4 +1,4 @@
-", ", "
+"""
 Authentication Routes for VoteWise AI
 
 Handles user authentication:
@@ -9,7 +9,7 @@ Handles user authentication:
 - PUT /api/auth/profile
 
 Uses Firebase Authentication with JWT tokens.
-", ", "
+"""
 
 import logging
 import secrets
@@ -18,12 +18,9 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from config import Config
-from middleware.auth_middleware import (
-    check_rate_limit,
-    generate_tokens,
-    rate_limit_key_func,
-    verify_firebase_token,
-)
+from middleware.auth_middleware import (check_rate_limit, generate_tokens,
+                                        rate_limit_key_func,
+                                        verify_firebase_token)
 from services.auth_service import user_profile_service
 from utils.response import error_response, success_response
 
@@ -34,7 +31,7 @@ auth_bp = Blueprint("auth", __name__)
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    ", ", "User login with Firebase ID token. Rate limited: 10 attempts per minute.", ", "
+    """User login with Firebase ID token. Rate limited: 10 attempts per minute."""
     rate_key = f"user_login:{rate_limit_key_func()}"
     if not check_rate_limit(rate_key, max_requests=10, window_seconds=60):
         return jsonify(error_response("Too many attempts. Try again later.", 429)), 429
@@ -61,7 +58,7 @@ def login():
                 email=email or ", ",
                 data={
                     "email": email,
-                    "full_name": decoded_token.get("name", ", "),
+                    "full_name": decoded_token.get("name"),
                     "role": "voter",
                 },
             )
@@ -72,16 +69,19 @@ def login():
         role = profile.get("role", "voter") if profile else "voter"
         tokens = generate_tokens(user_id, role)
 
-        return jsonify(
-            success_response(
-                message="Login successful",
-                data={
-                    "user": profile,
-                    "access_token": tokens["access_token"],
-                    "refresh_token": tokens["refresh_token"],
-                },
-            )
-        ), 200
+        return (
+            jsonify(
+                success_response(
+                    message="Login successful",
+                    data={
+                        "user": profile,
+                        "access_token": tokens["access_token"],
+                        "refresh_token": tokens["refresh_token"],
+                    },
+                )
+            ),
+            200,
+        )
 
     except (RuntimeError, ConnectionError, ValueError):
         logger.exception("Login error")
@@ -90,7 +90,7 @@ def login():
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    ", ", "User registration with Firebase ID token. Rate limited: 5 attempts per minute.", ", "
+    """User registration with Firebase ID token. Rate limited: 5 attempts per minute."""
     rate_key = f"register:{rate_limit_key_func()}"
     if not check_rate_limit(rate_key, max_requests=5, window_seconds=60):
         return jsonify(error_response("Too many attempts. Try again later.", 429)), 429
@@ -117,7 +117,7 @@ def register():
         profile_data = data.get("profile", {})
         profile_data["email"] = email
         profile_data["full_name"] = profile_data.get(
-            "full_name", decoded_token.get("name", ", ")
+            "full_name", decoded_token.get("name")
         )
 
         user_profile_service.create_user_profile(
@@ -125,9 +125,14 @@ def register():
         )
         profile = user_profile_service.get_user_profile(user_id)
 
-        return jsonify(
-            success_response(message="Registration successful", data={"user": profile})
-        ), 201
+        return (
+            jsonify(
+                success_response(
+                    message="Registration successful", data={"user": profile}
+                )
+            ),
+            201,
+        )
 
     except ValueError as e:
         return jsonify(error_response(str(e), 400)), 400
@@ -138,7 +143,7 @@ def register():
 
 @auth_bp.route("/google-signin", methods=["POST"])
 def google_signin():
-    ", ", "Google Sign-In authentication. Rate limited: 10 attempts per minute.", ", "
+    """Google Sign-In authentication. Rate limited: 10 attempts per minute."""
     rate_key = f"google_signin:{rate_limit_key_func()}"
     if not check_rate_limit(rate_key, max_requests=10, window_seconds=60):
         return jsonify(error_response("Too many attempts. Try again later.", 429)), 429
@@ -155,13 +160,13 @@ def google_signin():
 
         user_id = decoded_token.get("uid")
         email = decoded_token.get("email")
-        name = decoded_token.get("name", ", ")
+        name = decoded_token.get("name")
 
         profile = user_profile_service.get_user_profile(user_id)
         if not profile:
             user_profile_service.create_user_profile(
                 user_id=user_id,
-                email=email or ", ",
+                email=email or "",
                 data={"email": email, "full_name": name, "role": "voter"},
             )
             profile = user_profile_service.get_user_profile(user_id)
@@ -170,16 +175,19 @@ def google_signin():
         role = profile.get("role", "voter") if profile else "voter"
         tokens = generate_tokens(user_id, role)
 
-        return jsonify(
-            success_response(
-                message="Google Sign-In successful",
-                data={
-                    "user": profile,
-                    "access_token": tokens["access_token"],
-                    "refresh_token": tokens["refresh_token"],
-                },
-            )
-        ), 200
+        return (
+            jsonify(
+                success_response(
+                    message="Google Sign-In successful",
+                    data={
+                        "user": profile,
+                        "access_token": tokens["access_token"],
+                        "refresh_token": tokens["refresh_token"],
+                    },
+                )
+            ),
+            200,
+        )
 
     except (RuntimeError, ConnectionError, ValueError):
         logger.exception("Google sign-in error")
@@ -189,7 +197,7 @@ def google_signin():
 @auth_bp.route("/me", methods=["GET"])
 @jwt_required()
 def get_current_user():
-    ", ", "Get current user details. Requires valid JWT token.", ", "
+    """Get current user details. Requires valid JWT token."""
     try:
         identity = get_jwt_identity()
         user_id = identity.get("user_id")
@@ -210,7 +218,7 @@ def get_current_user():
 @auth_bp.route("/profile", methods=["PUT"])
 @jwt_required()
 def update_profile():
-    ", ", "Update current user profile.", ", "
+    """Update current user profile."""
     try:
         identity = get_jwt_identity()
         user_id = identity.get("user_id")
@@ -246,7 +254,7 @@ def update_profile():
 @auth_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh_token():
-    ", ", "Refresh access token using refresh token.", ", "
+    """Refresh access token using refresh token."""
     try:
         identity = get_jwt_identity()
         user_id = identity.get("user_id")
@@ -256,9 +264,10 @@ def refresh_token():
         role = user_profile_service.get_user_role(user_id) or "voter"
         tokens = generate_tokens(user_id, role)
 
-        return jsonify(
-            success_response(data={"access_token": tokens["access_token"]})
-        ), 200
+        return (
+            jsonify(success_response(data={"access_token": tokens["access_token"]})),
+            200,
+        )
 
     except (RuntimeError, ConnectionError, ValueError):
         logger.exception("Token refresh error")
@@ -268,7 +277,7 @@ def refresh_token():
 @auth_bp.route("/role-check", methods=["GET"])
 @jwt_required()
 def check_role():
-    ", ", "Check current user role. Requires valid JWT token.", ", "
+    """Check current user role. Requires valid JWT token."""
     try:
         identity = get_jwt_identity()
         user_id = identity.get("user_id")
@@ -285,7 +294,7 @@ def check_role():
 
 @auth_bp.route("/admin/login", methods=["POST"])
 def admin_login():
-    ", ", "Admin login endpoint. Rate limited: 5 attempts per minute.", ", "
+    """Admin login endpoint. Rate limited: 5 attempts per minute."""
     rate_key = f"admin_login:{rate_limit_key_func()}"
     if not check_rate_limit(rate_key, max_requests=5, window_seconds=60):
         logger.warning(
@@ -295,8 +304,8 @@ def admin_login():
 
     try:
         data = request.get_json(silent=True) or {}
-        email = data.get("email", ", ").strip().lower()
-        password = data.get("password", ", ")
+        email = data.get("email", "").strip().lower()
+        password = data.get("password", "")
 
         admin_email = Config.ADMIN_EMAIL
         admin_password = Config.ADMIN_PASSWORD
@@ -310,8 +319,11 @@ def admin_login():
             logger.warning("Failed admin login attempt for email: %s", email)
             return jsonify(error_response("Invalid admin credentials", 401)), 401
 
-        if not secrets.compare_digest(
-            password.encode("utf-8"), admin_password.encode("utf-8")
+        if (
+            not secrets.compare_digest(
+                password.encode("utf-8"), admin_password.encode("utf-8")
+            )
+            or not password
         ):
             logger.warning("Failed admin login attempt for email: %s", email)
             return jsonify(error_response("Invalid admin credentials", 401)), 401
@@ -319,17 +331,20 @@ def admin_login():
         tokens = generate_tokens("admin_user", "admin")
         logger.info("Admin login successful: %s", email)
 
-        return jsonify(
-            success_response(
-                message="Admin login successful",
-                data={
-                    "access_token": tokens["access_token"],
-                    "refresh_token": tokens["refresh_token"],
-                    "role": "admin",
-                    "email": admin_email,
-                },
-            )
-        ), 200
+        return (
+            jsonify(
+                success_response(
+                    message="Admin login successful",
+                    data={
+                        "access_token": tokens["access_token"],
+                        "refresh_token": tokens["refresh_token"],
+                        "role": "admin",
+                        "email": admin_email,
+                    },
+                )
+            ),
+            200,
+        )
 
     except (RuntimeError, ConnectionError, ValueError):
         logger.exception("Admin login error")
@@ -338,7 +353,7 @@ def admin_login():
 
 @auth_bp.route("/verify", methods=["POST"])
 def verify_token():
-    ", ", "Verify Firebase ID token and upsert user profile.", ", "
+    """Verify Firebase ID token and upsert user profile."""
     try:
         data = request.get_json(silent=True) or {}
         id_token = data.get("id_token")
@@ -393,16 +408,19 @@ def verify_token():
             "last_login_at": profile.get("last_login_at"),
         }
 
-        return jsonify(
-            success_response(
-                message="Verification successful",
-                data={
-                    "user": clean_user,
-                    "access_token": tokens["access_token"],
-                    "refresh_token": tokens["refresh_token"],
-                },
-            )
-        ), 200
+        return (
+            jsonify(
+                success_response(
+                    message="Verification successful",
+                    data={
+                        "user": clean_user,
+                        "access_token": tokens["access_token"],
+                        "refresh_token": tokens["refresh_token"],
+                    },
+                )
+            ),
+            200,
+        )
 
     except (RuntimeError, ConnectionError, ValueError):
         logger.exception("Verify token error")

@@ -1,8 +1,8 @@
-", ", "
+"""
 Constants for VoteWise AI.
 
 Centralized constants for consistent messaging, configuration, and validation.
-", ", "
+"""
 
 # Error messages (never leak internal details)
 ERROR_MESSAGES: dict[str, str] = {

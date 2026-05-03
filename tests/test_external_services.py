@@ -1,12 +1,13 @@
-", ", "Comprehensive tests for external Google/Firebase services to push coverage to 85%+.", ", "
+"""Comprehensive tests for external Google/Firebase services to push coverage to 85%+."""
+
+import base64
+from unittest.mock import MagicMock, patch
 
 import pytest
-from unittest.mock import MagicMock, patch
-import base64
 
 
 class TestAuthServiceExtended:
-    ", ", "Test FirebaseAuthService and UserProfileService.", ", "
+    """Test FirebaseAuthService and UserProfileService."""
 
     @patch("services.auth_service.auth.verify_id_token")
     def test_verify_token_invalid(self, mock_verify):
@@ -19,8 +20,9 @@ class TestAuthServiceExtended:
 
     @patch("services.auth_service.auth.verify_id_token")
     def test_verify_token_expired(self, mock_verify):
-        from services.auth_service import FirebaseAuthService
         from firebase_admin import auth
+
+        from services.auth_service import FirebaseAuthService
 
         mock_verify.side_effect = auth.ExpiredIdTokenError("Token expired")
         service = FirebaseAuthService()
@@ -75,8 +77,9 @@ class TestAuthServiceExtended:
 
     @patch("services.auth_service.auth.get_user")
     def test_get_user_not_found(self, mock_get):
-        from services.auth_service import FirebaseAuthService
         from firebase_admin import auth
+
+        from services.auth_service import FirebaseAuthService
 
         mock_get.side_effect = auth.UserNotFoundError("Not found")
         service = FirebaseAuthService()
@@ -85,8 +88,9 @@ class TestAuthServiceExtended:
 
     @patch("services.auth_service.auth.get_user")
     def test_get_user_firebase_error(self, mock_get):
-        from services.auth_service import FirebaseAuthService
         from firebase_admin import auth
+
+        from services.auth_service import FirebaseAuthService
 
         mock_get.side_effect = auth.FirebaseError("Error")
         service = FirebaseAuthService()
@@ -107,8 +111,9 @@ class TestAuthServiceExtended:
 
     @patch("services.auth_service.auth.create_user")
     def test_create_user_email_exists(self, mock_create):
-        from services.auth_service import FirebaseAuthService
         from firebase_admin import auth
+
+        from services.auth_service import FirebaseAuthService
 
         mock_create.side_effect = auth.EmailAlreadyExistsError("Email exists")
         service = FirebaseAuthService()
@@ -146,8 +151,9 @@ class TestAuthServiceExtended:
 
     @patch("services.auth_service.auth.delete_user")
     def test_delete_user_failure(self, mock_delete):
-        from services.auth_service import FirebaseAuthService
         from firebase_admin import auth
+
+        from services.auth_service import FirebaseAuthService
 
         mock_delete.side_effect = auth.FirebaseError("Error")
         service = FirebaseAuthService()
@@ -190,7 +196,7 @@ class TestAuthServiceExtended:
 
 
 class TestUserProfileServiceExtended:
-    ", ", "Test UserProfileService.", ", "
+    """Test UserProfileService."""
 
     def test_create_profile_no_db(self):
         from services.auth_service import UserProfileService
@@ -218,7 +224,7 @@ class TestUserProfileServiceExtended:
 
 
 class TestMapsServiceExtended:
-    ", ", "Test MapsService thoroughly.", ", "
+    """Test MapsService thoroughly."""
 
     @patch("services.maps_service.requests.get")
     def test_find_polling_booth_no_api_key(self, mock_get):
@@ -233,8 +239,9 @@ class TestMapsServiceExtended:
 
     @patch("services.maps_service.requests.get")
     def test_find_polling_booth_api_error(self, mock_get):
-        from services.maps_service import MapsService
         import requests
+
+        from services.maps_service import MapsService
 
         service = MapsService()
         service.api_key = "key"
@@ -466,7 +473,7 @@ class TestMapsServiceExtended:
 
 
 class TestTranslateServiceExtended:
-    ", ", "Test TranslateService and ElectionContentTranslator.", ", "
+    """Test TranslateService and ElectionContentTranslator."""
 
     def test_translate_same_language(self):
         from services.translate_service import TranslateService
@@ -523,7 +530,7 @@ class TestTranslateServiceExtended:
         content = {"title": "Election Info", "description": "Voting details"}
         result = service.translate_election_content(content, "hi")
         assert "title" in result
-        assert "translated_text" in result.get("title", ", ") or "title" in result
+        assert "translated_text" in result.get("title" "") or "title" in result
 
     def test_translate_election_content_with_steps(self):
         from services.translate_service import TranslateService
@@ -600,7 +607,7 @@ class TestTranslateServiceExtended:
 
 
 class TestSpeechServiceExtended:
-    ", ", "Test SpeechToTextService.", ", "
+    """Test SpeechToTextService."""
 
     def test_recognize_no_init(self):
         from services.speech_service import SpeechToTextService
@@ -704,7 +711,7 @@ class TestSpeechServiceExtended:
 
 
 class TestTTSServiceExtended:
-    ", ", "Test TextToSpeechService and AudioGuidancePlayer.", ", "
+    """Test TextToSpeechService and AudioGuidancePlayer."""
 
     def test_synthesize_no_init(self):
         from services.tts_service import TextToSpeechService
@@ -893,7 +900,7 @@ class TestTTSServiceExtended:
 
 
 class TestCacheServiceExtended:
-    ", ", "Test CacheService thoroughly.", ", "
+    """Test CacheService thoroughly."""
 
     def test_cache_in_memory_get(self):
         from services.cache_service import CacheService
@@ -976,7 +983,7 @@ class TestCacheServiceExtended:
         assert result == 0
 
     def test_module_level_functions(self):
-        from services.cache_service import cache_get, cache_set, cache_delete
+        from services.cache_service import cache_delete, cache_get, cache_set
 
         cache_set("test_key", "test_value")
         result = cache_get("test_key")
@@ -1003,14 +1010,14 @@ class TestCacheServiceExtended:
         assert call_count == 1
 
     def test_get_cache_service(self):
-        from services.cache_service import get_cache_service, CacheService
+        from services.cache_service import CacheService, get_cache_service
 
         service = get_cache_service()
         assert isinstance(service, CacheService)
 
 
 class TestCalendarServiceExtended:
-    ", ", "Test CalendarService and LocalCalendarService.", ", "
+    """Test CalendarService and LocalCalendarService."""
 
     @patch("services.calendar_service.requests.post")
     def test_create_reminder_failure(self, mock_post):
@@ -1036,8 +1043,9 @@ class TestCalendarServiceExtended:
 
     @patch("services.calendar_service.requests.post")
     def test_create_reminder_exception(self, mock_post):
-        from services.calendar_service import CalendarService
         import requests
+
+        from services.calendar_service import CalendarService
 
         service = CalendarService()
         service.access_token = "token"
@@ -1072,8 +1080,9 @@ class TestCalendarServiceExtended:
 
     @patch("services.calendar_service.requests.get")
     def test_get_upcoming_events_exception(self, mock_get):
-        from services.calendar_service import CalendarService
         import requests
+
+        from services.calendar_service import CalendarService
 
         service = CalendarService()
         service.access_token = "token"
@@ -1112,7 +1121,8 @@ class TestCalendarServiceExtended:
         assert "Election Day" in ics
 
     def test_local_generate_ics_registration(self):
-        from services.calendar_service import LocalCalendarService, CalendarService
+        from services.calendar_service import (CalendarService,
+                                               LocalCalendarService)
 
         with patch.object(
             CalendarService,
@@ -1135,7 +1145,7 @@ class TestCalendarServiceExtended:
 
 
 class TestFirestoreServiceExtended:
-    ", ", "Test firestore_service module-level functions.", ", "
+    """Test firestore_service module-level functions."""
 
     def test_verify_connection_success(self):
         from services.firestore_service import verify_firestore_connection
