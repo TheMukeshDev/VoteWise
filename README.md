@@ -218,46 +218,56 @@ Admin access is assigned manually and cannot be self-provisioned through the app
 
 ### Prerequisites
 
-- Python 3.9 or higher
-- Node.js 18 or higher (for frontend build)
+- Python 3.11 or higher
 - Google Cloud account with billing enabled
-- Firebase project with Authentication and Firestore
+- Firebase project with Authentication and Firestore enabled
 
-### Backend Setup
+### Quick Start
 
-1. Clone the repository and navigate to the project directory
-
-2. Create and activate a virtual environment:
+1. Clone and setup:
    ```bash
+   git clone <repo-url> && cd VoteWise
    python -m venv venv
-   source venv/bin/activate  # Linux/macOS
-   venv\Scripts\activate     # Windows
-   ```
-
-3. Install dependencies:
-   ```bash
+   source venv/bin/activate   # Linux/macOS
+   venv\Scripts\activate      # Windows
    pip install -r requirements.txt
    ```
 
-4. Create a `.env` file with required variables:
-   ```env
-   SECRET_KEY=your-secure-random-key
-   FLASK_ENV=development
-   GOOGLE_CLOUD_PROJECT=your-project-id
-   GEMINI_API_KEY=your-gemini-key
-   GOOGLE_MAPS_API_KEY=your-maps-key
-   ```
-
-5. For local development with Firebase Admin, download your service account key and set environment variable:
+2. Configure environment:
    ```bash
-   export FIREBASE_ADMIN_JSON='{"type": "service_account", ...}'  # Linux/macOS
-   # Windows: set FIREBASE_ADMIN_JSON={"type": "service_account", ...}
+   cp .env.example .env
+   # Edit .env with your Firebase and Google API credentials
    ```
 
-6. Run the development server:
+3. Run:
    ```bash
    python app.py
    ```
+
+4. Open `http://localhost:8080`
+
+### Detailed Backend Setup
+
+1. **Create a Firebase project** at [console.firebase.google.com](https://console.firebase.google.com)
+
+2. **Enable Authentication** (Email/Password and Google sign-in)
+
+3. **Create a Firestore database** (start in test mode for development)
+
+4. **Get your service account key**:
+   - Firebase Console > Project Settings > Service Accounts
+   - Click "Generate new private key"
+   - Use the JSON content as `FIREBASE_ADMIN_JSON` in your `.env`
+
+5. **Enable Google APIs** in [Google Cloud Console](https://console.cloud.google.com):
+   - Gemini API
+   - Maps JavaScript API
+   - Cloud Translation API
+   - Cloud Speech-to-Text API
+   - Cloud Text-to-Speech API
+   - Google Calendar API
+
+6. **Create API keys** and add them to `.env`
 
 ### Cloud Run Deployment
 

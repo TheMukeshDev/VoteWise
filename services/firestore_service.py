@@ -1,20 +1,35 @@
+", ", "Firestore Service for VoteWise AI", ", "
+
 import firebase_admin
 from firebase_admin import credentials, firestore
 from config import Config
 import json
 import logging
-from datetime import datetime
-from typing import Optional, Dict, Any, List
+import re
+from datetime import datetime, timezone
+from typing import Optional, Any
 from google.cloud import firestore as gcfirestore
 
 logger = logging.getLogger(__name__)
 
 _firestore_client: Optional[gcfirestore.Client] = None
-_firebase_initialized = False
+_firebase_initialized: bool = False
+
+
+def validate_document_id(doc_id: str) -> bool:
+    ", ", "Validate document ID to prevent path traversal attacks.
+
+    Only allows alphanumeric characters, underscores, and hyphens.
+    ", ", "
+    if not doc_id or not isinstance(doc_id, str):
+        return False
+    if ".." in doc_id or "/" in doc_id or "\\" in doc_id:
+        return False
+    return bool(re.match(r"^[a-zA-Z0-9_-]+$", doc_id))
 
 
 def init_firebase() -> bool:
-    """Initialize Firebase Admin SDK using FIREBASE_ADMIN_JSON from Secret Manager."""
+    ", ", "Initialize Firebase Admin SDK using FIREBASE_ADMIN_JSON from Secret Manager.", ", "
     global _firebase_initialized
 
     if _firebase_initialized and firebase_admin._apps:
@@ -41,8 +56,8 @@ def init_firebase() -> bool:
             )
             return True
 
-        except Exception as e:
-            logger.error(f"Firebase initialization failed: {str(e)}")
+        except (ValueError, RuntimeError, FileNotFoundError) as e:
+            logger.error("Firebase initialization failed: %s", e)
             _firebase_initialized = False
             return False
 
@@ -51,7 +66,7 @@ def init_firebase() -> bool:
 
 
 def get_firestore_client() -> Optional[gcfirestore.Client]:
-    """Get Firestore client singleton."""
+    ", ", "Get Firestore client singleton.", ", "
     global _firestore_client
 
     if _firestore_client is not None:
@@ -78,18 +93,18 @@ def get_firestore_client() -> Optional[gcfirestore.Client]:
             _firestore_client = gcfirestore.Client()
         logger.info("Firestore client created successfully")
         return _firestore_client
-    except Exception as e:
-        logger.error(f"Failed to create Firestore client: {str(e)}")
+    except (ValueError, RuntimeError, FileNotFoundError):
+        logger.error("Failed to create Firestore client")
         return None
 
 
 def get_db() -> Optional[gcfirestore.Client]:
-    """Alias for get_firestore_client() for backward compatibility."""
+    ", ", "Alias for get_firestore_client() for backward compatibility.", ", "
     return get_firestore_client()
 
 
-def verify_firestore_connection() -> Dict[str, Any]:
-    """Verify Firestore connection with a test write/read operation."""
+def verify_firestore_connection() -> dict[str, Any]:
+    ", ", "Verify Firestore connection with a test write/read operation.", ", "
     db = get_firestore_client()
     if not db:
         return {
@@ -123,37 +138,26 @@ def verify_firestore_connection() -> Dict[str, Any]:
             "connected": False,
             "message": "Could not read test document",
         }
-    except Exception as e:
-        logger.error(f"Firestore connection test failed: {str(e)}")
-        return {"success": False, "connected": False, "message": str(e)}
-
-
-# --- User Operations ---
-
-
-def save_user(user_id: str, data: Dict[str, Any]) -> Optional[str]:
-    """Save user data to Firestore."""
-    db = get_firestore_client()
-    if not db:
-        logger.error(f"Failed to save user {user_id}: Firestore not available")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to save user %s: %s", user_id, e)
         return None
 
     try:
         data["updated_at"] = firestore.SERVER_TIMESTAMP
         doc_ref = db.collection("users").document(user_id)
         doc_ref.set(data, merge=True)
-        logger.info(f"User {user_id} saved successfully")
+        logger.info("User %s saved successfully", user_id)
         return user_id
-    except Exception as e:
-        logger.error(f"Failed to save user {user_id}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to save user %s: %s", user_id, e)
         return None
 
 
-def get_user(user_id: str) -> Optional[Dict[str, Any]]:
-    """Get user data from Firestore."""
+def get_user(user_id: str) -> Optional[dict[str, Any]]:
+    ", ", "Get user data from Firestore.", ", "
     db = get_firestore_client()
     if not db:
-        logger.warning(f"Failed to get user {user_id}: Firestore not available")
+        logger.warning("Failed to get user %s: Firestore not available", user_id)
         return None
 
     try:
@@ -161,8 +165,8 @@ def get_user(user_id: str) -> Optional[Dict[str, Any]]:
         if doc.exists:
             return doc.to_dict()
         return None
-    except Exception as e:
-        logger.error(f"Failed to get user {user_id}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to get user %s: %s", user_id, e)
         return None
 
 
@@ -174,24 +178,24 @@ def create_or_update_user_profile(
     role: str = "user",
     auth_provider: str = "firebase",
     email_verified: bool = False,
-) -> Optional[Dict[str, Any]]:
-    """Create or update user profile with all required fields."""
+) -> Optional[dict[str, Any]]:
+    ", ", "Create or update user profile with all required fields.", ", "
     db = get_firestore_client()
     if not db:
         logger.error(
-            f"Failed to upsert profile for {firebase_uid}: Firestore not available"
+            "Failed to upsert profile for %s: Firestore not available", firebase_uid
         )
         return None
 
     try:
         existing = get_user(firebase_uid)
-        now = datetime.utcnow()
+        now = datetime.now(timezone.utc)
 
-        profile_data = {
+        profile_data: dict[str, Any] = {
             "firebase_uid": firebase_uid,
             "email": email,
             "name": name or email.split("@")[0] or "User",
-            "photo_url": photo_url or "",
+            "photo_url": photo_url or ", ",
             "role": role,
             "auth_provider": auth_provider,
             "email_verified": email_verified,
@@ -200,7 +204,7 @@ def create_or_update_user_profile(
         }
 
         if existing:
-            update_fields = {
+            update_fields: dict[str, Any] = {
                 "last_login_at": now,
                 "updated_at": now,
             }
@@ -210,24 +214,24 @@ def create_or_update_user_profile(
                 update_fields["photo_url"] = photo_url
 
             db.collection("users").document(firebase_uid).update(update_fields)
-            logger.info(f"User profile updated: uid={firebase_uid}, email={email}")
+            logger.info("User profile updated: uid=%s, email=%s", firebase_uid, email)
         else:
             profile_data["created_at"] = now
             db.collection("users").document(firebase_uid).set(profile_data)
-            logger.info(f"User profile created: uid={firebase_uid}, email={email}")
+            logger.info("User profile created: uid=%s, email=%s", firebase_uid, email)
 
         return get_user(firebase_uid)
 
-    except Exception as e:
-        logger.error(f"Failed to create/update profile for {firebase_uid}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to create/update profile for %s: %s", firebase_uid, e)
         return None
 
 
 # --- Election Operations ---
 
 
-def get_election_process_data() -> List[Dict[str, Any]]:
-    """Get election process steps from Firestore."""
+def get_election_process_data() -> list[dict[str, Any]]:
+    ", ", "Get election process steps from Firestore.", ", "
     db = get_firestore_client()
     if not db:
         logger.warning("Firestore not available for election process data")
@@ -241,42 +245,42 @@ def get_election_process_data() -> List[Dict[str, Any]]:
             .stream()
         )
         return [doc.to_dict() for doc in docs]
-    except Exception as e:
-        logger.error(f"Failed to get election process data: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to get election process data: %s", e)
         return []
 
 
-def get_faqs_data() -> List[Dict[str, Any]]:
-    """Get FAQs from Firestore."""
+def get_faqs_data() -> list[dict[str, Any]]:
+    ", ", "Get FAQs from Firestore.", ", "
     db = get_firestore_client()
     if not db:
         return []
     try:
         docs = db.collection("faqs").stream()
         return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-    except Exception as e:
-        logger.error(f"Failed to get FAQs: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to get FAQs: %s", e)
         return []
 
 
-def get_timeline_data() -> List[Dict[str, Any]]:
-    """Get timeline data from Firestore."""
+def get_timeline_data() -> list[dict[str, Any]]:
+    ", ", "Get timeline data from Firestore.", ", "
     db = get_firestore_client()
     if not db:
         return []
     try:
         docs = db.collection("timelines").stream()
         return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-    except Exception as e:
-        logger.error(f"Failed to get timeline data: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to get timeline data: %s", e)
         return []
 
 
 # --- Reminders Operations ---
 
 
-def save_reminder(user_id: str, reminder_data: Dict[str, Any]) -> Optional[str]:
-    """Save reminder for user."""
+def save_reminder(user_id: str, reminder_data: dict[str, Any]) -> Optional[str]:
+    ", ", "Save reminder for user.", ", "
     db = get_firestore_client()
     if not db:
         return None
@@ -286,26 +290,26 @@ def save_reminder(user_id: str, reminder_data: Dict[str, Any]) -> Optional[str]:
         )
         doc_ref.set(reminder_data)
         return doc_ref.id
-    except Exception as e:
-        logger.error(f"Failed to save reminder for {user_id}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to save reminder for %s: %s", user_id, e)
         return None
 
 
-def get_reminders(user_id: str) -> List[Dict[str, Any]]:
-    """Get all reminders for user."""
+def get_reminders(user_id: str) -> list[dict[str, Any]]:
+    ", ", "Get all reminders for user.", ", "
     db = get_firestore_client()
     if not db:
         return []
     try:
         docs = db.collection("users").document(user_id).collection("reminders").stream()
         return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-    except Exception as e:
-        logger.error(f"Failed to get reminders for {user_id}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to get reminders for %s: %s", user_id, e)
         return []
 
 
-def get_reminder(user_id: str, reminder_id: str) -> Optional[Dict[str, Any]]:
-    """Get specific reminder."""
+def get_reminder(user_id: str, reminder_id: str) -> Optional[dict[str, Any]]:
+    ", ", "Get specific reminder.", ", "
     db = get_firestore_client()
     if not db:
         return None
@@ -320,15 +324,15 @@ def get_reminder(user_id: str, reminder_id: str) -> Optional[Dict[str, Any]]:
         if doc.exists:
             return {"id": doc.id, **doc.to_dict()}
         return None
-    except Exception as e:
-        logger.error(f"Failed to get reminder {reminder_id}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to get reminder %s: %s", reminder_id, e)
         return None
 
 
 def update_reminder(
-    user_id: str, reminder_id: str, data: Dict[str, Any]
+    user_id: str, reminder_id: str, data: dict[str, Any]
 ) -> Optional[str]:
-    """Update reminder."""
+    ", ", "Update reminder.", ", "
     db = get_firestore_client()
     if not db:
         return None
@@ -341,13 +345,13 @@ def update_reminder(
         )
         doc_ref.update(data)
         return reminder_id
-    except Exception as e:
-        logger.error(f"Failed to update reminder {reminder_id}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to update reminder %s: %s", reminder_id, e)
         return None
 
 
 def delete_reminder(user_id: str, reminder_id: str) -> bool:
-    """Delete reminder."""
+    ", ", "Delete reminder.", ", "
     db = get_firestore_client()
     if not db:
         return False
@@ -356,16 +360,16 @@ def delete_reminder(user_id: str, reminder_id: str) -> bool:
             reminder_id
         ).delete()
         return True
-    except Exception as e:
-        logger.error(f"Failed to delete reminder {reminder_id}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to delete reminder %s: %s", reminder_id, e)
         return False
 
 
 # --- Bookmarks Operations ---
 
 
-def save_bookmark(user_id: str, bookmark_data: Dict[str, Any]) -> Optional[str]:
-    """Save bookmark for user."""
+def save_bookmark(user_id: str, bookmark_data: dict[str, Any]) -> Optional[str]:
+    ", ", "Save bookmark for user.", ", "
     db = get_firestore_client()
     if not db:
         return None
@@ -376,28 +380,28 @@ def save_bookmark(user_id: str, bookmark_data: Dict[str, Any]) -> Optional[str]:
         )
         doc_ref.set(bookmark_data)
         return doc_ref.id
-    except Exception as e:
-        logger.error(f"Failed to save bookmark for {user_id}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to save bookmark for %s: %s", user_id, e)
         return None
 
 
-def get_bookmarks(user_id: str) -> List[Dict[str, Any]]:
-    """Get all bookmarks for user."""
+def get_bookmarks(user_id: str) -> list[dict[str, Any]]:
+    ", ", "Get all bookmarks for user.", ", "
     db = get_firestore_client()
     if not db:
         return []
     try:
         docs = db.collection("users").document(user_id).collection("bookmarks").stream()
         return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-    except Exception as e:
-        logger.error(f"Failed to get bookmarks for {user_id}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to get bookmarks for %s: %s", user_id, e)
         return []
 
 
 def get_bookmark_by_resource(
     user_id: str, resource_type: str, resource_id: str
-) -> Optional[Dict[str, Any]]:
-    """Get bookmark by resource type and ID."""
+) -> Optional[dict[str, Any]]:
+    ", ", "Get bookmark by resource type and ID.", ", "
     db = get_firestore_client()
     if not db:
         return None
@@ -413,13 +417,13 @@ def get_bookmark_by_resource(
         for doc in docs:
             return {"id": doc.id, **doc.to_dict()}
         return None
-    except Exception as e:
-        logger.error(f"Failed to get bookmark by resource: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to get bookmark by resource: %s", e)
         return None
 
 
 def delete_bookmark(user_id: str, bookmark_id: str) -> bool:
-    """Delete bookmark."""
+    ", ", "Delete bookmark.", ", "
     db = get_firestore_client()
     if not db:
         return False
@@ -428,8 +432,8 @@ def delete_bookmark(user_id: str, bookmark_id: str) -> bool:
             bookmark_id
         ).delete()
         return True
-    except Exception as e:
-        logger.error(f"Failed to delete bookmark {bookmark_id}: {str(e)}")
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Failed to delete bookmark %s: %s", bookmark_id, e)
         return False
 
 

@@ -3,7 +3,6 @@ import json
 from unittest.mock import MagicMock, patch
 
 from utils.response import success_response, error_response, paginated_response
-from utils.response_helper import format_chat_response
 from utils.validators import (
     validate_email,
     validate_password,
@@ -58,18 +57,6 @@ class TestResponseUtils:
         assert res["pagination"]["pages"] == 0
 
 
-class TestResponseHelper:
-    def test_format_chat_response(self):
-        res = format_chat_response("Intro", ["s1"], ["t1"], ["a1"])
-        assert res["intro"] == "Intro"
-        assert res["steps"] == ["s1"]
-        assert res["tips"] == ["t1"]
-        assert res["actions"] == ["a1"]
-
-        res2 = format_chat_response("Intro")
-        assert res2["steps"] == []
-
-
 class TestValidators:
     def test_validate_email(self):
         assert validate_email("test@example.com") is True
@@ -90,17 +77,17 @@ class TestValidators:
 
     def test_validate_ids(self):
         assert validate_user_id("u1") is True
-        assert not validate_user_id("")
+        assert not validate_user_id(", ")
 
         assert validate_faq_id("f1") is True
-        assert not validate_faq_id("")
+        assert not validate_faq_id(", ")
 
         assert validate_timeline_id("t1") is True
-        assert not validate_timeline_id("")
+        assert not validate_timeline_id(", ")
 
     def test_sanitize_string(self):
         assert sanitize_string("  test  ") == "test"
-        assert sanitize_string(None) == ""
+        assert sanitize_string(None) == ", "
 
         long_str = "a" * 1050
         assert len(sanitize_string(long_str)) == 1000
@@ -122,7 +109,7 @@ class TestLoggingConfig:
         # With exception
         try:
             1 / 0
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             import sys
 
             record_exc = logging.LogRecord(

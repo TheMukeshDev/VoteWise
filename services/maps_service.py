@@ -1,4 +1,4 @@
-"""
+", ", "
 Google Maps Platform Service for VoteWise AI
 
 Provides polling booth guidance and location services.
@@ -8,27 +8,27 @@ Features:
 - Maps embedding
 - Route directions
 - Location-based election help
-"""
+", ", "
 
 import logging
 import requests
-from typing import Optional, Dict, Any, List
+from typing import Optional, Any
 from config import Config
 
 logger = logging.getLogger(__name__)
 
 
-def get_nearby_polling_booths(lat, lng):
-    """
+def get_nearby_polling_booths(lat: float, lng: float) -> Optional[dict[str, Any]]:
+    ", ", "
     Backward-compatible function for finding polling booths.
-    (Legacy API for routes/polling.py)
-    """
+    (Legacy API for routes/polling.py - deprecated, use MapsService directly)
+    ", ", "
     service = MapsService()
     return service.find_polling_booth(lat, lng)
 
 
 class MapsService:
-    """Google Maps Platform integration for polling guidance."""
+    ", ", "Google Maps Platform integration for polling guidance.", ", "
 
     def __init__(self):
         self.api_key = Config.GOOGLE_MAPS_API_KEY
@@ -36,8 +36,8 @@ class MapsService:
 
     def find_polling_booth(
         self, lat: float, lng: float, radius: int = 5000
-    ) -> Optional[Dict[str, Any]]:
-        """
+    ) -> Optional[dict[str, Any]]:
+        ", ", "
         Find nearest polling booth location.
 
         Args:
@@ -47,7 +47,7 @@ class MapsService:
 
         Returns:
             Polling booth data or None
-        """
+        ", ", "
         if not self.api_key:
             return self._mock_polling_booth(lat, lng)
 
@@ -69,13 +69,13 @@ class MapsService:
 
             return self._mock_polling_booth(lat, lng)
         except requests.RequestException as e:
-            logger.warning(f"Maps API Error: {e}")
+            logger.warning("Maps API Error: %s", e)
             return self._mock_polling_booth(lat, lng)
 
     def find_multiple_booths(
         self, lat: float, lng: float, radius: int = 10000, max_results: int = 5
-    ) -> List[Dict[str, Any]]:
-        """
+    ) -> list[dict[str, Any]]:
+        ", ", "
         Find multiple polling booth options.
 
         Args:
@@ -85,8 +85,8 @@ class MapsService:
             max_results: Maximum booths to return
 
         Returns:
-            List of polling booth data
-        """
+            list of polling booth data
+        ", ", "
         if not self.api_key:
             return [self._mock_polling_booth(lat, lng)]
 
@@ -109,11 +109,11 @@ class MapsService:
 
             return booths if booths else [self._mock_polling_booth(lat, lng)]
         except requests.RequestException as e:
-            logger.warning(f"Maps API Error: {e}")
+            logger.warning("Maps API Error: %s", e)
             return [self._mock_polling_booth(lat, lng)]
 
-    def geocode(self, address: str) -> Optional[Dict[str, Any]]:
-        """
+    def geocode(self, address: str) -> Optional[dict[str, Any]]:
+        ", ", "
         Convert address to coordinates.
 
         Args:
@@ -121,7 +121,7 @@ class MapsService:
 
         Returns:
             Location data with lat/lng
-        """
+        ", ", "
         if not self.api_key:
             return None
 
@@ -146,7 +146,7 @@ class MapsService:
         return None
 
     def reverse_geocode(self, lat: float, lng: float) -> Optional[str]:
-        """
+        ", ", "
         Convert coordinates to readable address.
 
         Args:
@@ -155,7 +155,7 @@ class MapsService:
 
         Returns:
             Formatted address string
-        """
+        ", ", "
         if not self.api_key:
             return "Location coordinates provided"
 
@@ -175,8 +175,8 @@ class MapsService:
 
     def get_directions(
         self, origin_lat: float, origin_lng: float, dest_lat: float, dest_lng: float
-    ) -> Optional[Dict[str, Any]]:
-        """
+    ) -> Optional[dict[str, Any]]:
+        ", ", "
         Get directions between two points.
 
         Args:
@@ -187,7 +187,7 @@ class MapsService:
 
         Returns:
             Directions data with route info
-        """
+        ", ", "
         if not self.api_key:
             return self._mock_directions(origin_lat, origin_lng, dest_lat, dest_lng)
 
@@ -228,7 +228,7 @@ class MapsService:
     def get_static_map_url(
         self, lat: float, lng: float, zoom: int = 15, size: str = "400x300"
     ) -> str:
-        """
+        ", ", "
         Generate static map image URL.
 
         Args:
@@ -239,7 +239,7 @@ class MapsService:
 
         Returns:
             Static map URL
-        """
+        ", ", "
         if not self.api_key:
             return f"https://maps.google.com/?q={lat},{lng}"
 
@@ -253,7 +253,7 @@ class MapsService:
         )
 
     def get_embed_html(self, lat: float, lng: float, zoom: int = 15) -> str:
-        """
+        ", ", "
         Generate embedded map iframe HTML.
 
         Args:
@@ -263,7 +263,7 @@ class MapsService:
 
         Returns:
             Iframe HTML string
-        """
+        ", ", "
         if not self.api_key:
             return f'<iframe src="https://maps.google.com/?q={lat},{lng}&output=svembed" width="100%" height="400"></iframe>'
 
@@ -277,16 +277,16 @@ class MapsService:
         )
 
     def _format_booth_data(
-        self, place: Dict, user_lat: float, user_lng: float
-    ) -> Dict[str, Any]:
-        """Format place data to booth format."""
+        self, place: dict, user_lat: float, user_lng: float
+    ) -> dict[str, Any]:
+        ", ", "Format place data to booth format.", ", "
         location = place.get("geometry", {}).get("location", {})
         place_lat = location.get("lat", 0)
         place_lng = location.get("lng", 0)
 
         return {
             "booth_name": place.get("name", "Local Polling Booth"),
-            "address": place.get("vicinity", place.get("formatted_address", "")),
+            "address": place.get("vicinity", place.get("formatted_address", ", ")),
             "place_id": place.get("place_id"),
             "lat": place_lat,
             "lng": place_lng,
@@ -304,8 +304,8 @@ class MapsService:
             "types": place.get("types", []),
         }
 
-    def _mock_polling_booth(self, lat: float, lng: float) -> Dict[str, Any]:
-        """Mock polling booth when API unavailable."""
+    def _mock_polling_booth(self, lat: float, lng: float) -> dict[str, Any]:
+        ", ", "Mock polling booth when API unavailable.", ", "
         return {
             "booth_name": "Community Center Polling Station",
             "address": "123 Election Road, Your Constituency",
@@ -322,8 +322,8 @@ class MapsService:
 
     def _mock_directions(
         self, o_lat: float, o_lng: float, d_lat: float, d_lng: float
-    ) -> Dict[str, Any]:
-        """Mock directions when API unavailable."""
+    ) -> dict[str, Any]:
+        ", ", "Mock directions when API unavailable.", ", "
         return {
             "distance": "1.2 km",
             "duration": "15 mins",

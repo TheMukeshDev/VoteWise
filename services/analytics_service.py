@@ -1,24 +1,24 @@
-"""
+", ", "
 Analytics Service for VoteWise AI
 
 Provides analytics tracking using Firebase Analytics.
-"""
+", ", "
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Optional, Any
 
 logger = logging.getLogger(__name__)
 
 
 class AnalyticsService:
-    """Firebase Analytics integration."""
+    ", ", "Firebase Analytics integration.", ", "
 
     def __init__(self):
         self.measurement_id = None
         self._init_analytics()
 
     def _init_analytics(self):
-        """Initialize Firebase Analytics."""
+        ", ", "Initialize Firebase Analytics.", ", "
         try:
             from firebase_analytics import analytics as firebase_analytics
             from config import Config
@@ -28,11 +28,13 @@ class AnalyticsService:
                 self.client = firebase_analytics
             else:
                 self.client = None
-        except ImportError:
+        except (ImportError, RuntimeError):
             self.client = None
 
-    def log_event(self, event_name: str, params: Optional[Dict] = None) -> bool:
-        """
+    def log_event(
+        self, event_name: str, params: Optional[dict[str, Any]] = None
+    ) -> bool:
+        ", ", "
         Log custom event.
 
         Args:
@@ -41,74 +43,74 @@ class AnalyticsService:
 
         Returns:
             True if logged
-        """
+        ", ", "
         if self.client:
             try:
                 self.client.log_event(event_name, params or {})
                 return True
-            except Exception:
+            except (RuntimeError, ConnectionError, ValueError):
                 pass
 
         return self._log_to_firestore(event_name, params)
 
     def log_page_view(self, page_name: str, user_id: Optional[str] = None) -> bool:
-        """Log page view."""
+        ", ", "Log page view.", ", "
         return self.log_event(
             "page_view", {"page_name": page_name, "user_id": user_id or "anonymous"}
         )
 
     def log_feature_use(self, feature_name: str, user_id: str) -> bool:
-        """Log feature usage."""
+        ", ", "Log feature usage.", ", "
         return self.log_event(
             "feature_use", {"feature_name": feature_name, "user_id": user_id}
         )
 
     def log_language_change(self, language: str, user_id: str) -> bool:
-        """Log language preference change."""
+        ", ", "Log language preference change.", ", "
         return self.log_event(
             "language_change", {"language": language, "user_id": user_id}
         )
 
     def log_reminder_create(self, reminder_type: str, user_id: str) -> bool:
-        """Log reminder creation."""
+        ", ", "Log reminder creation.", ", "
         return self.log_event(
             "reminder_create", {"reminder_type": reminder_type, "user_id": user_id}
         )
 
     def log_calendar_sync(self, success: bool, user_id: str) -> bool:
-        """Log calendar sync attempt."""
+        ", ", "Log calendar sync attempt.", ", "
         return self.log_event("calendar_sync", {"success": success, "user_id": user_id})
 
     def log_polling_booth_search(self, user_id: str) -> bool:
-        """Log polling booth search."""
+        ", ", "Log polling booth search.", ", "
         return self.log_event("polling_booth_search", {"user_id": user_id})
 
     def log_voice_input(self, success: bool, user_id: str) -> bool:
-        """Log voice input usage."""
+        ", ", "Log voice input usage.", ", "
         return self.log_event("voice_input", {"success": success, "user_id": user_id})
 
     def log_audio_playback(self, content_type: str, user_id: str) -> bool:
-        """Log audio playback."""
+        ", ", "Log audio playback.", ", "
         return self.log_event(
             "audio_playback", {"content_type": content_type, "user_id": user_id}
         )
 
     def log_ai_chat(self, query: str, user_id: str) -> bool:
-        """Log AI chat interaction."""
+        ", ", "Log AI chat interaction.", ", "
         return self.log_event(
             "ai_chat", {"query_preview": query[:50], "user_id": user_id}
         )
 
     def log_signup(self, method: str, user_id: str) -> bool:
-        """Log user signup."""
+        ", ", "Log user signup.", ", "
         return self.log_event("signup", {"method": method, "user_id": user_id})
 
     def log_login(self, method: str, user_id: str) -> bool:
-        """Log user login."""
+        ", ", "Log user login.", ", "
         return self.log_event("login", {"method": method, "user_id": user_id})
 
-    def _log_to_firestore(self, event_name: str, params: Optional[Dict]) -> bool:
-        """Fallback logging to Firestore."""
+    def _log_to_firestore(self, event_name: str, params: Optional[dict]) -> bool:
+        ", ", "Fallback logging to Firestore.", ", "
         try:
             from services.data_access_layer import firestore_db
             from datetime import datetime
@@ -121,11 +123,11 @@ class AnalyticsService:
             }
             firestore_db.create_analytics(doc_id, data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return False
 
-    def get_user_stats(self, user_id: str) -> Dict[str, Any]:
-        """Get user statistics."""
+    def get_user_stats(self, user_id: str) -> dict[str, Any]:
+        ", ", "Get user statistics.", ", "
         return {
             "user_id": user_id,
             "session_count": 0,
@@ -135,14 +137,14 @@ class AnalyticsService:
 
 
 class LoggingService:
-    """Cloud Logging integration."""
+    ", ", "Cloud Logging integration.", ", "
 
     def __init__(self):
         self._initialized = False
         self._init_logging()
 
     def _init_logging(self):
-        """Initialize Cloud Logging."""
+        ", ", "Initialize Cloud Logging.", ", "
         try:
             from google.cloud import logging as cloud_logging
             from config import Config
@@ -154,42 +156,42 @@ class LoggingService:
             else:
                 self.client = None
                 self.logger = None
-        except Exception as e:
-            logger.warning(f"Failed to initialize Cloud Logging: {e}")
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.warning("Failed to initialize Cloud Logging: %s", e)
             self.client = None
             self.logger = None
 
     def log_info(self, message: str, **kwargs) -> None:
-        """Log info message."""
+        ", ", "Log info message.", ", "
         if self.logger:
             try:
                 self.logger.log({"message": message, **kwargs}, severity="INFO")
-            except Exception:
+            except (RuntimeError, ConnectionError, ValueError):
                 pass
         logger.info(message)
 
     def log_warning(self, message: str, **kwargs) -> None:
-        """Log warning message."""
+        ", ", "Log warning message.", ", "
         if self.logger:
             try:
                 self.logger.log({"message": message, **kwargs}, severity="WARNING")
-            except Exception:
+            except (RuntimeError, ConnectionError, ValueError):
                 pass
         logger.warning(message)
 
     def log_error(self, message: str, **kwargs) -> None:
-        """Log error message."""
+        ", ", "Log error message.", ", "
         if self.logger:
             try:
                 self.logger.log({"message": message, **kwargs}, severity="ERROR")
-            except Exception:
+            except (RuntimeError, ConnectionError, ValueError):
                 pass
         logger.error(message)
 
     def log_http_request(
         self, method: str, path: str, status: int, latency: float
     ) -> None:
-        """Log HTTP request."""
+        ", ", "Log HTTP request.", ", "
         if self.logger:
             try:
                 self.logger.log(
@@ -201,7 +203,7 @@ class LoggingService:
                     },
                     severity="INFO",
                 )
-            except Exception:
+            except (RuntimeError, ConnectionError, ValueError):
                 pass
 
 

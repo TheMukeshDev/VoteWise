@@ -1,6 +1,9 @@
-import os
+", ", "Configuration management for VoteWise AI.", ", "
+
 import json
 import logging
+import os
+from typing import Any
 
 from dotenv import load_dotenv
 
@@ -9,19 +12,8 @@ load_dotenv(override=True)
 logger = logging.getLogger(__name__)
 
 
-def _get_required_env(name, fallback=None):
-    """Get required environment variable with optional fallback."""
-    value = os.environ.get(name, fallback)
-    if not value and name not in os.environ:
-        if fallback:
-            return fallback
-        if name in ("SECRET_KEY",):
-            return None
-    return value
-
-
-def _get_firebase_admin_json():
-    """Get Firebase Admin JSON - either from env or construct from individual fields."""
+def _get_firebase_admin_json() -> dict[str, Any] | None:
+    ", ", "Get Firebase Admin JSON from env or construct from individual fields.", ", "
     firebase_json_str = os.environ.get("FIREBASE_ADMIN_JSON")
 
     if firebase_json_str:
@@ -33,7 +25,7 @@ def _get_firebase_admin_json():
                 "FIREBASE_ADMIN_JSON environment variable is not valid JSON"
             ) from e
 
-    private_key = os.environ.get("FIREBASE_PRIVATE_KEY", "")
+    private_key = os.environ.get("FIREBASE_PRIVATE_KEY", ", ")
     if private_key:
         private_key = private_key.replace("\\n", "\n")
 
@@ -54,29 +46,32 @@ def _get_firebase_admin_json():
     return None
 
 
+def _resolve_cors_origins(env: str) -> str:
+    ", ", "Resolve CORS origins based on environment.", ", "
+    cors = os.environ.get("CORS_ORIGINS")
+    if env == "production":
+        return cors if cors and cors != "*" else ", "
+    return cors or "*"
+
+
 class Config:
-    """Base configuration."""
+    ", ", "Base configuration.", ", "
 
-    _env = os.environ.get("FLASK_ENV", "production")
-    _secret_key = (
-        os.environ.get("SECRET_KEY") or "dev-only-insecure-key-do-not-use-in-prod"
+    SECRET_KEY = os.environ.get("SECRET_KEY") or (
+        "dev-only-insecure-key-do-not-use-in-prod"
+        if os.environ.get("FLASK_ENV") != "production"
+        else None
     )
-
-    SECRET_KEY = _secret_key
+    if not SECRET_KEY and os.environ.get("FLASK_ENV") == "production":
+        raise ValueError("SECRET_KEY environment variable must be set in production")
     DEBUG = False
+    TESTING = False
     PORT = int(os.environ.get("PORT", 8080))
     ENV_FILE = os.environ.get("ENV_FILE", ".env")
-    env = os.environ.get("FLASK_ENV", "production")
-    _cors_origins = os.environ.get("CORS_ORIGINS")
 
-    if env == "production" and not _cors_origins:
-        CORS_ORIGINS = ""  # Restrictive in production
-    elif env == "production" and _cors_origins == "*":
-        CORS_ORIGINS = ""  # Override wildcard in production
-    else:
-        CORS_ORIGINS = _cors_origins or "*"
-
-    ENV = env
+    FLASK_ENV = os.environ.get("FLASK_ENV", "production")
+    ENV = FLASK_ENV
+    CORS_ORIGINS = _resolve_cors_origins(FLASK_ENV)
     VERSION = "1.0.0"
 
     FIREBASE_ADMIN_JSON = _get_firebase_admin_json()
@@ -91,41 +86,44 @@ class Config:
 
     GOOGLE_MAPS_API_KEY = os.environ.get("GOOGLE_MAPS_API_KEY")
     GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY")
-    REDIS_URL = os.environ.get("REDIS_URL")  # For rate limiting and caching
+    REDIS_URL = os.environ.get("REDIS_URL")
 
     ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL")
     ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
 
 
 class DevelopmentConfig(Config):
-    """Development configuration with relaxed settings."""
+    ", ", "Development configuration with relaxed settings.", ", "
 
     DEBUG = True
     ENV = "development"
+    FLASK_ENV = "development"
     CORS_ORIGINS = "*"
 
 
 class ProductionConfig(Config):
-    """Production configuration."""
+    ", ", "Production configuration.", ", "
 
     DEBUG = False
     ENV = "production"
+    FLASK_ENV = "production"
     CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "https://your-domain.com")
 
 
 class TestConfig(Config):
-    """Test configuration with mock values."""
+    ", ", "Test configuration with mock values.", ", "
 
     TESTING = True
     DEBUG = True
     ENV = "testing"
+    FLASK_ENV = "testing"
     SECRET_KEY = "test-secret-key-for-testing-only"
     CORS_ORIGINS = "*"
     GOOGLE_CLOUD_PROJECT = "test-project"
     GEMINI_API_KEY = "test-key"
 
 
-config_by_name = {
+config_by_name: dict[str, type[Config]] = {
     "development": DevelopmentConfig,
     "production": ProductionConfig,
     "testing": TestConfig,
@@ -133,7 +131,7 @@ config_by_name = {
 }
 
 
-def get_config():
-    """Get configuration based on FLASK_ENV or default to production."""
+def get_config() -> type[Config]:
+    ", ", "Get configuration class based on FLASK_ENV.", ", "
     env = os.environ.get("FLASK_ENV", "production")
     return config_by_name.get(env, ProductionConfig)

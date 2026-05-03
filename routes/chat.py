@@ -1,35 +1,96 @@
-from flask import Blueprint, request, jsonify, current_app
-from utils.response import error_response
-from config import Config
-from google import genai
+", ", "Chat routes for VoteWise AI.", ", "
+
+import json
 import logging
+from typing import Any, Optional
+
+from flask import Blueprint, current_app, jsonify, request
+
+from config import Config
+from utils.response import success_response, error_response
 
 logger = logging.getLogger(__name__)
 
 chat_bp = Blueprint("chat", __name__)
 
-# Initialize Gemini client
-client = None
+_client: Optional[Any] = None
 try:
-    api_key = Config.GEMINI_API_KEY
-    if api_key:
-        client = genai.Client(api_key=api_key)
+    _api_key: Optional[str] = Config.GEMINI_API_KEY
+    if _api_key:
+        from google import genai
+
+        _client = genai.Client(api_key=_api_key)
         logger.info("Gemini client initialized")
-except Exception as e:
-    logger.warning(f"Failed to initialize Gemini client: {e}")
+except ImportError:
+    logger.warning("google-genai not installed, using fallback responses")
+except (RuntimeError, ConnectionError, ValueError) as e:
+    logger.warning("Failed to initialize Gemini client: %s", e)
+
+INTENT_KEYWORDS = {
+    "register": ["register", "voter id", "epic", "enroll"],
+    "document": ["document", "id proof", "aadhaar", "passport", "license"],
+    "booth": ["booth", "polling station", "location", "find"],
+}
+
+FALLBACK_RESPONSES = {
+    "register": {
+        "success": True,
+        "intro": "To register as a voter:",
+        "steps": [
+            "Visit the Election Commission website",
+            "Fill the online form with your details",
+            "Submit ID and address proof",
+            "Get your voter ID (EPIC)",
+        ],
+        "tips": ["Register at least 30 days before elections"],
+        "actions": ["Learn more about registration"],
+    },
+    "document": {
+        "success": True,
+        "intro": "Accepted ID documents:",
+        "steps": [
+            "Voter ID (EPIC) - Recommended",
+            "Aadhaar Card",
+            "Passport",
+            "Driving License",
+        ],
+        "tips": ["Carry any one photo ID to the polling station"],
+        "actions": ["View full document list"],
+    },
+    "booth": {
+        "success": True,
+        "intro": "Find your polling booth:",
+        "steps": [
+            "Check your voter slip",
+            "Visit Election Commission website",
+            "Enter your EPIC number or name",
+            "Note the location and directions",
+        ],
+        "tips": ["Visit a day before to familiarize yourself"],
+        "actions": ["Find my polling booth"],
+    },
+}
+
+DEFAULT_RESPONSE = {
+    "success": True,
+    "intro": "I'm here to help with election education!",
+    "steps": [
+        "Learn about voter registration",
+        "Find your polling booth",
+        "Understand required documents",
+        "Track election timeline",
+    ],
+    "tips": ["Always verify from official sources"],
+    "actions": ["Ask me about registration", "Ask about documents"],
+}
 
 
 @chat_bp.route("/chat", methods=["POST"])
-def chat():
-    """
-    AI Chat endpoint with Gemini integration.
-
-    Expected JSON: {"message": "How do I register to vote?", "user_prefs": {}}
-    Returns: {"intro": "", "steps": [], "tips": [], "actions": []}
-    """
-    data = request.get_json() or {}
-    message = data.get("message", "")
-    user_prefs = data.get("user_prefs", {})
+def chat() -> tuple:
+    ", ", "AI Chat endpoint with Gemini integration.", ", "
+    data: dict[str, Any] = request.get_json(silent=True) or {}
+    message: str = data.get("message", ", ")
+    user_prefs: dict[str, Any] = data.get("user_prefs", {})
 
     if not message:
         return jsonify(error_response("Message is required", 400)), 400
@@ -43,8 +104,8 @@ def chat():
         result = _generate_ai_response(message, user_prefs)
         return jsonify(result), 200
 
-    except Exception as e:
-        current_app.logger.error(f"Chat error: {e}")
+    except (RuntimeError, ConnectionError, ValueError):
+        current_app.logger.error("Chat error occurred")
         return jsonify(
             {
                 "success": True,
@@ -61,126 +122,69 @@ def chat():
 
 
 def _detect_intent(message: str) -> str:
-    """Detect user intent from message keywords."""
-    message_lower = message.lower()
-
-    intent_keywords = {
-        "register": ["register", "voter id", "epic", "enroll"],
-        "document": ["document", "id proof", "aadhaar", "passport", "license"],
-        "booth": ["booth", "polling station", "location", "find"],
-    }
-
-    for intent, keywords in intent_keywords.items():
+    ", ", "Detect user intent from message keywords.", ", "
+    message_lower: str = message.lower()
+    for intent, keywords in INTENT_KEYWORDS.items():
         if any(kw in message_lower for kw in keywords):
             return intent
     return "default"
 
 
 def _generate_ai_response(message: str, user_prefs: dict) -> dict:
-    """Generate AI response using Gemini or fallback to rule-based responses."""
-    intent = _detect_intent(message)
-
-    if intent and intent != "default":
+    ", ", "Generate AI response using Gemini or fallback to rule-based responses.", ", "
+    intent: str = _detect_intent(message)
+    if intent != "default":
         return _get_fallback_response(intent)
-
-    if client:
+    if _client:
         return _call_gemini_api(message, user_prefs)
-
     return _get_fallback_response(message)
 
 
-def _get_fallback_response(message):
-    """Fallback responses for unknown messages"""
-    message_lower = message.lower()
-
-    responses = {
-        "register": {
-            "intro": "To register as a voter:",
-            "steps": [
-                "Visit the Election Commission website",
-                "Fill the online form with your details",
-                "Submit ID and address proof",
-                "Get your voter ID (EPIC)",
-            ],
-            "tips": ["Register at least 30 days before elections"],
-            "actions": ["Learn more about registration"],
-        },
-        "document": {
-            "intro": "Accepted ID documents:",
-            "steps": [
-                "Voter ID (EPIC) - Recommended",
-                "Aadhaar Card",
-                "Passport",
-                "Driving License",
-            ],
-            "tips": ["Carry any one photo ID to the polling station"],
-            "actions": ["View full document list"],
-        },
-        "booth": {
-            "intro": "Find your polling booth:",
-            "steps": [
-                "Check your voter slip",
-                "Visit Election Commission website",
-                "Enter your EPIC number or name",
-                "Note the location and directions",
-            ],
-            "tips": ["Visit a day before to familiarize yourself"],
-            "actions": ["Find my polling booth"],
-        },
-    }
-
-    for key, resp in responses.items():
+def _get_fallback_response(message: str) -> dict:
+    ", ", "Return fallback response for known intents or default.", ", "
+    message_lower: str = message.lower()
+    for key, resp in FALLBACK_RESPONSES.items():
         if key in message_lower:
-            resp["success"] = True
-            return resp
-
-    default_resp = {
-        "intro": "I'm here to help with election education!",
-        "steps": [
-            "Learn about voter registration",
-            "Find your polling booth",
-            "Understand required documents",
-            "Track election timeline",
-        ],
-        "tips": ["Always verify from official sources"],
-        "actions": ["Ask me about registration", "Ask about documents"],
-    }
-    default_resp["success"] = True
-    return default_resp
+            return dict(resp)
+    return dict(DEFAULT_RESPONSE)
 
 
 def _call_gemini_api(message: str, user_prefs: dict) -> dict:
-    """Call Gemini API for AI response."""
-    if not client:
+    ", ", "Call Gemini API for AI response.", ", "
+    if not _client:
         return _get_fallback_response(message)
 
     try:
-        prompt = f"""You are VoteWise AI, a neutral, helpful civic assistant for election education.
-Keep responses brief, friendly, and informative.
-Respond in this JSON format only:
-{{"intro": "Brief intro", "steps": ["step1", "step2"], "tips": ["tip1"], "actions": ["action1"]}}
-
-User: {message}
-Context: {user_prefs}
-"""
-        response = client.models.generate_content(
+        prompt: str = (
+            "You are VoteWise AI, a neutral, helpful civic assistant for election education.\n"
+            , "Keep responses brief, friendly, and informative.\n"
+            , "Respond in this JSON format only:\n"
+            '{"intro": "Brief intro", "steps": ["step1", "step2"], "tips": ["tip1"], "actions": ["action1"]}\n\n'
+            f"User: {message}\nContext: {user_prefs}\n"
+        )
+        response = _client.models.generate_content(
             model="gemini-2.0-flash",
             contents=prompt,
         )
-        text = response.candidates[0].content.parts[0].text
+        text: str = response.candidates[0].content.parts[0].text
         text = text.strip("```json").strip("```").strip()
-        import json
-
-        result = json.loads(text)
+        result: dict = json.loads(text)
         result["success"] = True
         return result
-    except Exception:
+    except (RuntimeError, ConnectionError, ValueError) as e:
+        logger.error("Gemini API call failed: %s", e)
         return _get_fallback_response(message)
 
 
 @chat_bp.route("/health", methods=["GET"])
 def health():
-    """Health check for chat service"""
+    ", ", "Health check for chat service.", ", "
     return jsonify(
-        {"status": "healthy", "ai_available": client is not None, "rate_limited": False}
+        success_response(
+            data={
+                "status": "healthy",
+                "ai_available": _client is not None,
+                "rate_limited": False,
+            }
+        )
     ), 200

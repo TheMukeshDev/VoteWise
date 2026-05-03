@@ -1,4 +1,4 @@
-"""
+", ", "
 Comprehensive Firestore Data Access Layer for VoteWise AI
 
 Provides CRUD operations for all collections:
@@ -12,25 +12,29 @@ Provides CRUD operations for all collections:
 - analytics
 - polling_guidance
 - settings
-"""
+", ", "
 
 import firebase_admin
 from firebase_admin import credentials, firestore
-from typing import List, Optional, Dict, Any
+from typing import Optional, Any
 from datetime import datetime
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class FirestoreDB:
-    """Comprehensive Firestore database access layer."""
+    ", ", "Comprehensive Firestore database access layer.", ", "
 
     def __init__(self):
         self._initialized = False
         self._init_firebase()
 
-    def _init_firebase(self):
-        """Initialize Firebase Admin SDK."""
+    def _init_firebase(self) -> None:
+        ", ", "Initialize Firebase Admin SDK.", ", "
         if not firebase_admin._apps:
             from config import Config
+
             firebase_json = Config.FIREBASE_ADMIN_JSON
             project_id = Config.FIREBASE_PROJECT_ID
             if firebase_json and project_id:
@@ -38,25 +42,26 @@ class FirestoreDB:
                     cred = credentials.Certificate(firebase_json)
                     firebase_admin.initialize_app(cred, {"projectId": project_id})
                     self._initialized = True
-                except Exception:
+                except (RuntimeError, ConnectionError, ValueError):
                     pass
 
     @property
-    def db(self):
-        """Get Firestore client."""
+    def db(self) -> Optional[Any]:
+        ", ", "Get Firestore client.", ", "
         if not self._initialized:
             self._init_firebase()
         try:
             return firestore.client()
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return None
 
     # ==========================================
     # USERS COLLECTION
     # ==========================================
 
-    def create_user(self, user_id: str, data: Dict[str, Any]) -> bool:
-        """Create a new user document."""
+    def create_user(self, user_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Create a new user document.", ", "
         db = self.db
         if not db:
             return False
@@ -68,11 +73,12 @@ class FirestoreDB:
         try:
             db.collection("users").document(user_id).set(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
-    def get_user(self, user_id: str) -> Optional[Dict[str, Any]]:
-        """Get user by ID."""
+    def get_user(self, user_id: str) -> Optional[dict[str, Any]]:
+        ", ", "Get user by ID.", ", "
         db = self.db
         if not db:
             return None
@@ -82,11 +88,12 @@ class FirestoreDB:
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return None
 
-    def update_user(self, user_id: str, data: Dict[str, Any]) -> bool:
-        """Update user document."""
+    def update_user(self, user_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Update user document.", ", "
         db = self.db
         if not db:
             return False
@@ -96,11 +103,12 @@ class FirestoreDB:
         try:
             db.collection("users").document(user_id).update(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     def delete_user(self, user_id: str) -> bool:
-        """Delete user document."""
+        ", ", "Delete user document.", ", "
         db = self.db
         if not db:
             return False
@@ -108,11 +116,12 @@ class FirestoreDB:
         try:
             db.collection("users").document(user_id).delete()
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
-    def get_all_users(self, limit: int = 100) -> List[Dict[str, Any]]:
-        """Get all users (admin only)."""
+    def get_all_users(self, limit: int = 100) -> list[dict[str, Any]]:
+        ", ", "Get all users (admin only).", ", "
         db = self.db
         if not db:
             return []
@@ -120,15 +129,15 @@ class FirestoreDB:
         try:
             docs = db.collection("users").limit(limit).stream()
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
     # ==========================================
     # ELECTION_PROCESS COLLECTION
     # ==========================================
 
-    def create_election_process(self, process_id: str, data: Dict[str, Any]) -> bool:
-        """Create election process content."""
+    def create_election_process(self, process_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Create election process content.", ", "
         db = self.db
         if not db:
             return False
@@ -139,11 +148,12 @@ class FirestoreDB:
         try:
             db.collection("election_process").document(process_id).set(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
-    def get_election_process(self, process_id: str) -> Optional[Dict[str, Any]]:
-        """Get election process by ID."""
+    def get_election_process(self, process_id: str) -> Optional[dict[str, Any]]:
+        ", ", "Get election process by ID.", ", "
         db = self.db
         if not db:
             return None
@@ -153,13 +163,14 @@ class FirestoreDB:
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return None
 
     def get_all_election_processes(
         self, language: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """Get all election processes."""
+    ) -> list[dict[str, Any]]:
+        ", ", "Get all election processes.", ", "
         db = self.db
         if not db:
             return []
@@ -170,11 +181,11 @@ class FirestoreDB:
                 query = query.where("language", "==", language)
             docs = query.stream()
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
-    def update_election_process(self, process_id: str, data: Dict[str, Any]) -> bool:
-        """Update election process."""
+    def update_election_process(self, process_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Update election process.", ", "
         db = self.db
         if not db:
             return False
@@ -184,11 +195,12 @@ class FirestoreDB:
         try:
             db.collection("election_process").document(process_id).update(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     def delete_election_process(self, process_id: str) -> bool:
-        """Delete election process."""
+        ", ", "Delete election process.", ", "
         db = self.db
         if not db:
             return False
@@ -196,15 +208,16 @@ class FirestoreDB:
         try:
             db.collection("election_process").document(process_id).delete()
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     # ==========================================
     # TIMELINES COLLECTION
     # ==========================================
 
-    def create_timeline(self, timeline_id: str, data: Dict[str, Any]) -> bool:
-        """Create timeline."""
+    def create_timeline(self, timeline_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Create timeline.", ", "
         db = self.db
         if not db:
             return False
@@ -215,11 +228,12 @@ class FirestoreDB:
         try:
             db.collection("timelines").document(timeline_id).set(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
-    def get_timeline(self, timeline_id: str) -> Optional[Dict[str, Any]]:
-        """Get timeline by ID."""
+    def get_timeline(self, timeline_id: str) -> Optional[dict[str, Any]]:
+        ", ", "Get timeline by ID.", ", "
         db = self.db
         if not db:
             return None
@@ -229,13 +243,14 @@ class FirestoreDB:
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return None
 
     def get_timelines(
         self, election_type: Optional[str] = None, region: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """Get timelines with filters."""
+    ) -> list[dict[str, Any]]:
+        ", ", "Get timelines with filters.", ", "
         db = self.db
         if not db:
             return []
@@ -248,11 +263,11 @@ class FirestoreDB:
                 query = query.where("region", "==", region)
             docs = query.stream()
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
-    def update_timeline(self, timeline_id: str, data: Dict[str, Any]) -> bool:
-        """Update timeline."""
+    def update_timeline(self, timeline_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Update timeline.", ", "
         db = self.db
         if not db:
             return False
@@ -262,11 +277,12 @@ class FirestoreDB:
         try:
             db.collection("timelines").document(timeline_id).update(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     def delete_timeline(self, timeline_id: str) -> bool:
-        """Delete timeline."""
+        ", ", "Delete timeline.", ", "
         db = self.db
         if not db:
             return False
@@ -274,15 +290,16 @@ class FirestoreDB:
         try:
             db.collection("timelines").document(timeline_id).delete()
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     # ==========================================
     # FAQS COLLECTION
     # ==========================================
 
-    def create_faq(self, faq_id: str, data: Dict[str, Any]) -> bool:
-        """Create FAQ."""
+    def create_faq(self, faq_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Create FAQ.", ", "
         db = self.db
         if not db:
             return False
@@ -293,11 +310,12 @@ class FirestoreDB:
         try:
             db.collection("faqs").document(faq_id).set(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
-    def get_faq(self, faq_id: str) -> Optional[Dict[str, Any]]:
-        """Get FAQ by ID."""
+    def get_faq(self, faq_id: str) -> Optional[dict[str, Any]]:
+        ", ", "Get FAQ by ID.", ", "
         db = self.db
         if not db:
             return None
@@ -307,13 +325,14 @@ class FirestoreDB:
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return None
 
     def get_faqs(
         self, category: Optional[str] = None, language: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """Get FAQs with filters."""
+    ) -> list[dict[str, Any]]:
+        ", ", "Get FAQs with filters.", ", "
         db = self.db
         if not db:
             return []
@@ -326,11 +345,11 @@ class FirestoreDB:
                 query = query.where("language", "==", language)
             docs = query.stream()
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
-    def update_faq(self, faq_id: str, data: Dict[str, Any]) -> bool:
-        """Update FAQ."""
+    def update_faq(self, faq_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Update FAQ.", ", "
         db = self.db
         if not db:
             return False
@@ -340,11 +359,12 @@ class FirestoreDB:
         try:
             db.collection("faqs").document(faq_id).update(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     def delete_faq(self, faq_id: str) -> bool:
-        """Delete FAQ."""
+        ", ", "Delete FAQ.", ", "
         db = self.db
         if not db:
             return False
@@ -352,7 +372,8 @@ class FirestoreDB:
         try:
             db.collection("faqs").document(faq_id).delete()
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     # ==========================================
@@ -360,9 +381,9 @@ class FirestoreDB:
     # ==========================================
 
     def create_reminder(
-        self, user_id: str, reminder_id: str, data: Dict[str, Any]
+        self, user_id: str, reminder_id: str, data: dict[str, Any]
     ) -> bool:
-        """Create reminder for user."""
+        ", ", "Create reminder for user.", ", "
         db = self.db
         if not db:
             return False
@@ -375,11 +396,12 @@ class FirestoreDB:
                 reminder_id
             ).set(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
-    def get_reminder(self, user_id: str, reminder_id: str) -> Optional[Dict[str, Any]]:
-        """Get reminder by ID."""
+    def get_reminder(self, user_id: str, reminder_id: str) -> Optional[dict[str, Any]]:
+        ", ", "Get reminder by ID.", ", "
         db = self.db
         if not db:
             return None
@@ -395,13 +417,14 @@ class FirestoreDB:
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return None
 
     def get_user_reminders(
         self, user_id: str, status: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """Get all reminders for a user."""
+    ) -> list[dict[str, Any]]:
+        ", ", "Get all reminders for a user.", ", "
         db = self.db
         if not db:
             return []
@@ -412,13 +435,13 @@ class FirestoreDB:
                 query = query.where("status", "==", status)
             docs = query.stream()
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
     def update_reminder(
-        self, user_id: str, reminder_id: str, data: Dict[str, Any]
+        self, user_id: str, reminder_id: str, data: dict[str, Any]
     ) -> bool:
-        """Update reminder."""
+        ", ", "Update reminder.", ", "
         db = self.db
         if not db:
             return False
@@ -430,11 +453,12 @@ class FirestoreDB:
                 reminder_id
             ).update(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     def delete_reminder(self, user_id: str, reminder_id: str) -> bool:
-        """Delete reminder."""
+        ", ", "Delete reminder.", ", "
         db = self.db
         if not db:
             return False
@@ -444,15 +468,16 @@ class FirestoreDB:
                 reminder_id
             ).delete()
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     # ==========================================
     # ANNOUNCEMENTS COLLECTION
     # ==========================================
 
-    def create_announcement(self, announcement_id: str, data: Dict[str, Any]) -> bool:
-        """Create announcement."""
+    def create_announcement(self, announcement_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Create announcement.", ", "
         db = self.db
         if not db:
             return False
@@ -463,11 +488,12 @@ class FirestoreDB:
         try:
             db.collection("announcements").document(announcement_id).set(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
-    def get_announcement(self, announcement_id: str) -> Optional[Dict[str, Any]]:
-        """Get announcement by ID."""
+    def get_announcement(self, announcement_id: str) -> Optional[dict[str, Any]]:
+        ", ", "Get announcement by ID.", ", "
         db = self.db
         if not db:
             return None
@@ -477,11 +503,12 @@ class FirestoreDB:
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return None
 
-    def get_announcements(self, region: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Get active announcements."""
+    def get_announcements(self, region: Optional[str] = None) -> list[dict[str, Any]]:
+        ", ", "Get active announcements.", ", "
         db = self.db
         if not db:
             return []
@@ -494,11 +521,11 @@ class FirestoreDB:
                 "published_at", direction=firestore.Query.DESCENDING
             ).stream()
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
-    def update_announcement(self, announcement_id: str, data: Dict[str, Any]) -> bool:
-        """Update announcement."""
+    def update_announcement(self, announcement_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Update announcement.", ", "
         db = self.db
         if not db:
             return False
@@ -508,11 +535,12 @@ class FirestoreDB:
         try:
             db.collection("announcements").document(announcement_id).update(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     def delete_announcement(self, announcement_id: str) -> bool:
-        """Delete announcement."""
+        ", ", "Delete announcement.", ", "
         db = self.db
         if not db:
             return False
@@ -520,7 +548,8 @@ class FirestoreDB:
         try:
             db.collection("announcements").document(announcement_id).delete()
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     # ==========================================
@@ -528,9 +557,9 @@ class FirestoreDB:
     # ==========================================
 
     def create_bookmark(
-        self, user_id: str, bookmark_id: str, data: Dict[str, Any]
+        self, user_id: str, bookmark_id: str, data: dict[str, Any]
     ) -> bool:
-        """Create bookmark for user."""
+        ", ", "Create bookmark for user.", ", "
         db = self.db
         if not db:
             return False
@@ -542,11 +571,12 @@ class FirestoreDB:
                 bookmark_id
             ).set(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
-    def get_user_bookmarks(self, user_id: str) -> List[Dict[str, Any]]:
-        """Get all bookmarks for a user."""
+    def get_user_bookmarks(self, user_id: str) -> list[dict[str, Any]]:
+        ", ", "Get all bookmarks for a user.", ", "
         db = self.db
         if not db:
             return []
@@ -559,11 +589,11 @@ class FirestoreDB:
                 .stream()
             )
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
     def delete_bookmark(self, user_id: str, bookmark_id: str) -> bool:
-        """Delete bookmark."""
+        ", ", "Delete bookmark.", ", "
         db = self.db
         if not db:
             return False
@@ -573,15 +603,16 @@ class FirestoreDB:
                 bookmark_id
             ).delete()
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     # ==========================================
     # ANALYTICS COLLECTION
     # ==========================================
 
-    def create_analytics(self, analytics_id: str, data: Dict[str, Any]) -> bool:
-        """Create analytics record."""
+    def create_analytics(self, analytics_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Create analytics record.", ", "
         db = self.db
         if not db:
             return False
@@ -589,13 +620,14 @@ class FirestoreDB:
         try:
             db.collection("analytics").document(analytics_id).set(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     def get_analytics(
         self, metric_type: Optional[str] = None, start_date: Optional[datetime] = None
-    ) -> List[Dict[str, Any]]:
-        """Get analytics data."""
+    ) -> list[dict[str, Any]]:
+        ", ", "Get analytics data.", ", "
         db = self.db
         if not db:
             return []
@@ -606,11 +638,11 @@ class FirestoreDB:
                 query = query.where("metric_type", "==", metric_type)
             docs = query.stream()
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
     def increment_analytics(self, metric_type: str, date: datetime) -> bool:
-        """Increment analytics metric."""
+        ", ", "Increment analytics metric.", ", "
         db = self.db
         if not db:
             return False
@@ -630,15 +662,16 @@ class FirestoreDB:
                 {"metric_value": firestore.Increment(1)}
             )
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     # ==========================================
     # POLLING_GUIDANCE COLLECTION
     # ==========================================
 
-    def create_polling_guidance(self, guidance_id: str, data: Dict[str, Any]) -> bool:
-        """Create polling guidance."""
+    def create_polling_guidance(self, guidance_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Create polling guidance.", ", "
         db = self.db
         if not db:
             return False
@@ -648,11 +681,12 @@ class FirestoreDB:
         try:
             db.collection("polling_guidance").document(guidance_id).set(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
-    def get_polling_guidance(self, guidance_id: str) -> Optional[Dict[str, Any]]:
-        """Get polling guidance by ID."""
+    def get_polling_guidance(self, guidance_id: str) -> Optional[dict[str, Any]]:
+        ", ", "Get polling guidance by ID.", ", "
         db = self.db
         if not db:
             return None
@@ -662,13 +696,14 @@ class FirestoreDB:
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return None
 
     def get_polling_guidances(
         self, region: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """Get active polling guidances."""
+    ) -> list[dict[str, Any]]:
+        ", ", "Get active polling guidances.", ", "
         db = self.db
         if not db:
             return []
@@ -679,11 +714,11 @@ class FirestoreDB:
                 query = query.where("region", "==", region)
             docs = query.stream()
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
-    def update_polling_guidance(self, guidance_id: str, data: Dict[str, Any]) -> bool:
-        """Update polling guidance."""
+    def update_polling_guidance(self, guidance_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Update polling guidance.", ", "
         db = self.db
         if not db:
             return False
@@ -693,7 +728,8 @@ class FirestoreDB:
         try:
             db.collection("polling_guidance").document(guidance_id).update(data)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     # ==========================================
@@ -701,7 +737,7 @@ class FirestoreDB:
     # ==========================================
 
     def create_setting(self, key: str, value: Any) -> bool:
-        """Create or update setting."""
+        ", ", "Create or update setting.", ", "
         db = self.db
         if not db:
             return False
@@ -711,11 +747,12 @@ class FirestoreDB:
                 {"key": key, "value": value, "updated_at": firestore.SERVER_TIMESTAMP}
             )
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
     def get_setting(self, key: str) -> Optional[Any]:
-        """Get setting value."""
+        ", ", "Get setting value.", ", "
         db = self.db
         if not db:
             return None
@@ -725,11 +762,12 @@ class FirestoreDB:
             if doc.exists:
                 return doc.to_dict().get("value")
             return None
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return None
 
-    def get_all_settings(self) -> Dict[str, Any]:
-        """Get all settings."""
+    def get_all_settings(self) -> dict[str, Any]:
+        ", ", "Get all settings.", ", "
         db = self.db
         if not db:
             return {}
@@ -737,15 +775,15 @@ class FirestoreDB:
         try:
             docs = db.collection("settings").stream()
             return {doc.id: doc.to_dict().get("value") for doc in docs}
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return {}
 
     # ==========================================
     # VOTER_PREFERENCES SUB_COLLECTION
     # ==========================================
 
-    def create_or_update_preferences(self, user_id: str, data: Dict[str, Any]) -> bool:
-        """Create or update voter preferences."""
+    def create_or_update_preferences(self, user_id: str, data: dict[str, Any]) -> bool:
+        ", ", "Create or update voter preferences.", ", "
         db = self.db
         if not db:
             return False
@@ -761,11 +799,12 @@ class FirestoreDB:
             )
             doc_ref.set(data, merge=True)
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return False
 
-    def get_preferences(self, user_id: str) -> Optional[Dict[str, Any]]:
-        """Get voter preferences."""
+    def get_preferences(self, user_id: str) -> Optional[dict[str, Any]]:
+        ", ", "Get voter preferences.", ", "
         db = self.db
         if not db:
             return None
@@ -781,7 +820,8 @@ class FirestoreDB:
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.error("Database operation failed: %s", e)
             return None
 
 

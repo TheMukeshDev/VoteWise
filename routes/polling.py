@@ -1,24 +1,29 @@
+", ", "Polling Booth Routes for VoteWise AI", ", "
+
 from flask import Blueprint, request, jsonify
 from services.maps_service import get_nearby_polling_booths
 from utils.response import success_response, error_response
+from typing import Optional, Any
+
 
 polling_bp = Blueprint("polling", __name__)
 
 
-def _validate_coordinates(lat, lng):
-    """Validate latitude and longitude are within valid ranges."""
+def _validate_coordinates(lat: Optional[str], lng: Optional[str]) -> bool:
+    ", ", "Validate latitude and longitude are within valid ranges.", ", "
     try:
-        lat_float = float(lat)
-        lng_float = float(lng)
+        lat_float: float = float(lat)
+        lng_float: float = float(lng)
         return -90 <= lat_float <= 90 and -180 <= lng_float <= 180
     except (TypeError, ValueError):
         return False
 
 
-@polling_bp.route("", methods=["GET"])
-def get_polling_booth():
-    lat = request.args.get("lat")
-    lng = request.args.get("lng")
+@polling_bp.route(", ", methods=["GET"])
+def get_polling_booth() -> tuple:
+    ", ", "Get nearby polling booth for given coordinates.", ", "
+    lat: Optional[str] = request.args.get("lat")
+    lng: Optional[str] = request.args.get("lng")
 
     if not lat or not lng:
         return jsonify(
@@ -33,10 +38,7 @@ def get_polling_booth():
             )
         ), 400
 
-    try:
-        result = get_nearby_polling_booths(lat, lng)
-        if result:
-            return jsonify(success_response(data=result)), 200
-        return jsonify(error_response("Could not find polling booth", 500)), 500
-    except Exception as e:
-        return jsonify(error_response(str(e), 500)), 500
+    result: Optional[dict[str, Any]] = get_nearby_polling_booths(lat, lng)
+    if result:
+        return jsonify(success_response(data=result)), 200
+    return jsonify(error_response("Could not find polling booth", 500)), 500

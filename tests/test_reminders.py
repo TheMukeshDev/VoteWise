@@ -1,6 +1,6 @@
-"""
+", ", "
 Tests for reminder routes.
-"""
+", ", "
 
 import pytest
 import json
@@ -9,10 +9,10 @@ pytestmark = pytest.mark.unit
 
 
 class TestReminderRoutesUnauthenticated:
-    """Test reminder API endpoints without authentication."""
+    ", ", "Test reminder API endpoints without authentication.", ", "
 
     def test_set_reminder_requires_auth(self, client):
-        """Test setting reminder requires authentication."""
+        ", ", "Test setting reminder requires authentication.", ", "
         response = client.post(
             "/api/reminders",
             data=json.dumps({"title": "Test Event", "reminder_date": "2026-05-20"}),
@@ -21,21 +21,21 @@ class TestReminderRoutesUnauthenticated:
         assert response.status_code == 401
 
     def test_get_reminders_requires_auth(self, client):
-        """Test getting reminders requires authentication."""
+        ", ", "Test getting reminders requires authentication.", ", "
         response = client.get("/api/reminders")
         assert response.status_code == 401
 
     def test_get_reminder_requires_auth(self, client):
-        """Test getting single reminder requires authentication."""
+        ", ", "Test getting single reminder requires authentication.", ", "
         response = client.get("/api/reminders/reminder-id")
         assert response.status_code == 401
 
 
 class TestReminderValidation:
-    """Test reminder validation."""
+    ", ", "Test reminder validation.", ", "
 
     def test_reminder_missing_title(self, client):
-        """Test reminder requires title field."""
+        ", ", "Test reminder requires title field.", ", "
         response = client.post(
             "/api/reminders",
             data=json.dumps({"reminder_date": "2026-05-20"}),
@@ -44,7 +44,7 @@ class TestReminderValidation:
         assert response.status_code == 401
 
     def test_reminder_missing_date(self, client):
-        """Test reminder requires reminder_date field."""
+        ", ", "Test reminder requires reminder_date field.", ", "
         response = client.post(
             "/api/reminders",
             data=json.dumps({"title": "Test Event"}),
@@ -54,10 +54,10 @@ class TestReminderValidation:
 
 
 class TestReminderFormat:
-    """Test reminder response format."""
+    ", ", "Test reminder response format.", ", "
 
     def test_error_response_format(self, client):
-        """Test error response has proper format."""
+        ", ", "Test error response has proper format.", ", "
         response = client.get("/api/reminders")
         data = json.loads(response.data)
 

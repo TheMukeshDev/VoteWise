@@ -5,7 +5,7 @@ import json
 
 @pytest.fixture(autouse=True)
 def mock_jwt():
-    """Mock JWT for all protected routes."""
+    ", ", "Mock JWT for all protected routes.", ", "
     with (
         patch(
             "flask_jwt_extended.view_decorators.verify_jwt_in_request"
@@ -71,10 +71,10 @@ class TestAnnouncementAdminRoutes:
             patch(
                 "middleware.auth_middleware.user_profile_service.get_user_profile"
             ) as mock_profile,
-            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ""),
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ", "),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
-            mock_profile.return_value = {"email": ""}
+            mock_profile.return_value = {"email": ", "}
             mock_svc.get_all_for_admin.return_value = []
             res = client.get("/api/admin/announcements/", headers=auth_headers)
             assert res.status_code == 200
@@ -89,10 +89,10 @@ class TestAnnouncementAdminRoutes:
             patch(
                 "middleware.auth_middleware.user_profile_service.get_user_profile"
             ) as mock_profile,
-            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ""),
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ", "),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
-            mock_profile.return_value = {"email": ""}
+            mock_profile.return_value = {"email": ", "}
             mock_create.return_value = {"id": "a1", "title": "A1", "message": "C1"}
             res = client.post(
                 "/api/admin/announcements/",
@@ -113,10 +113,10 @@ class TestElectionProcessAdminRoutes:
             patch(
                 "middleware.auth_middleware.user_profile_service.get_user_profile"
             ) as mock_profile,
-            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ""),
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ", "),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
-            mock_profile.return_value = {"email": ""}
+            mock_profile.return_value = {"email": ", "}
             mock_ep_svc.get_all.return_value = []
             res = client.get("/api/admin/election-process/", headers=auth_headers)
             assert res.status_code == 200
@@ -133,10 +133,10 @@ class TestPollingGuidanceAdminRoutes:
             patch(
                 "middleware.auth_middleware.user_profile_service.get_user_profile"
             ) as mock_profile,
-            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ""),
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ", "),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
-            mock_profile.return_value = {"email": ""}
+            mock_profile.return_value = {"email": ", "}
             mock_pg_svc.get_all.return_value = []
             res = client.get("/api/admin/polling-guidance/", headers=auth_headers)
             assert res.status_code == 200
@@ -159,10 +159,10 @@ class TestTimelineAdminRoutes:
             patch(
                 "middleware.auth_middleware.user_profile_service.get_user_profile"
             ) as mock_profile,
-            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ""),
+            patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", ", "),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
-            mock_profile.return_value = {"email": ""}
+            mock_profile.return_value = {"email": ", "}
             mock_timeline_svc.get_all_events.return_value = []
             res = client.get("/api/admin/timelines/", headers=auth_headers)
             assert res.status_code == 200

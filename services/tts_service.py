@@ -1,4 +1,4 @@
-"""
+", ", "
 Google Cloud Text-to-Speech Service for VoteWise AI
 
 Provides spoken responses for voters.
@@ -7,52 +7,52 @@ Features:
 - Support for multiple languages
 - Accessibility audio playback
 - MP3 audio output
-"""
+", ", "
 
 import logging
 import base64
-from typing import Optional, Dict, Any, List
+from typing import Optional, Any
 from config import Config
 
 logger = logging.getLogger(__name__)
 
 
 class TextToSpeechService:
-    """Google Cloud Text-to-Speech API integration."""
+    ", ", "Google Cloud Text-to-Speech API integration.", ", "
 
     VOICE_PROFILES = {
-        "en": {"language_code": "en-US", "name": "en-US-Neural2-J"},
-        "hi": {"language_code": "hi-IN", "name": "hi-IN-Neural2-D"},
-        "bn": {"language_code": "bn-IN", "name": "bn-IN-Standard-A"},
-        "ta": {"language_code": "ta-IN", "name": "ta-IN-Standard-A"},
-        "te": {"language_code": "te-IN", "name": "te-IN-Standard-A"},
-        "mr": {"language_code": "mr-IN", "name": "mr-IN-Standard-A"},
-        "kn": {"language_code": "kn-IN", "name": "kn-IN-Standard-A"},
-        "gu": {"language_code": "gu-IN", "name": "gu-IN-Standard-A"},
-        "ml": {"language_code": "ml-IN", "name": "ml-IN-Standard-A"},
-        "pa": {"language_code": "pa-IN", "name": "pa-IN-Standard-A"},
+        "en": {"language_code": "en-US", "name": "en-US-Neural2-J",
+        "hi": {"language_code": "hi-IN", "name": "hi-IN-Neural2-D",
+        "bn": {"language_code": "bn-IN", "name": "bn-IN-Standard-A",
+        "ta": {"language_code": "ta-IN", "name": "ta-IN-Standard-A",
+        "te": {"language_code": "te-IN", "name": "te-IN-Standard-A",
+        "mr": {"language_code": "mr-IN", "name": "mr-IN-Standard-A",
+        "kn": {"language_code": "kn-IN", "name": "kn-IN-Standard-A",
+        "gu": {"language_code": "gu-IN", "name": "gu-IN-Standard-A",
+        "ml": {"language_code": "ml-IN", "name": "ml-IN-Standard-A",
+        "pa": {"language_code": "pa-IN", "name": "pa-IN-Standard-A",
     }
 
     def __init__(self):
-        self.api_key = Config.GOOGLE_CLOUD_PROJECT
+        self._project_id = Config.GOOGLE_CLOUD_PROJECT
         self._initialized = False
         self._init_tts()
 
-    def _init_tts(self):
-        """Initialize TTS client."""
+    def _init_tts(self) -> None:
+        ", ", "Initialize TTS client.", ", "
         try:
             from google.cloud import texttospeech
             import os
 
-            if Config.FIREBASE_CREDENTIALS_PATH and os.path.exists(
-                Config.FIREBASE_CREDENTIALS_PATH
+            if Config.FIREBASE_ADMIN_JSON and os.path.exists(
+                os.environ.get("GOOGLE_APPLICATION_CREDENTIALS", ", ")
             ):
                 self.client = texttospeech.TextToSpeechClient()
                 self._initialized = True
             else:
                 self.client = None
-        except Exception as e:
-            logger.warning(f"Text-to-speech init error: {e}")
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.warning("Text-to-speech init error: %s", e)
             self.client = None
 
     def synthesize(
@@ -63,8 +63,8 @@ class TextToSpeechService:
         speaking_rate: float = 1.0,
         pitch: float = 0.0,
         audio_format: str = "mp3",
-    ) -> Optional[Dict[str, Any]]:
-        """
+    ) -> Optional[dict[str, Any]]:
+        ", ", "
         Convert text to speech.
 
         Args:
@@ -77,7 +77,7 @@ class TextToSpeechService:
 
         Returns:
             Audio data and metadata
-        """
+        ", ", "
         if self.client and self._initialized:
             try:
                 from google.cloud import texttospeech
@@ -100,15 +100,15 @@ class TextToSpeechService:
                     "language": language,
                     "text": text,
                 }
-            except Exception as e:
+            except (RuntimeError, ConnectionError, ValueError) as e:
                 logger.warning(f"Synthesis error: {e}")
 
         return self._mock_synthesize(text, language, audio_format)
 
     def synthesize_ssml(
         self, ssml: str, language: str = "en", audio_format: str = "mp3"
-    ) -> Optional[Dict[str, Any]]:
-        """
+    ) -> Optional[dict[str, Any]]:
+        ", ", "
         Synthesize SSML for advanced control.
 
         Args:
@@ -118,7 +118,7 @@ class TextToSpeechService:
 
         Returns:
             Audio data
-        """
+        ", ", "
         if self.client and self._initialized:
             try:
                 from google.cloud import texttospeech
@@ -138,31 +138,31 @@ class TextToSpeechService:
                     "audio_format": audio_format,
                     "language": language,
                 }
-            except Exception as e:
-                logger.warning(f"SSML synthesis error: {e}")
+            except (RuntimeError, ConnectionError, ValueError) as e:
+                logger.warning("SSML synthesis error: %s", e)
 
         return None
 
     def speak_election_steps(
-        self, steps: List[Dict[str, Any]], language: str = "en"
-    ) -> Optional[Dict[str, Any]]:
-        """
+        self, steps: list[dict[str, Any]], language: str = "en"
+    ) -> Optional[dict[str, Any]]:
+        ", ", "
         Convert election steps to speech.
 
         Args:
-            steps: List of election steps
+            steps: list of election steps
             language: Language code
 
         Returns:
             Audio data
-        """
+        ", ", "
         text = self._format_steps_for_speech(steps)
         return self.synthesize(text, language)
 
     def speak_faq_answer(
         self, question: str, answer: str, language: str = "en"
-    ) -> Optional[Dict[str, Any]]:
-        """
+    ) -> Optional[dict[str, Any]]:
+        ", ", "
         Speak FAQ question and answer.
 
         Args:
@@ -172,14 +172,14 @@ class TextToSpeechService:
 
         Returns:
             Audio data
-        """
+        ", ", "
         text = f"Question: {question}. Answer: {answer}"
         return self.synthesize(text, language)
 
     def speak_timeline_event(
-        self, event: Dict[str, Any], language: str = "en"
-    ) -> Optional[Dict[str, Any]]:
-        """
+        self, event: dict[str, Any], language: str = "en"
+    ) -> Optional[dict[str, Any]]:
+        ", ", "
         Speak election timeline event.
 
         Args:
@@ -188,7 +188,7 @@ class TextToSpeechService:
 
         Returns:
             Audio data
-        """
+        ", ", "
         text = f"Important date: {event.get('title', 'Election Event')}"
         if event.get("date"):
             text += f" on {event.get('date')}"
@@ -197,8 +197,8 @@ class TextToSpeechService:
 
         return self.synthesize(text, language)
 
-    def _get_voice_config(self, language: str, gender: str = "neutral") -> Dict:
-        """Get voice configuration."""
+    def _get_voice_config(self, language: str, gender: str = "neutral") -> Any:
+        ", ", "Get voice configuration.", ", "
         from google.cloud import texttospeech
 
         voice_profile = self.VOICE_PROFILES.get(language, self.VOICE_PROFILES["en"])
@@ -219,8 +219,8 @@ class TextToSpeechService:
 
     def _get_audio_config(
         self, audio_format: str, speaking_rate: float = 1.0, pitch: float = 0.0
-    ) -> Dict:
-        """Get audio configuration."""
+    ) -> Any:
+        ", ", "Get audio configuration.", ", "
         from google.cloud import texttospeech
 
         encoding_map = {
@@ -235,13 +235,13 @@ class TextToSpeechService:
             pitch=pitch,
         )
 
-    def _format_steps_for_speech(self, steps: List[Dict]) -> str:
-        """Format election steps for speech."""
+    def _format_steps_for_speech(self, steps: list[dict[str, Any]]) -> str:
+        ", ", "Format election steps for speech.", ", "
         text_parts = []
 
         for i, step in enumerate(steps, 1):
             if isinstance(step, dict):
-                step_text = step.get("title") or step.get("description", "")
+                step_text = step.get("title") or step.get("description", ", ")
             else:
                 step_text = str(step)
 
@@ -251,18 +251,18 @@ class TextToSpeechService:
 
     def _mock_synthesize(
         self, text: str, language: str, audio_format: str
-    ) -> Dict[str, Any]:
-        """Mock synthesis when API unavailable."""
+    ) -> dict[str, Any]:
+        ", ", "Mock synthesis when API unavailable.", ", "
         return {
-            "audio_content": "",
+            "audio_content": ", ",
             "audio_format": audio_format,
             "language": language,
             "text": text,
             "mock": True,
         }
 
-    def get_available_voices(self) -> List[Dict[str, Any]]:
-        """Get available voice profiles."""
+    def get_available_voices(self) -> list[dict[str, Any]]:
+        ", ", "Get available voice profiles.", ", "
         if self.client and self._initialized:
             try:
                 from google.cloud import texttospeech
@@ -284,22 +284,22 @@ class TextToSpeechService:
                         )
 
                 return voices
-            except Exception:
+            except (RuntimeError, ConnectionError, ValueError):
                 pass
 
         return list(self.VOICE_PROFILES.values())
 
 
 class AudioGuidancePlayer:
-    """Audio player for election guidance."""
+    ", ", "Audio player for election guidance.", ", "
 
     def __init__(self):
         self.service = TextToSpeechService()
 
     def play_election_info(
         self, info_type: str, data: Any, language: str = "en"
-    ) -> Dict[str, Any]:
-        """
+    ) -> Optional[dict[str, Any]]:
+        ", ", "
         Generate audio for election information.
 
         Args:
@@ -309,10 +309,10 @@ class AudioGuidancePlayer:
 
         Returns:
             Audio playback data
-        """
+        ", ", "
         if info_type == "faq":
             return self.service.speak_faq_answer(
-                data.get("question", ""), data.get("answer", ""), language
+                data.get("question", ", "), data.get("answer", ", "), language
             )
         elif info_type == "steps":
             return self.service.speak_election_steps(data, language)
@@ -322,7 +322,7 @@ class AudioGuidancePlayer:
         return self.service.synthesize(str(data), language)
 
     def get_playback_url(self, audio_content: str, audio_format: str = "mp3") -> str:
-        """
+        ", ", "
         Get audio playback URL.
 
         Args:
@@ -331,7 +331,7 @@ class AudioGuidancePlayer:
 
         Returns:
             Data URL for playback
-        """
+        ", ", "
         mime_types = {
             "mp3": "audio/mp3",
             "linear16": "audio/wav",

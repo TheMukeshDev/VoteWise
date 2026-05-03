@@ -1,16 +1,16 @@
-"""
+", ", "
 Firestore Health Check Service for VoteWise AI
-"""
+", ", "
 
 from firebase_admin import firestore
 
 
 class FirestoreHealthCheck:
-    """Check Firestore connectivity."""
+    ", ", "Check Firestore connectivity.", ", "
 
     @staticmethod
     def check_connection():
-        """Check if Firestore is connected."""
+        ", ", "Check if Firestore is connected.", ", "
         try:
             db = firestore.client()
             if db:
@@ -20,7 +20,7 @@ class FirestoreHealthCheck:
                     "message": "Firestore is connected and working",
                 }
             return {"connected": False, "message": "Firestore client not available"}
-        except Exception as e:
+        except (RuntimeError, ConnectionError, ValueError) as e:
             return {
                 "connected": False,
                 "message": f"Firestore connection failed: {str(e)}",
@@ -28,14 +28,14 @@ class FirestoreHealthCheck:
 
     @staticmethod
     def get_collections():
-        """Get list of collections in Firestore."""
+        ", ", "Get list of collections in Firestore.", ", "
         try:
             db = firestore.client()
             if db:
                 collections = db.collections()
                 return [col.id for col in collections]
             return []
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
 

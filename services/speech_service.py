@@ -1,4 +1,4 @@
-"""
+", ", "
 Google Cloud Speech-to-Text Service for VoteWise AI
 
 Provides voice input for voter questions.
@@ -7,26 +7,26 @@ Features:
 - Audio input from microphone
 - Support for multiple languages
 - Fallback for when API unavailable
-"""
+", ", "
 
 import base64
 import logging
-from typing import Optional, Dict, Any
+from typing import Optional, Any
 from config import Config
 
 logger = logging.getLogger(__name__)
 
 
 class SpeechToTextService:
-    """Google Cloud Speech-to-Text API integration."""
+    ", ", "Google Cloud Speech-to-Text API integration.", ", "
 
     def __init__(self):
-        self.api_key = Config.GOOGLE_CLOUD_PROJECT
+        self._project_id = Config.GOOGLE_CLOUD_PROJECT
         self._initialized = False
         self._init_speech()
 
-    def _init_speech(self):
-        """Initialize speech client."""
+    def _init_speech(self) -> None:
+        ", ", "Initialize speech client.", ", "
         try:
             from google.cloud import speech
             import os
@@ -40,8 +40,8 @@ class SpeechToTextService:
                 self._initialized = True
             else:
                 self.client = None
-        except Exception as e:
-            logger.warning(f"Speech-to-text init error: {e}")
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.warning("Speech-to-text init error: %s", e)
             self.client = None
 
     def recognize(
@@ -50,7 +50,7 @@ class SpeechToTextService:
         language_code: str = "en-US",
         sample_rate: int = 16000,
     ) -> Optional[str]:
-        """
+        ", ", "
         Convert audio to text.
 
         Args:
@@ -60,7 +60,7 @@ class SpeechToTextService:
 
         Returns:
             Recognized text or None
-        """
+        ", ", "
         if self.client and self._initialized:
             try:
                 from google.cloud import speech
@@ -79,15 +79,15 @@ class SpeechToTextService:
                 for result in response.results:
                     if result.alternatives:
                         return result.alternatives[0].transcript
-            except Exception as e:
-                logger.warning(f"Speech recognition error: {e}")
+            except (RuntimeError, ConnectionError, ValueError) as e:
+                logger.warning("Speech recognition error: %s", e)
 
         return None
 
     def recognize_from_base64(
         self, base64_audio: str, language_code: str = "en-US"
     ) -> Optional[str]:
-        """
+        ", ", "
         Convert base64 encoded audio to text.
 
         Args:
@@ -96,18 +96,18 @@ class SpeechToTextService:
 
         Returns:
             Recognized text
-        """
+        ", ", "
         try:
             audio_content = base64.b64decode(base64_audio)
             return self.recognize(audio_content, language_code)
-        except Exception as e:
-            logger.warning(f"Base64 decode error: {e}")
+        except (RuntimeError, ConnectionError, ValueError) as e:
+            logger.warning("Base64 decode error: %s", e)
             return self._mock_recognize()
 
     def transcribe_streaming(
         self, audio_iterator, language_code: str = "en-US"
     ) -> Optional[str]:
-        """
+        ", ", "
         Stream recognition for long audio.
 
         Args:
@@ -116,7 +116,7 @@ class SpeechToTextService:
 
         Returns:
             Recognized text
-        """
+        ", ", "
         if self.client and self._initialized:
             try:
                 from google.cloud import speech
@@ -143,49 +143,49 @@ class SpeechToTextService:
                         result = response.results[0]
                         if result.alternatives:
                             return result.alternatives[0].transcript
-            except Exception as e:
-                logger.warning(f"Streaming recognition error: {e}")
+            except (RuntimeError, ConnectionError, ValueError) as e:
+                logger.warning("Streaming recognition error: %s", e)
 
         return self._mock_recognize()
 
-    def get_audio_config(self) -> Dict[str, Any]:
-        """Get audio configuration for frontend."""
+    def get_audio_config(self) -> dict[str, Any]:
+        ", ", "Get audio configuration for frontend.", ", "
         return {
             "sample_rate": 16000,
             "language_codes": [
-                {"code": "en-US", "name": "English (US)"},
-                {"code": "en-IN", "name": "English (India)"},
-                {"code": "hi-IN", "name": "Hindi"},
-                {"code": "bn-IN", "name": "Bengali"},
-                {"code": "ta-IN", "name": "Tamil"},
-                {"code": "te-IN", "name": "Telugu"},
-                {"code": "mr-IN", "name": "Marathi"},
-                {"code": "kn-IN", "name": "Kannada"},
-                {"code": "gu-IN", "name": "Gujarati"},
-                {"code": "ml-IN", "name": "Malayalam"},
-                {"code": "pa-IN", "name": "Punjabi"},
-                {"code": "or-IN", "name": "Odia"},
-                {"code": "as-IN", "name": "Assamese"},
-                {"code": "ur-IN", "name": "Urdu"},
+                {"code": "en-US", "name": "English (US)",
+                {"code": "en-IN", "name": "English (India)",
+                {"code": "hi-IN", "name": "Hindi",
+                {"code": "bn-IN", "name": "Bengali",
+                {"code": "ta-IN", "name": "Tamil",
+                {"code": "te-IN", "name": "Telugu",
+                {"code": "mr-IN", "name": "Marathi",
+                {"code": "kn-IN", "name": "Kannada",
+                {"code": "gu-IN", "name": "Gujarati",
+                {"code": "ml-IN", "name": "Malayalam",
+                {"code": "pa-IN", "name": "Punjabi",
+                {"code": "or-IN", "name": "Odia",
+                {"code": "as-IN", "name": "Assamese",
+                {"code": "ur-IN", "name": "Urdu",
             ],
             "encoding": "LINEAR16",
         }
 
     def _mock_recognize(self) -> str:
-        """Mock recognition for demo."""
+        ", ", "Mock recognition for demo.", ", "
         return "How do I register to vote?"
 
 
 class VoiceInputHandler:
-    """Handle voice input for voter dashboard."""
+    ", ", "Handle voice input for voter dashboard.", ", "
 
     def __init__(self):
         self.service = SpeechToTextService()
 
     def process_voice_question(
         self, audio_data: str, language: str = "en"
-    ) -> Dict[str, Any]:
-        """
+    ) -> dict[str, Any]:
+        ", ", "
         Process voice input from voter.
 
         Args:
@@ -194,7 +194,7 @@ class VoiceInputHandler:
 
         Returns:
             Result with text and status
-        """
+        ", ", "
         language_code = self._to_language_code(language)
 
         text = self.service.recognize_from_base64(audio_data, language_code)
@@ -205,7 +205,7 @@ class VoiceInputHandler:
         return {"success": True, "text": text, "language": language, "source": "voice"}
 
     def _to_language_code(self, code: str) -> str:
-        """Convert simple code to Google language code."""
+        ", ", "Convert simple code to Google language code.", ", "
         mapping = {
             "en": "en-US",
             "hi": "hi-IN",
@@ -221,7 +221,7 @@ class VoiceInputHandler:
         return mapping.get(code, "en-US")
 
     def _mock_question(self, language: str) -> str:
-        """Mock question based on language."""
+        ", ", "Mock question based on language.", ", "
         questions = {
             "hi": "मैं वोटर के रूप में कैसे पंजीकरण करूं?",
             "bn": "আমি কীভাবে ভোটার হিসাবে নথিভুক্ত করব?",

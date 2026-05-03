@@ -53,20 +53,17 @@ class TestAuthService:
 
 class TestUserProfileService:
     def test_get_user_profile(self):
-        service = UserProfileService()
-        mock_db = MagicMock()
-        mock_db.collection().document().get.return_value.exists = True
-        mock_db.collection().document().get.return_value.id = "u1"
-        mock_db.collection().document().get.return_value.to_dict.return_value = {
-            "email": "test@test.com"
-        }
-        with patch.object(UserProfileService, "db", new=mock_db):
-            assert service.get_user_profile("u1")["id"] == "u1"
+        with patch("services.auth_service.get_user") as mock_get:
+            mock_get.return_value = {"email": "test@test.com"}
+            service = UserProfileService()
+            result = service.get_user_profile("u1")
+            assert result["id"] == "u1"
+            assert result["email"] == "test@test.com"
 
     def test_create_profile(self):
-        service = UserProfileService()
-        mock_db = MagicMock()
-        with patch.object(UserProfileService, "db", new=mock_db):
+        with patch("services.firestore_service.save_user") as mock_save:
+            mock_save.return_value = "u1"
+            service = UserProfileService()
             assert service.create_user_profile("u1", "a@b.com", {}) is True
 
 

@@ -1,13 +1,25 @@
-"""
+", ", "
 VoteWise AI Backend - Flask Application Factory
 
 A production-ready Flask backend for a civic-tech platform
 providing election education, voter guidance, and admin management.
-"""
+", ", "
 
 import logging
 import os
-from flask import Flask, jsonify, request
+import time
+import uuid
+from datetime import datetime, UTC
+
+from flask import (
+    Blueprint,
+    Flask,
+    g,
+    jsonify,
+    redirect,
+    render_template,
+    request,
+)
 from flask_cors import CORS
 from dotenv import load_dotenv
 
@@ -33,23 +45,53 @@ from middleware.auth_middleware import setup_auth_middleware
 
 logger = logging.getLogger(__name__)
 
+FRONTEND_ROUTES: list[tuple[str, str]] = [
+    ("/", "index.html"),
+    ("/dashboard", "app.html"),
+    ("/admin-login", "admin-login.html"),
+    ("/results", "results.html"),
+    ("/admin", "admin.html"),
+]
 
-def create_app(config_class=None):
-    """
+FRONTEND_ROUTES_WITH_FIREBASE_CONFIG: list[tuple[str, str]] = [
+    ("/login", "login.html"),
+    ("/signup", "signup.html"),
+    ("/profile", "profile.html"),
+    ("/settings", "settings.html"),
+]
+
+
+def create_app(config_class: type | None = None) -> Flask:
+    ", ", "
     Application factory pattern for creating Flask app instances.
     Supports configuration injection for testing and deployment.
-    """
+    ", ", "
     if config_class is None:
         config_class = get_config()
 
     app = Flask(__name__)
     app.config.from_object(config_class)
-
     load_dotenv(app.config.get("ENV_FILE", ".env"))
 
+    _configure_cors(app)
+    _register_security_headers(app)
+    setup_logging(app)
+    register_error_handlers(app)
+    setup_auth_middleware(app)
+    _register_blueprints(app)
+    _register_health_endpoint(app)
+    _register_test_firestore_endpoint(app)
+    _register_frontend_routes(app)
+    _register_request_logging(app)
+
+    return app
+
+
+def _configure_cors(app: Flask) -> None:
+    ", ", "Configure CORS settings.", ", "
     cors_origins = app.config.get("CORS_ORIGINS", "*")
     if app.config.get("ENV") == "production" and cors_origins == "*":
-        cors_origins = ""
+        cors_origins = ", "
 
     CORS(
         app,
@@ -62,85 +104,24 @@ def create_app(config_class=None):
         },
     )
 
+
+def _register_security_headers(app: Flask) -> None:
+    ", ", "Add security headers to all responses.", ", "
+
     @app.after_request
     def add_security_headers(response):
-        """Add security headers to all responses."""
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
         return response
 
-    setup_logging(app)
-    register_error_handlers(app)
-    setup_auth_middleware(app)
 
-    _register_blueprints(app)
-    _register_frontend_routes(app)
-    _register_request_logging(app)
-
-    @app.route("/api/health")
-    def health():
-        return jsonify(
-            {
-                "status": "healthy",
-                "service": "VoteWise AI",
-                "version": app.config.get("VERSION", "1.0.0"),
-                "environment": app.config.get("ENV", "production"),
-                "timestamp": __import__("datetime")
-                .datetime.now(__import__("datetime").UTC)
-                .isoformat()
-                .replace("+00:00", "Z"),
-            }
-        )
-
-    @app.route("/api/test-firestore", methods=["GET", "POST"])
-    def test_firestore():
-        """Test Firestore connection with write/read/delete operations."""
-        from services.firestore_service import (
-            verify_firestore_connection,
-            save_user,
-            get_user,
-        )
-        import uuid
-
-        result = {
-            "connection": verify_firestore_connection(),
-        }
-
-        if request.method == "POST":
-            test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
-            test_data = {
-                "email": f"test_{test_user_id}@example.com",
-                "name": "Test User",
-                "role": "tester",
-                "test_run": True,
-            }
-
-            saved = save_user(test_user_id, test_data)
-            if saved:
-                result["write"] = {"success": True, "user_id": test_user_id}
-
-                fetched = get_user(test_user_id)
-                if fetched and fetched.get("email") == test_data["email"]:
-                    result["read"] = {"success": True, "data": fetched}
-                else:
-                    result["read"] = {"success": False, "error": "Data mismatch"}
-            else:
-                result["write"] = {"success": False}
-                result["read"] = {"success": False}
-
-        return jsonify(result)
-
-    return app
-
-
-def _register_blueprints(app):
-    """Register all API blueprints with URL prefixes."""
-
+def _register_blueprints(app: Flask) -> None:
+    ", ", "Register all API blueprints with URL prefixes.", ", "
     from routes.speech import speech_bp
 
-    blueprints = [
+    blueprints: list[tuple[str, Blueprint]] = [
         ("/api/auth", auth_bp),
         ("/api/chat", chat_bp),
         ("/api/speech", speech_bp),
@@ -161,8 +142,8 @@ def _register_blueprints(app):
         app.register_blueprint(blueprint, url_prefix=url_prefix)
 
 
-def _get_firebase_config(app):
-    """Generate Firebase config for frontend."""
+def _get_firebase_config(app: Flask) -> dict[str, str | None]:
+    ", ", "Generate Firebase config for frontend.", ", "
     return {
         "apiKey": app.config.get("FIREBASE_API_KEY"),
         "authDomain": app.config.get("FIREBASE_AUTH_DOMAIN"),
@@ -173,92 +154,115 @@ def _get_firebase_config(app):
     }
 
 
-def _register_frontend_routes(app):
-    """Register all frontend page routes."""
-
+def _register_frontend_routes(app: Flask) -> None:
+    ", ", "Register all frontend page routes.", ", "
     firebase_config = _get_firebase_config(app)
 
-    @app.route("/")
-    def index():
-        from flask import render_template
+    for path, template in FRONTEND_ROUTES:
 
-        return render_template("index.html")
+        def _render(t=template):
+            return render_template(t)
 
-    @app.route("/dashboard")
-    def dashboard():
-        from flask import render_template
-
-        return render_template("app.html", firebase_config=firebase_config)
+        _render.__name__ = f"render_{template.replace('.html', '')}"
+        app.route(path)(_render)
 
     @app.route("/app")
     def app_redirect():
-        from flask import redirect
-
         return redirect("/dashboard")
 
-    @app.route("/login")
-    def login_page():
-        from flask import render_template
+    for path, template in FRONTEND_ROUTES_WITH_FIREBASE_CONFIG:
 
-        return render_template("login.html", firebase_config=firebase_config)
+        def _render_with_config(t=template, c=firebase_config):
+            return render_template(t, firebase_config=c)
 
-    @app.route("/signup")
-    def signup_page():
-        from flask import render_template
-
-        return render_template("signup.html", firebase_config=firebase_config)
-
-    @app.route("/admin-login")
-    def admin_login_page():
-        from flask import render_template
-
-        return render_template("admin-login.html")
-
-    @app.route("/results")
-    def results_page():
-        from flask import render_template
-
-        return render_template("results.html")
-
-    @app.route("/admin")
-    def admin_page():
-        from flask import render_template
-
-        return render_template("admin.html")
-
-    @app.route("/profile")
-    def profile_page():
-        from flask import render_template
-
-        return render_template("profile.html", firebase_config=firebase_config)
-
-    @app.route("/settings")
-    def settings_page():
-        from flask import render_template
-
-        return render_template("settings.html", firebase_config=firebase_config)
+        _render_with_config.__name__ = (
+            f"render_with_config_{template.replace('.html', '')}"
+        )
+        app.route(path)(_render_with_config)
 
 
-def _register_request_logging(app):
-    """Register request/response logging hooks."""
+def _register_health_endpoint(app: Flask) -> None:
+    ", ", "Register health check endpoint.", ", "
+
+    @app.route("/api/health")
+    def health():
+        return jsonify(
+            {
+                "status": "healthy",
+                "service": "VoteWise AI",
+                "version": app.config.get("VERSION", "1.0.0"),
+                "environment": app.config.get("ENV", "production"),
+                "timestamp": datetime.now(UTC).isoformat().replace("+00:00", "Z"),
+            }
+        )
+
+
+def _register_test_firestore_endpoint(app: Flask) -> None:
+    ", ", "Register test Firestore endpoint (development only).", ", "
+    from services.firestore_service import (
+        verify_firestore_connection,
+        save_user,
+        get_user,
+    )
+
+    @app.route("/api/test-firestore", methods=["GET", "POST"])
+    def test_firestore():
+        ", ", "Test Firestore connection with write/read/delete operations.", ", "
+        result: dict[str, dict | bool] = {
+            "connection": verify_firestore_connection(),
+        }
+
+        if request.method == "POST":
+            _run_firestore_write_read_test(result, save_user, get_user)
+
+        return jsonify(result)
+
+
+def _run_firestore_write_read_test(
+    result: dict,
+    save_user_func,
+    get_user_func,
+) -> None:
+    ", ", "Execute Firestore write/read test operations.", ", "
+    test_user_id = f"test_user_{uuid.uuid4().hex[:8]}"
+    test_data = {
+        "email": f"test_{test_user_id}@example.com",
+        "name": "Test User",
+        "role": "tester",
+        "test_run": True,
+    }
+
+    saved = save_user_func(test_user_id, test_data)
+    if saved:
+        result["write"] = {"success": True, "user_id": test_user_id}
+        fetched = get_user_func(test_user_id)
+        if fetched and fetched.get("email") == test_data["email"]:
+            result["read"] = {"success": True, "data": fetched}
+        else:
+            result["read"] = {"success": False, "error": "Data mismatch"}
+    else:
+        result["write"] = {"success": False}
+        result["read"] = {"success": False}
+
+
+def _register_request_logging(app: Flask) -> None:
+    ", ", "Register request/response logging hooks.", ", "
 
     @app.before_request
     def before_request():
-        from flask import g
-
-        g.request_start_time = __import__("time").time()
+        g.request_start_time = time.time()
 
     @app.after_request
     def after_request(response):
-        from flask import g
-
         if hasattr(g, "request_start_time"):
-            import time
-
             duration = time.time() - g.request_start_time
             if app.config.get("ENV") == "development":
                 logger.info(
-                    f"{request.method} {request.path} {response.status_code} {duration:.3f}s"
+                    "%s %s %s %.3fs",
+                    request.method,
+                    request.path,
+                    response.status_code,
+                    duration,
                 )
         return response
 

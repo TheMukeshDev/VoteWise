@@ -108,7 +108,7 @@ class TestAnalyticsService:
 
 class TestLoggingService:
     def test_init_logging(self):
-        """Test logging initialization - tests it can be called."""
+        ", ", "Test logging initialization - tests it can be called.", ", "
         service = LoggingService()
         assert service.logger is not None or service.logger is None
 

@@ -1,11 +1,11 @@
-"""
+", ", "
 FAQ Service for VoteWise AI
 
 Real Firestore CRUD operations for FAQs with caching.
-"""
+", ", "
 
 from firebase_admin import firestore
-from typing import Optional, List, Dict, Any
+from typing import Optional, Any
 
 from services.cache_service import (
     get_cached,
@@ -14,33 +14,34 @@ from services.cache_service import (
     CACHE_KEYS,
     TTL_VALUES,
 )
+from utils.constants import SUPPORTED_LANGUAGES, FAQ_CATEGORIES
 
 
 class FAQService:
-    """Service for FAQ CRUD operations in Firestore."""
+    ", ", "Service for FAQ CRUD operations in Firestore.", ", "
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._db = None
 
     @property
     def db(self):
-        """Get Firestore client."""
+        ", ", "Get Firestore client.", ", "
         if not self._db:
             try:
                 self._db = firestore.client()
-            except Exception:
+            except (RuntimeError, ConnectionError, ValueError):
                 return None
         return self._db
 
     def _get_collection(self):
-        """Get FAQs collection reference."""
+        ", ", "Get FAQs collection reference.", ", "
         return self.db.collection("faqs") if self.db else None
 
     def get_all(
         self, category: Optional[str] = None, language: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """Get all FAQs from Firestore with caching."""
-        cache_key = f"{CACHE_KEYS['faqs']}:{category}:{language}"
+    ) -> list[dict[str, Any]]:
+        ", ", "Get all FAQs from Firestore with caching.", ", "
+        cache_key: str = f"{CACHE_KEYS['faqs']}:{category}:{language}"
         cached = get_cached(cache_key)
         if cached is not None:
             return cached
@@ -57,26 +58,26 @@ class FAQService:
         page: int = 1,
         limit: int = 20,
     ) -> tuple:
-        """Get FAQs with pagination."""
-        all_faqs = self._get_all_no_cache(category, language)
-        total = len(all_faqs) if all_faqs else 0
-        start = (page - 1) * limit
-        end = start + limit
+        ", ", "Get FAQs with pagination.", ", "
+        all_faqs: list[dict[str, Any]] = self._get_all_no_cache(category, language)
+        total: int = len(all_faqs) if all_faqs else 0
+        start: int = (page - 1) * limit
+        end: int = start + limit
         return (all_faqs[start:end] if all_faqs else [], total)
 
     def _get_all_no_cache(
         self, category: Optional[str] = None, language: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
-        """Get all FAQs without caching."""
+    ) -> list[dict[str, Any]]:
+        ", ", "Get all FAQs without caching.", ", "
         coll = self._get_collection()
         if not coll:
             return []
 
         try:
             docs = coll.stream()
-            results = []
+            results: list[dict[str, Any]] = []
             for doc in docs:
-                data = doc.to_dict()
+                data: dict[str, Any] = doc.to_dict()
                 if data and data.get("is_published"):
                     if category and data.get("category") != category:
                         continue
@@ -84,11 +85,11 @@ class FAQService:
                         continue
                     results.append({"id": doc.id, **data})
             return results
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return []
 
-    def get_by_id(self, faq_id: str) -> Optional[Dict[str, Any]]:
-        """Get a specific FAQ by ID."""
+    def get_by_id(self, faq_id: str) -> Optional[dict[str, Any]]:
+        ", ", "Get a specific FAQ by ID.", ", "
         coll = self._get_collection()
         if not coll:
             return None
@@ -98,7 +99,7 @@ class FAQService:
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return None
 
     def create(
@@ -108,8 +109,8 @@ class FAQService:
         category: str = "general",
         language: str = "en",
         is_published: bool = True,
-    ) -> Optional[Dict[str, Any]]:
-        """Create a new FAQ and invalidate cache."""
+    ) -> Optional[dict[str, Any]]:
+        ", ", "Create a new FAQ and invalidate cache.", ", "
         coll = self._get_collection()
         if not coll:
             return None
@@ -130,16 +131,16 @@ class FAQService:
             )
 
             # Invalidate FAQ cache on create
-            for lang in ["en", "hi", "kn", "ta"]:
-                for cat in [None, "general", "registration", "voting"]:
+            for lang in SUPPORTED_LANGUAGES:
+                for cat in FAQ_CATEGORIES:
                     delete_cached(f"{CACHE_KEYS['faqs']}:{cat}:{lang}")
 
             return {"id": doc_ref.id}
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return None
 
-    def update(self, faq_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-        """Update an FAQ."""
+    def update(self, faq_id: str, data: dict[str, Any]) -> Optional[dict[str, Any]]:
+        ", ", "Update an FAQ.", ", "
         coll = self._get_collection()
         if not coll:
             return None
@@ -149,16 +150,16 @@ class FAQService:
             coll.document(faq_id).update(data)
 
             # Invalidate cache
-            for lang in ["en", "hi", "kn", "ta"]:
-                for cat in [None, "general", "registration", "voting"]:
+            for lang in SUPPORTED_LANGUAGES:
+                for cat in FAQ_CATEGORIES:
                     delete_cached(f"{CACHE_KEYS['faqs']}:{cat}:{lang}")
 
             return self.get_by_id(faq_id)
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return None
 
     def delete(self, faq_id: str, soft: bool = True) -> bool:
-        """Delete an FAQ (soft delete by default)."""
+        ", ", "Delete an FAQ (soft delete by default).", ", "
         coll = self._get_collection()
         if not coll:
             return False
@@ -171,13 +172,13 @@ class FAQService:
                 doc_ref.delete()
 
             # Invalidate cache
-            for lang in ["en", "hi", "kn", "ta"]:
-                for cat in [None, "general", "registration", "voting"]:
+            for lang in SUPPORTED_LANGUAGES:
+                for cat in FAQ_CATEGORIES:
                     delete_cached(f"{CACHE_KEYS['faqs']}:{cat}:{lang}")
 
             return True
-        except Exception:
+        except (RuntimeError, ConnectionError, ValueError):
             return False
 
 
-faq_service = FAQService()
+faq_service: FAQService = FAQService()

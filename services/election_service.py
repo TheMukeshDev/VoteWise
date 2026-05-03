@@ -1,3 +1,6 @@
+", ", "Election Service for VoteWise AI", ", "
+
+from typing import  Any
 from services.firestore_service import (
     get_election_process_data,
     get_faqs_data,
@@ -5,12 +8,12 @@ from services.firestore_service import (
 )
 
 
-def get_election_process():
-    """
+def get_election_process() -> list[dict[str, Any]]:
+    ", ", "
     Returns the step-by-step election process.
     If Firestore is empty/unavailable, return fallback data.
-    """
-    data = get_election_process_data()
+    ", ", "
+    data: list[dict[str, Any]] = get_election_process_data()
     if not data:
         return [
             {
@@ -42,8 +45,9 @@ def get_election_process():
     return data
 
 
-def get_faqs():
-    data = get_faqs_data()
+def get_faqs() -> list[dict[str, Any]]:
+    ", ", "Get FAQs from Firestore or return fallback data.", ", "
+    data: list[dict[str, Any]] = get_faqs_data()
     if not data:
         return [
             {
@@ -58,8 +62,9 @@ def get_faqs():
     return data
 
 
-def get_timeline():
-    data = get_timeline_data()
+def get_timeline() -> list[dict[str, Any]]:
+    ", ", "Get timeline data from Firestore or return fallback data.", ", "
+    data: list[dict[str, Any]] = get_timeline_data()
     if not data:
         return [
             {"date": "2024-03-01", "event": "Voter Registration Deadline"},

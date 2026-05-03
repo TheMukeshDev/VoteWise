@@ -1,24 +1,25 @@
-"""
+", ", "
 API Documentation for VoteWise AI
 
 OpenAPI/Swagger documentation for all endpoints.
-"""
+", ", "
 
 from flask import Blueprint, jsonify, render_template
+from typing import Any
 
 docs_bp = Blueprint("docs", __name__)
 
 
 @docs_bp.route("/docs")
-def api_docs():
-    """Render OpenAPI documentation UI."""
+def api_docs() -> tuple:
+    ", ", "Render OpenAPI documentation UI.", ", "
     return render_template("docs.html")
 
 
 @docs_bp.route("/openapi.json")
-def openapi_spec():
-    """Return OpenAPI 3.0 specification."""
-    spec = {
+def openapi_spec() -> tuple:
+    ", ", "Return OpenAPI 3.0 specification.", ", "
+    spec: dict[str, Any] = {
         "openapi": "3.0.3",
         "info": {
             "title": "VoteWise AI API",
