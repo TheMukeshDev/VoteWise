@@ -21,9 +21,7 @@ def _get_firebase_admin_json() -> dict[str, Any] | None:
             return json.loads(firebase_json_str)
         except json.JSONDecodeError as e:
             logger.error("FIREBASE_ADMIN_JSON is not valid JSON")
-            raise ValueError(
-                "FIREBASE_ADMIN_JSON environment variable is not valid JSON"
-            ) from e
+            raise ValueError("FIREBASE_ADMIN_JSON environment variable is not valid JSON") from e
 
     private_key = os.environ.get("FIREBASE_PRIVATE_KEY")
     if private_key:
@@ -58,9 +56,7 @@ class Config:
     """Base configuration."""
 
     SECRET_KEY = os.environ.get("SECRET_KEY") or (
-        "dev-only-insecure-key-do-not-use-in-prod"
-        if os.environ.get("FLASK_ENV") != "production"
-        else None
+        "dev-only-insecure-key-do-not-use-in-prod" if os.environ.get("FLASK_ENV") != "production" else None
     )
     if not SECRET_KEY and os.environ.get("FLASK_ENV") == "production":
         raise ValueError("SECRET_KEY environment variable must be set in production")

@@ -55,14 +55,10 @@ def create_polling_guidance() -> tuple:
     """Create a new polling guidance (admin only)."""
     data: dict[str, Any] = request.get_json() or {}
 
-    is_valid, missing = validate_required_fields(
-        data, ["region", "title", "description"]
-    )
+    is_valid, missing = validate_required_fields(data, ["region", "title", "description"])
     if not is_valid:
         return (
-            jsonify(
-                error_response(f"Missing required fields: {', '.join(missing)}", 400)
-            ),
+            jsonify(error_response(f"Missing required fields: {', '.join(missing)}", 400)),
             400,
         )
 
@@ -75,11 +71,7 @@ def create_polling_guidance() -> tuple:
     )
 
     return (
-        jsonify(
-            success_response(
-                message="Polling guidance created successfully", data=guidance
-            )
-        ),
+        jsonify(success_response(message="Polling guidance created successfully", data=guidance)),
         201,
     )
 
@@ -90,19 +82,13 @@ def update_polling_guidance(guidance_id: str) -> tuple:
     """Update a polling guidance (admin only)."""
     data: dict[str, Any] = request.get_json() or {}
 
-    guidance: Optional[dict[str, Any]] = polling_guidance_service.update(
-        guidance_id, data
-    )
+    guidance: Optional[dict[str, Any]] = polling_guidance_service.update(guidance_id, data)
 
     if not guidance:
         return jsonify(error_response("Polling guidance not found", 404)), 404
 
     return (
-        jsonify(
-            success_response(
-                message="Polling guidance updated successfully", data=guidance
-            )
-        ),
+        jsonify(success_response(message="Polling guidance updated successfully", data=guidance)),
         200,
     )
 

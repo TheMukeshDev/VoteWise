@@ -23,9 +23,7 @@ class TestSaveUserUpdated:
 
     def test_save_user_no_db(self):
         """Test save_user with no database."""
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             from services.firestore_service import save_user
 
             result = save_user("user1", {"name": "Test"})
@@ -79,9 +77,7 @@ class TestGetUserUpdated:
 
     def test_get_user_no_db(self):
         """Test get_user with no database."""
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             from services.firestore_service import get_user
 
             result = get_user("user1")
@@ -111,8 +107,7 @@ class TestCreateOrUpdateUserProfileUpdated:
             ]
             mock_get_db.return_value = db_mock
 
-            from services.firestore_service import \
-                create_or_update_user_profile
+            from services.firestore_service import create_or_update_user_profile
 
             result = create_or_update_user_profile(
                 firebase_uid="user1",
@@ -135,8 +130,7 @@ class TestCreateOrUpdateUserProfileUpdated:
             db_mock.collection().document().get.return_value = doc_mock
             mock_get_db.return_value = db_mock
 
-            from services.firestore_service import \
-                create_or_update_user_profile
+            from services.firestore_service import create_or_update_user_profile
 
             result = create_or_update_user_profile(
                 firebase_uid="user1",
@@ -148,15 +142,10 @@ class TestCreateOrUpdateUserProfileUpdated:
 
     def test_no_db(self):
         """Test with no database available."""
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
-            from services.firestore_service import \
-                create_or_update_user_profile
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
+            from services.firestore_service import create_or_update_user_profile
 
-            result = create_or_update_user_profile(
-                firebase_uid="user1", email="test@example.com"
-            )
+            result = create_or_update_user_profile(firebase_uid="user1", email="test@example.com")
             assert result is None
 
 
@@ -169,9 +158,7 @@ class TestReminderOperationsUpdated:
             db_mock = MagicMock()
             doc_ref_mock = MagicMock()
             doc_ref_mock.id = "reminder1"
-            db_mock.collection().document().collection().document.return_value = (
-                doc_ref_mock
-            )
+            db_mock.collection().document().collection().document.return_value = doc_ref_mock
             mock_get_db.return_value = db_mock
 
             from services.firestore_service import save_reminder
@@ -182,9 +169,7 @@ class TestReminderOperationsUpdated:
 
     def test_save_reminder_no_db(self):
         """Test save_reminder with no database."""
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             from services.firestore_service import save_reminder
 
             result = save_reminder("user1", {"title": "Test"})
@@ -200,9 +185,7 @@ class TestBookmarkOperationsUpdated:
             db_mock = MagicMock()
             doc_ref_mock = MagicMock()
             doc_ref_mock.id = "bookmark1"
-            db_mock.collection().document().collection().document.return_value = (
-                doc_ref_mock
-            )
+            db_mock.collection().document().collection().document.return_value = doc_ref_mock
             mock_get_db.return_value = db_mock
 
             from services.firestore_service import save_bookmark
@@ -218,9 +201,7 @@ class TestBookmarkOperationsUpdated:
             doc_mock = MagicMock()
             doc_mock.id = "bm1"
             doc_mock.to_dict.return_value = {"resource_type": "faq"}
-            db_mock.collection().document().collection().stream.return_value = [
-                doc_mock
-            ]
+            db_mock.collection().document().collection().stream.return_value = [doc_mock]
             mock_get_db.return_value = db_mock
 
             from services.firestore_service import get_bookmarks

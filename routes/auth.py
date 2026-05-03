@@ -18,9 +18,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from config import Config
-from middleware.auth_middleware import (check_rate_limit, generate_tokens,
-                                        rate_limit_key_func,
-                                        verify_firebase_token)
+from middleware.auth_middleware import check_rate_limit, generate_tokens, rate_limit_key_func, verify_firebase_token
 from services.auth_service import user_profile_service
 from utils.response import error_response, success_response
 
@@ -116,21 +114,13 @@ def register():
 
         profile_data = data.get("profile", {})
         profile_data["email"] = email
-        profile_data["full_name"] = profile_data.get(
-            "full_name", decoded_token.get("name")
-        )
+        profile_data["full_name"] = profile_data.get("full_name", decoded_token.get("name"))
 
-        user_profile_service.create_user_profile(
-            user_id=user_id, email=email or ", ", data=profile_data
-        )
+        user_profile_service.create_user_profile(user_id=user_id, email=email or ", ", data=profile_data)
         profile = user_profile_service.get_user_profile(user_id)
 
         return (
-            jsonify(
-                success_response(
-                    message="Registration successful", data={"user": profile}
-                )
-            ),
+            jsonify(success_response(message="Registration successful", data={"user": profile})),
             201,
         )
 
@@ -297,9 +287,7 @@ def admin_login():
     """Admin login endpoint. Rate limited: 5 attempts per minute."""
     rate_key = f"admin_login:{rate_limit_key_func()}"
     if not check_rate_limit(rate_key, max_requests=5, window_seconds=60):
-        logger.warning(
-            "Rate limit exceeded for admin login from %s", request.remote_addr
-        )
+        logger.warning("Rate limit exceeded for admin login from %s", request.remote_addr)
         return jsonify(error_response("Too many attempts. Try again later.", 429)), 429
 
     try:
@@ -313,18 +301,11 @@ def admin_login():
         if not admin_email or not admin_password:
             return jsonify(error_response("Admin not configured", 500)), 500
 
-        if not secrets.compare_digest(
-            email.encode("utf-8"), admin_email.lower().encode("utf-8")
-        ):
+        if not secrets.compare_digest(email.encode("utf-8"), admin_email.lower().encode("utf-8")):
             logger.warning("Failed admin login attempt for email: %s", email)
             return jsonify(error_response("Invalid admin credentials", 401)), 401
 
-        if (
-            not secrets.compare_digest(
-                password.encode("utf-8"), admin_password.encode("utf-8")
-            )
-            or not password
-        ):
+        if not secrets.compare_digest(password.encode("utf-8"), admin_password.encode("utf-8")) or not password:
             logger.warning("Failed admin login attempt for email: %s", email)
             return jsonify(error_response("Invalid admin credentials", 401)), 401
 

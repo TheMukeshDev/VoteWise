@@ -19,9 +19,7 @@ def success_response(
     return response
 
 
-def error_response(
-    message: str = "Error", code: int = 500, errors: list | None = None
-) -> dict[str, Any]:
+def error_response(message: str = "Error", code: int = 500, errors: list | None = None) -> dict[str, Any]:
     """Create a standardized error response."""
     response: dict[str, Any] = {"success": False, "message": message}
     if errors:

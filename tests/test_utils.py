@@ -2,13 +2,24 @@ import json
 import logging
 from unittest.mock import MagicMock, patch
 
-from utils.logging_config import (JSONFormatter, StandardFormatter,
-                                  log_admin_action, log_integration_failure,
-                                  log_request, setup_logging)
+from utils.logging_config import (
+    JSONFormatter,
+    StandardFormatter,
+    log_admin_action,
+    log_integration_failure,
+    log_request,
+    setup_logging,
+)
 from utils.response import error_response, paginated_response, success_response
-from utils.validators import (sanitize_string, validate_email, validate_faq_id,
-                              validate_password, validate_required_fields,
-                              validate_timeline_id, validate_user_id)
+from utils.validators import (
+    sanitize_string,
+    validate_email,
+    validate_faq_id,
+    validate_password,
+    validate_required_fields,
+    validate_timeline_id,
+    validate_user_id,
+)
 
 
 class TestResponseUtils:
@@ -32,9 +43,7 @@ class TestResponseUtils:
         assert res["success"] is False
 
     def test_paginated_response(self):
-        res = paginated_response(
-            items=[{"id": 1}, {"id": 2}], page=1, per_page=10, total=2
-        )
+        res = paginated_response(items=[{"id": 1}, {"id": 2}], page=1, per_page=10, total=2)
         assert res["success"] is True
         assert res["data"] == [{"id": 1}, {"id": 2}]
         assert res["pagination"]["page"] == 1
@@ -101,9 +110,7 @@ class TestLoggingConfig:
         except (RuntimeError, ConnectionError, ValueError):
             import sys
 
-            record_exc = logging.LogRecord(
-                "test", logging.ERROR, "path", 1, "error msg", None, sys.exc_info()
-            )
+            record_exc = logging.LogRecord("test", logging.ERROR, "path", 1, "error msg", None, sys.exc_info())
             res_str_exc = formatter.format(record_exc)
             res_exc = json.loads(res_str_exc)
             assert "exception" in res_exc

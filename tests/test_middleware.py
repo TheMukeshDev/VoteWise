@@ -3,12 +3,18 @@ from unittest.mock import MagicMock, patch
 import pytest
 from flask import Flask, jsonify
 
-from middleware.auth_middleware import (AuthMiddleware, check_rate_limit,
-                                        generate_tokens, get_current_user,
-                                        get_current_user_role, require_admin,
-                                        require_auth, require_voter,
-                                        setup_auth_middleware,
-                                        verify_firebase_token)
+from middleware.auth_middleware import (
+    AuthMiddleware,
+    check_rate_limit,
+    generate_tokens,
+    get_current_user,
+    get_current_user_role,
+    require_admin,
+    require_auth,
+    require_voter,
+    setup_auth_middleware,
+    verify_firebase_token,
+)
 
 
 class TestAuthMiddleware:
@@ -105,9 +111,7 @@ class TestDecorators:
             "email": "admin@votewise.ai",
         }  # default is empty
 
-        with patch(
-            "middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", "admin@votewise.ai"
-        ):
+        with patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL", "admin@votewise.ai"):
             with app.test_client() as client:
                 res = client.get("/admin")
                 assert res.status_code == 200

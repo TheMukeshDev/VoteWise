@@ -21,9 +21,7 @@ def get_timelines() -> tuple:
         election_type: Optional[str] = request.args.get("election_type")
         status: Optional[str] = request.args.get("status")
 
-        timelines: list[dict[str, Any]] = timeline_service.get_all(
-            election_type=election_type, status=status
-        )
+        timelines: list[dict[str, Any]] = timeline_service.get_all(election_type=election_type, status=status)
         return jsonify(success_response(data=timelines)), 200
 
     except (RuntimeError, ConnectionError, ValueError) as e:

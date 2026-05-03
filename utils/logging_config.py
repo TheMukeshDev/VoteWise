@@ -41,21 +41,11 @@ class StandardFormatter(logging.Formatter):
     reset = "\x1b[0m"
 
     FORMATS = {
-        logging.DEBUG: grey
-        + "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        + reset,
-        logging.INFO: blue
-        + "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        + reset,
-        logging.WARNING: yellow
-        + "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        + reset,
-        logging.ERROR: red
-        + "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        + reset,
-        logging.CRITICAL: red
-        + "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
-        + reset,
+        logging.DEBUG: grey + "%(asctime)s - %(name)s - %(levelname)s - %(message)s" + reset,
+        logging.INFO: blue + "%(asctime)s - %(name)s - %(levelname)s - %(message)s" + reset,
+        logging.WARNING: yellow + "%(asctime)s - %(name)s - %(levelname)s - %(message)s" + reset,
+        logging.ERROR: red + "%(asctime)s - %(name)s - %(levelname)s - %(message)s" + reset,
+        logging.CRITICAL: red + "%(asctime)s - %(name)s - %(levelname)s - %(message)s" + reset,
     }
 
     def format(self, record):

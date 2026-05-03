@@ -214,8 +214,7 @@ class TestDataModelsFull:
         assert d["metric_type"] == "page_view"
 
     def test_enums(self):
-        from models.data_models import (AnnouncementPriority, ReminderStatus,
-                                        ReminderType, ResourceType, UserRole)
+        from models.data_models import AnnouncementPriority, ReminderStatus, ReminderType, ResourceType, UserRole
 
         assert UserRole.VOTER.value == "voter"
         assert UserRole.ADMIN.value == "admin"
@@ -508,9 +507,7 @@ class TestBookmarkRoutesFull:
         assert r.status_code == 400
 
     def test_save_bookmark_invalid_resource_type(self, client):
-        r = client.post(
-            "/api/user/bookmarks", json={"resource_type": "invalid", "resource_id": "x"}
-        )
+        r = client.post("/api/user/bookmarks", json={"resource_type": "invalid", "resource_id": "x"})
         assert r.status_code == 400
 
     def test_save_bookmark_already_exists(self, client):
@@ -563,9 +560,7 @@ class TestChatRoutesFull:
         assert r.status_code == 200
 
     def test_chat_with_user_prefs(self, client):
-        r = client.post(
-            "/api/chat/chat", json={"message": "hello", "user_prefs": {"state": "KA"}}
-        )
+        r = client.post("/api/chat/chat", json={"message": "hello", "user_prefs": {"state": "KA"}})
         assert r.status_code == 200
 
     def test_chat_health(self, client):
@@ -590,9 +585,7 @@ class TestReminderRoutes:
     def test_create_reminder(self, client):
         with patch("routes.reminder.save_reminder_to_db") as mock_sr:
             mock_sr.return_value = "r1"
-            r = client.post(
-                "/api/reminders", json={"title": "Vote", "reminder_date": "2026-05-01"}
-            )
+            r = client.post("/api/reminders", json={"title": "Vote", "reminder_date": "2026-05-01"})
             assert r.status_code == 201
 
     def test_create_reminder_missing_title(self, client):
@@ -749,9 +742,7 @@ class TestGoogleServicesHubFull:
 
         hub = GoogleServicesHub()
         hub.translate = MagicMock()
-        hub.translate.get_supported_languages.return_value = [
-            {"code": "en", "name": "English"}
-        ]
+        hub.translate.get_supported_languages.return_value = [{"code": "en", "name": "English"}]
         result = hub.get_supported_languages()
         assert len(result) > 0
 
@@ -893,9 +884,7 @@ class TestConfigFull:
         ]
         origs = {k: os.environ.get(k) for k in keys}
         try:
-            os.environ["FIREBASE_PRIVATE_KEY"] = (
-                "-----BEGIN RSA PRIVATE KEY-----\ntest\n-----END RSA PRIVATE KEY-----"
-            )
+            os.environ["FIREBASE_PRIVATE_KEY"] = "-----BEGIN RSA PRIVATE KEY-----\ntest\n-----END RSA PRIVATE KEY-----"
             os.environ["FIREBASE_PROJECT_ID"] = "test-project"
             os.environ["FIREBASE_CLIENT_EMAIL"] = "test@test.iam.gserviceaccount.com"
             os.environ["FIREBASE_PRIVATE_KEY_ID"] = "key123"
@@ -974,9 +963,7 @@ class TestAuthRoutesFull:
                 }
                 mock_ups.create_user_profile.return_value = True
                 mock_ups.update_last_login.return_value = True
-                r = client.post(
-                    "/api/auth/google-signin", json={"id_token": "google-token"}
-                )
+                r = client.post("/api/auth/google-signin", json={"id_token": "google-token"})
                 assert r.status_code == 200
 
     def test_google_signin_profile_creation(self, client):
@@ -990,9 +977,7 @@ class TestAuthRoutesFull:
                 mock_ups.get_user_profile.side_effect = [None, {"uid": "u2"}]
                 mock_ups.create_user_profile.return_value = True
                 mock_ups.update_last_login.return_value = True
-                r = client.post(
-                    "/api/auth/google-signin", json={"id_token": "google-token"}
-                )
+                r = client.post("/api/auth/google-signin", json={"id_token": "google-token"})
                 assert r.status_code == 200
 
     def test_google_signin_missing_token(self, client):
@@ -1104,9 +1089,7 @@ class TestAuthRoutesFull:
 
     def test_admin_login_not_configured(self, client):
         with patch("config.Config.ADMIN_EMAIL", None):
-            r = client.post(
-                "/api/auth/admin/login", json={"email": "a@t.com", "password": "x"}
-            )
+            r = client.post("/api/auth/admin/login", json={"email": "a@t.com", "password": "x"})
             assert r.status_code == 500
 
     def test_refresh_token(self, client):
@@ -1578,9 +1561,7 @@ class TestElectionServiceFull:
     def test_get_election_process(self):
         from services.election_service import get_election_process
 
-        with patch(
-            "services.election_service.get_election_process_data", return_value=[]
-        ):
+        with patch("services.election_service.get_election_process_data", return_value=[]):
             result = get_election_process()
             assert len(result) > 0
 
@@ -1604,9 +1585,7 @@ class TestElectionServiceFull:
     def test_get_faqs_with_data(self):
         from services.election_service import get_faqs
 
-        with patch(
-            "services.election_service.get_faqs_data", return_value=[{"q": "A?"}]
-        ):
+        with patch("services.election_service.get_faqs_data", return_value=[{"q": "A?"}]):
             result = get_faqs()
             assert result == [{"q": "A?"}]
 
@@ -1636,9 +1615,7 @@ class TestFirestoreServiceFull:
 
         mock_db = MagicMock()
         mock_db.collection().document().set.side_effect = RuntimeError("err")
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=mock_db
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=mock_db):
             result = save_user("u1", {"name": "Test"})
             assert result is None
 
@@ -1647,9 +1624,7 @@ class TestFirestoreServiceFull:
 
         mock_db = MagicMock()
         mock_db.collection().document().get.side_effect = RuntimeError("err")
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=mock_db
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=mock_db):
             result = get_user("u1")
             assert result is None
 
@@ -1658,9 +1633,7 @@ class TestFirestoreServiceFull:
 
         mock_db = MagicMock()
         mock_db.collection().document().get.side_effect = RuntimeError("err")
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=mock_db
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=mock_db):
             result = create_or_update_user_profile("u1", "t@t.com")
             assert result is None
 
@@ -1672,9 +1645,7 @@ class TestPollingGuidanceServiceFull:
         from services.polling_guidance_service import PollingGuidanceService
 
         svc = PollingGuidanceService()
-        with patch.object(
-            type(svc), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(svc), "db", new_callable=lambda: property(lambda self: None)):
             result = svc.get_all()
             assert result == []
 
@@ -2015,9 +1986,7 @@ class TestUserRoutes:
     def test_update_profile_role_stripped(self, client):
         with patch("routes.user.save_user", return_value="u1"):
             with patch("routes.user.get_user", return_value={"uid": "u1"}):
-                r = client.put(
-                    "/api/user/profile", json={"role": "admin", "uid": "fake"}
-                )
+                r = client.put("/api/user/profile", json={"role": "admin", "uid": "fake"})
                 assert r.status_code == 200
 
     def test_update_profile_save_fails(self, client):
@@ -2212,9 +2181,7 @@ class TestBaseServiceFull:
             collection_name = "test"
 
         svc = TestService()
-        with patch.object(
-            type(svc), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(svc), "db", new_callable=lambda: property(lambda self: None)):
             result = svc.db
             assert result is None
 
@@ -2225,9 +2192,7 @@ class TestBaseServiceFull:
             collection_name = "test"
 
         svc = TestService()
-        with patch.object(
-            type(svc), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(svc), "db", new_callable=lambda: property(lambda self: None)):
             assert svc._get_collection() is None
 
     def test_get_all_no_collection(self):
@@ -2237,9 +2202,7 @@ class TestBaseServiceFull:
             collection_name = "test"
 
         svc = TestService()
-        with patch.object(
-            type(svc), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(svc), "db", new_callable=lambda: property(lambda self: None)):
             assert svc.get_all() == []
 
     def test_get_all_with_filters(self):
@@ -2270,9 +2233,7 @@ class TestBaseServiceFull:
             collection_name = "test"
 
         svc = TestService()
-        with patch.object(
-            type(svc), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(svc), "db", new_callable=lambda: property(lambda self: None)):
             assert svc._get_all_fallback() == []
 
     def test_fallback_exception(self):
@@ -2329,9 +2290,7 @@ class TestBaseServiceFull:
             collection_name = "test"
 
         svc = TestService()
-        with patch.object(
-            type(svc), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(svc), "db", new_callable=lambda: property(lambda self: None)):
             assert svc.get_by_id("x") is None
 
     def test_create_no_collection(self):
@@ -2341,9 +2300,7 @@ class TestBaseServiceFull:
             collection_name = "test"
 
         svc = TestService()
-        with patch.object(
-            type(svc), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(svc), "db", new_callable=lambda: property(lambda self: None)):
             assert svc.create({"name": "test"}) is None
 
     def test_update_no_collection(self):
@@ -2353,9 +2310,7 @@ class TestBaseServiceFull:
             collection_name = "test"
 
         svc = TestService()
-        with patch.object(
-            type(svc), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(svc), "db", new_callable=lambda: property(lambda self: None)):
             assert svc.update("x", {"name": "test"}) is None
 
     def test_delete_no_collection(self):
@@ -2365,9 +2320,7 @@ class TestBaseServiceFull:
             collection_name = "test"
 
         svc = TestService()
-        with patch.object(
-            type(svc), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(svc), "db", new_callable=lambda: property(lambda self: None)):
             assert svc.delete("x") is False
 
     def test_get_all_for_admin_no_collection(self):
@@ -2377,9 +2330,7 @@ class TestBaseServiceFull:
             collection_name = "test"
 
         svc = TestService()
-        with patch.object(
-            type(svc), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(svc), "db", new_callable=lambda: property(lambda self: None)):
             assert svc.get_all_for_admin() == []
 
     def test_get_all_for_admin_exception(self):
@@ -2497,9 +2448,7 @@ class TestDataAccessLayerFull:
 
         db = FirestoreDB()
         db._initialized = True
-        with patch(
-            "firebase_admin.firestore.client", side_effect=ConnectionError("err")
-        ):
+        with patch("firebase_admin.firestore.client", side_effect=ConnectionError("err")):
             result = db.db
             assert result is None
 
@@ -2716,9 +2665,7 @@ class TestDataAccessLayerFull:
         db = FirestoreDB()
         db._initialized = True
         mock_db = MagicMock()
-        mock_db.collection().document().collection().stream.side_effect = Exception(
-            "err"
-        )
+        mock_db.collection().document().collection().stream.side_effect = Exception("err")
         with patch("firebase_admin.firestore.client", return_value=mock_db):
             assert db.get_user_reminders("u1") == []
 
@@ -2767,9 +2714,7 @@ class TestDataAccessLayerFull:
         db = FirestoreDB()
         db._initialized = True
         mock_db = MagicMock()
-        mock_db.collection().document().collection().stream.side_effect = Exception(
-            "err"
-        )
+        mock_db.collection().document().collection().stream.side_effect = Exception("err")
         with patch("firebase_admin.firestore.client", return_value=mock_db):
             assert db.get_user_bookmarks("u1") == []
 
@@ -2880,9 +2825,7 @@ class TestDataAccessLayerFull:
         db = FirestoreDB()
         db._initialized = True
         mock_db = MagicMock()
-        mock_db.collection().document().collection().document.side_effect = (
-            RuntimeError("err")
-        )
+        mock_db.collection().document().collection().document.side_effect = RuntimeError("err")
         with patch("firebase_admin.firestore.client", return_value=mock_db):
             assert db.create_or_update_preferences("u1", {"lang": "en"}) is False
 
@@ -2892,9 +2835,7 @@ class TestDataAccessLayerFull:
         db = FirestoreDB()
         db._initialized = True
         mock_db = MagicMock()
-        mock_db.collection().document().collection().document().get.side_effect = (
-            ValueError("err")
-        )
+        mock_db.collection().document().collection().document().get.side_effect = ValueError("err")
         with patch("firebase_admin.firestore.client", return_value=mock_db):
             assert db.get_preferences("u1") is None
 

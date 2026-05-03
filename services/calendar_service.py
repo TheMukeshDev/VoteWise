@@ -48,7 +48,7 @@ class CalendarService:
         summary: str,
         start_date: str,
         end_date: Optional[str] = None,
-        description: str = ", ",
+        description: str = "",
         location: str = ", ",
         reminder_type: str = "election",
     ) -> Optional[dict[str, Any]]:
@@ -70,14 +70,11 @@ class CalendarService:
             return self._create_local_reminder(summary, start_date, description)
 
         start_dt = self._parse_date(start_date)
-        end_dt = (
-            end_date and self._parse_date(end_date) or start_dt + timedelta(hours=4)
-        )
+        end_dt = end_date and self._parse_date(end_date) or start_dt + timedelta(hours=4)
 
         event = {
             "summary": summary,
-            "description": description
-            or f"Election reminder from VoteWise AI: {summary}",
+            "description": description or f"Election reminder from VoteWise AI: {summary}",
             "location": location,
             "start": {"dateTime": start_dt.isoformat(), "timeZone": "Asia/Kolkata"},
             "end": {"dateTime": end_dt.isoformat(), "timeZone": "Asia/Kolkata"},
@@ -131,9 +128,7 @@ class CalendarService:
             reminder_type="registration",
         )
 
-    def create_polling_reminder(
-        self, polling_date: str, booth_location: str = ", "
-    ) -> Optional[dict[str, Any]]:
+    def create_polling_reminder(self, polling_date: str, booth_location: str = ", ") -> Optional[dict[str, Any]]:
         """
         Create polling day reminder.
 
@@ -246,7 +241,7 @@ class CalendarService:
         summary: str,
         start_date: str,
         end_date: Optional[str] = None,
-        description: str = ", ",
+        description: str = "",
         location: str = ", ",
     ) -> str:
         """
@@ -263,9 +258,7 @@ class CalendarService:
             ICS file content string
         """
         start_dt = self._parse_date(start_date)
-        end_dt = (
-            end_date and self._parse_date(end_date) or start_dt + timedelta(hours=4)
-        )
+        end_dt = end_date and self._parse_date(end_date) or start_dt + timedelta(hours=4)
 
         ics = f"""BEGIN:VCALENDAR
 VERSION:2.0
@@ -315,9 +308,7 @@ END:VCALENDAR"""
         }
         return colors.get(reminder_type, "7")
 
-    def _create_local_reminder(
-        self, summary: str, start_date: str, description: str
-    ) -> dict[str, Any]:
+    def _create_local_reminder(self, summary: str, start_date: str, description: str) -> dict[str, Any]:
         """Create local reminder when API unavailable."""
         return {
             "kind": "calendar#event",
@@ -334,14 +325,10 @@ class LocalCalendarService:
     """Local calendar service for voters not using Google OAuth."""
 
     @staticmethod
-    def generate_voting_calendar(
-        title: str, date: str, reminder_type: str = "polling"
-    ) -> str:
+    def generate_voting_calendar(title: str, date: str, reminder_type: str = "polling") -> str:
         """Generate ICS for voter calendar."""
         service = CalendarService()
-        return service.generate_ics_file(
-            summary=title, start_date=date, description=f"VoteWise AI reminder: {title}"
-        )
+        return service.generate_ics_file(summary=title, start_date=date, description=f"VoteWise AI reminder: {title}")
 
 
 calendar_service = CalendarService()

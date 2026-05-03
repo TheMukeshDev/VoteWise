@@ -16,13 +16,17 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional
 
 from flask import g, jsonify, request
-from flask_jwt_extended import (JWTManager, create_access_token,
-                                create_refresh_token, get_jwt_identity,
-                                verify_jwt_in_request)
+from flask_jwt_extended import (
+    JWTManager,
+    create_access_token,
+    create_refresh_token,
+    get_jwt_identity,
+    verify_jwt_in_request,
+)
 
 from services.auth_service import firebase_auth_service, user_profile_service
 
-ALLOWED_ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL" "").lower()
+ALLOWED_ADMIN_EMAIL = os.environ.get("ADMIN_EMAIL", "").lower()
 
 jwt_manager = JWTManager()
 
@@ -70,9 +74,7 @@ def init_auth_middleware(app):
     @jwt_manager.invalid_token_loader
     def invalid_token_callback(error):
         return (
-            jsonify(
-                {"success": False, "message": "Invalid token", "error": "invalid_token"}
-            ),
+            jsonify({"success": False, "message": "Invalid token", "error": "invalid_token"}),
             401,
         )
 
@@ -114,9 +116,7 @@ def generate_tokens(user_id: str, role: str = "voter") -> Dict[str, str]:
     """
     additional_claims = {"role": role}
 
-    access_token = create_access_token(
-        identity={"user_id": user_id, "role": role}, additional_claims=additional_claims
-    )
+    access_token = create_access_token(identity={"user_id": user_id, "role": role}, additional_claims=additional_claims)
 
     refresh_token = create_refresh_token(identity={"user_id": user_id})
 
@@ -200,9 +200,7 @@ def require_role(allowed_roles: List[str]) -> Callable:
                         403,
                     )
 
-                user_profile = user_profile_service.get_user_profile(
-                    identity["user_id"]
-                )
+                user_profile = user_profile_service.get_user_profile(identity["user_id"])
                 g.current_user = user_profile
                 g.user_role = user_role
 
@@ -296,9 +294,7 @@ class AuthMiddleware:
         profile = self.profile_service.get_user_profile(user_id)
 
         if not profile:
-            self.profile_service.create_user_profile(
-                user_id=user_id, email=email, data={"email": email}
-            )
+            self.profile_service.create_user_profile(user_id=user_id, email=email, data={"email": email})
             profile = self.profile_service.get_user_profile(user_id)
 
         return profile

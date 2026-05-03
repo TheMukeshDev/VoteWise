@@ -7,9 +7,7 @@ from services.data_access_layer import FirestoreDB
 
 @pytest.fixture
 def mock_db_property():
-    with patch(
-        "services.data_access_layer.FirestoreDB.db", new_callable=PropertyMock
-    ) as mock_db:
+    with patch("services.data_access_layer.FirestoreDB.db", new_callable=PropertyMock) as mock_db:
         yield mock_db
 
 
@@ -219,9 +217,7 @@ class TestFirestoreDB:
         doc_mock.exists = True
         doc_mock.id = "rem1"
         doc_mock.to_dict.return_value = {"msg": "Hi"}
-        db_mock.collection().document().collection().document().get.return_value = (
-            doc_mock
-        )
+        db_mock.collection().document().collection().document().get.return_value = doc_mock
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
         assert dal.get_reminder("u1", "rem1")["msg"] == "Hi"
@@ -395,9 +391,7 @@ class TestFirestoreDB:
         doc_mock.exists = True
         doc_mock.id = "main"
         doc_mock.to_dict.return_value = {"p": "v"}
-        db_mock.collection().document().collection().document().get.return_value = (
-            doc_mock
-        )
+        db_mock.collection().document().collection().document().get.return_value = doc_mock
         mock_db_property.return_value = db_mock
         dal = FirestoreDB()
         assert dal.get_preferences("u1")["p"] == "v"

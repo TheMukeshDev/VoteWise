@@ -168,9 +168,7 @@ class FirestoreDB:
             logger.error("Database operation failed: %s", e)
             return None
 
-    def get_all_election_processes(
-        self, language: Optional[str] = None
-    ) -> list[dict[str, Any]]:
+    def get_all_election_processes(self, language: Optional[str] = None) -> list[dict[str, Any]]:
         """Get all election processes."""
         db = self.db
         if not db:
@@ -248,9 +246,7 @@ class FirestoreDB:
             logger.error("Database operation failed: %s", e)
             return None
 
-    def get_timelines(
-        self, election_type: Optional[str] = None, region: Optional[str] = None
-    ) -> list[dict[str, Any]]:
+    def get_timelines(self, election_type: Optional[str] = None, region: Optional[str] = None) -> list[dict[str, Any]]:
         """Get timelines with filters."""
         db = self.db
         if not db:
@@ -330,9 +326,7 @@ class FirestoreDB:
             logger.error("Database operation failed: %s", e)
             return None
 
-    def get_faqs(
-        self, category: Optional[str] = None, language: Optional[str] = None
-    ) -> list[dict[str, Any]]:
+    def get_faqs(self, category: Optional[str] = None, language: Optional[str] = None) -> list[dict[str, Any]]:
         """Get FAQs with filters."""
         db = self.db
         if not db:
@@ -381,9 +375,7 @@ class FirestoreDB:
     # REMINDERS COLLECTION (User subcollection)
     # ==========================================
 
-    def create_reminder(
-        self, user_id: str, reminder_id: str, data: dict[str, Any]
-    ) -> bool:
+    def create_reminder(self, user_id: str, reminder_id: str, data: dict[str, Any]) -> bool:
         """Create reminder for user."""
         db = self.db
         if not db:
@@ -393,9 +385,7 @@ class FirestoreDB:
         data["updated_at"] = firestore.SERVER_TIMESTAMP
 
         try:
-            db.collection("users").document(user_id).collection("reminders").document(
-                reminder_id
-            ).set(data)
+            db.collection("users").document(user_id).collection("reminders").document(reminder_id).set(data)
             return True
         except (RuntimeError, ConnectionError, ValueError) as e:
             logger.error("Database operation failed: %s", e)
@@ -408,13 +398,7 @@ class FirestoreDB:
             return None
 
         try:
-            doc = (
-                db.collection("users")
-                .document(user_id)
-                .collection("reminders")
-                .document(reminder_id)
-                .get()
-            )
+            doc = db.collection("users").document(user_id).collection("reminders").document(reminder_id).get()
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None
@@ -422,9 +406,7 @@ class FirestoreDB:
             logger.error("Database operation failed: %s", e)
             return None
 
-    def get_user_reminders(
-        self, user_id: str, status: Optional[str] = None
-    ) -> list[dict[str, Any]]:
+    def get_user_reminders(self, user_id: str, status: Optional[str] = None) -> list[dict[str, Any]]:
         """Get all reminders for a user."""
         db = self.db
         if not db:
@@ -439,9 +421,7 @@ class FirestoreDB:
         except (RuntimeError, ConnectionError, ValueError):
             return []
 
-    def update_reminder(
-        self, user_id: str, reminder_id: str, data: dict[str, Any]
-    ) -> bool:
+    def update_reminder(self, user_id: str, reminder_id: str, data: dict[str, Any]) -> bool:
         """Update reminder."""
         db = self.db
         if not db:
@@ -450,9 +430,7 @@ class FirestoreDB:
         data["updated_at"] = firestore.SERVER_TIMESTAMP
 
         try:
-            db.collection("users").document(user_id).collection("reminders").document(
-                reminder_id
-            ).update(data)
+            db.collection("users").document(user_id).collection("reminders").document(reminder_id).update(data)
             return True
         except (RuntimeError, ConnectionError, ValueError) as e:
             logger.error("Database operation failed: %s", e)
@@ -465,9 +443,7 @@ class FirestoreDB:
             return False
 
         try:
-            db.collection("users").document(user_id).collection("reminders").document(
-                reminder_id
-            ).delete()
+            db.collection("users").document(user_id).collection("reminders").document(reminder_id).delete()
             return True
         except (RuntimeError, ConnectionError, ValueError) as e:
             logger.error("Database operation failed: %s", e)
@@ -518,9 +494,7 @@ class FirestoreDB:
             query = db.collection("announcements").where("is_active", "==", True)
             if region:
                 query = query.where("region", "==", region)
-            docs = query.order_by(
-                "published_at", direction=firestore.Query.DESCENDING
-            ).stream()
+            docs = query.order_by("published_at", direction=firestore.Query.DESCENDING).stream()
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
         except (RuntimeError, ConnectionError, ValueError):
             return []
@@ -557,9 +531,7 @@ class FirestoreDB:
     # BOOKMARKS COLLECTION (User subcollection)
     # ==========================================
 
-    def create_bookmark(
-        self, user_id: str, bookmark_id: str, data: dict[str, Any]
-    ) -> bool:
+    def create_bookmark(self, user_id: str, bookmark_id: str, data: dict[str, Any]) -> bool:
         """Create bookmark for user."""
         db = self.db
         if not db:
@@ -568,9 +540,7 @@ class FirestoreDB:
         data["created_at"] = firestore.SERVER_TIMESTAMP
 
         try:
-            db.collection("users").document(user_id).collection("bookmarks").document(
-                bookmark_id
-            ).set(data)
+            db.collection("users").document(user_id).collection("bookmarks").document(bookmark_id).set(data)
             return True
         except (RuntimeError, ConnectionError, ValueError) as e:
             logger.error("Database operation failed: %s", e)
@@ -583,12 +553,7 @@ class FirestoreDB:
             return []
 
         try:
-            docs = (
-                db.collection("users")
-                .document(user_id)
-                .collection("bookmarks")
-                .stream()
-            )
+            docs = db.collection("users").document(user_id).collection("bookmarks").stream()
             return [{"id": doc.id, **doc.to_dict()} for doc in docs]
         except (RuntimeError, ConnectionError, ValueError):
             return []
@@ -600,9 +565,7 @@ class FirestoreDB:
             return False
 
         try:
-            db.collection("users").document(user_id).collection("bookmarks").document(
-                bookmark_id
-            ).delete()
+            db.collection("users").document(user_id).collection("bookmarks").document(bookmark_id).delete()
             return True
         except (RuntimeError, ConnectionError, ValueError) as e:
             logger.error("Database operation failed: %s", e)
@@ -659,9 +622,7 @@ class FirestoreDB:
                 },
                 merge=True,
             )
-            db.collection("analytics").document(doc_id).update(
-                {"metric_value": firestore.Increment(1)}
-            )
+            db.collection("analytics").document(doc_id).update({"metric_value": firestore.Increment(1)})
             return True
         except (RuntimeError, ConnectionError, ValueError) as e:
             logger.error("Database operation failed: %s", e)
@@ -701,9 +662,7 @@ class FirestoreDB:
             logger.error("Database operation failed: %s", e)
             return None
 
-    def get_polling_guidances(
-        self, region: Optional[str] = None
-    ) -> list[dict[str, Any]]:
+    def get_polling_guidances(self, region: Optional[str] = None) -> list[dict[str, Any]]:
         """Get active polling guidances."""
         db = self.db
         if not db:
@@ -792,12 +751,7 @@ class FirestoreDB:
         data["updated_at"] = firestore.SERVER_TIMESTAMP
 
         try:
-            doc_ref = (
-                db.collection("users")
-                .document(user_id)
-                .collection("preferences")
-                .document("main")
-            )
+            doc_ref = db.collection("users").document(user_id).collection("preferences").document("main")
             doc_ref.set(data, merge=True)
             return True
         except (RuntimeError, ConnectionError, ValueError) as e:
@@ -811,13 +765,7 @@ class FirestoreDB:
             return None
 
         try:
-            doc = (
-                db.collection("users")
-                .document(user_id)
-                .collection("preferences")
-                .document("main")
-                .get()
-            )
+            doc = db.collection("users").document(user_id).collection("preferences").document("main").get()
             if doc.exists:
                 return {"id": doc.id, **doc.to_dict()}
             return None

@@ -11,9 +11,7 @@ class TestChatRoutes:
 
     def test_chat_missing_message(self, client):
         """Test chat without message returns error."""
-        response = client.post(
-            "/api/chat/chat", data=json.dumps({}), content_type="application/json"
-        )
+        response = client.post("/api/chat/chat", data=json.dumps({}), content_type="application/json")
         assert response.status_code == 400
         data = json.loads(response.data)
         assert data.get("success") is False
@@ -45,9 +43,7 @@ class TestChatRoutes:
         """Test chat respects user preferences."""
         response = client.post(
             "/api/chat/chat",
-            data=json.dumps(
-                {"message": "Test question", "user_prefs": {"language": "en"}}
-            ),
+            data=json.dumps({"message": "Test question", "user_prefs": {"language": "en"}}),
             content_type="application/json",
         )
         assert response.status_code == 200

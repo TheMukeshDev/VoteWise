@@ -40,9 +40,7 @@ def _ensure_firebase_initialized() -> bool:
         if firebase_json:
             try:
                 cred = credentials.Certificate(firebase_json)
-                firebase_admin.initialize_app(
-                    cred, {"projectId": Config.FIREBASE_PROJECT_ID}
-                )
+                firebase_admin.initialize_app(cred, {"projectId": Config.FIREBASE_PROJECT_ID})
             except (ValueError, RuntimeError) as e:
                 logger.warning("Firebase initialization warning: %s", e)
                 try:
@@ -80,17 +78,11 @@ class FirebaseAuthService:
             logger.error("Token verification failed: %s", e)
             return None
 
-    def create_custom_token(
-        self, user_id: str, additional_claims: Optional[dict] = None
-    ) -> Optional[str]:
+    def create_custom_token(self, user_id: str, additional_claims: Optional[dict] = None) -> Optional[str]:
         """Create custom JWT token for user."""
         try:
             custom_token = auth.create_custom_token(user_id, additional_claims or {})
-            return (
-                custom_token.decode("utf-8")
-                if isinstance(custom_token, bytes)
-                else custom_token
-            )
+            return custom_token.decode("utf-8") if isinstance(custom_token, bytes) else custom_token
         except (auth.UidAlreadyExistsError, ValueError):
             return None
 
@@ -105,24 +97,17 @@ class FirebaseAuthService:
                 "photo_url": user.photo_url,
                 "disabled": user.disabled,
                 "email_verified": user.email_verified,
-                "provider_data": [
-                    {"provider_id": p.provider_id, "uid": p.uid}
-                    for p in user.provider_data
-                ],
+                "provider_data": [{"provider_id": p.provider_id, "uid": p.uid} for p in user.provider_data],
             }
         except auth.UserNotFoundError:
             return None
         except (auth.FirebaseError, ValueError):
             return None
 
-    def create_user(
-        self, email: str, password: str, display_name: Optional[str] = None
-    ) -> Optional[dict[str, Any]]:
+    def create_user(self, email: str, password: str, display_name: Optional[str] = None) -> Optional[dict[str, Any]]:
         """Create new user with email/password."""
         try:
-            user = auth.create_user(
-                email=email, password=password, display_name=display_name
-            )
+            user = auth.create_user(email=email, password=password, display_name=display_name)
             return {"uid": user.uid, "email": user.email}
         except (
             auth.EmailAlreadyExistsError,
@@ -147,9 +132,7 @@ class FirebaseAuthService:
         except (auth.FirebaseError, ValueError):
             return False
 
-    def set_custom_user_claims(
-        self, user_id: str, claims: dict[str, Any]
-    ) -> Optional[bool]:
+    def set_custom_user_claims(self, user_id: str, claims: dict[str, Any]) -> Optional[bool]:
         """Set custom claims for user (e.g., role)."""
         try:
             auth.set_custom_user_claims(user_id, claims)
@@ -172,9 +155,7 @@ class UserProfileService:
     def __init__(self) -> None:
         _ensure_firebase_initialized()
 
-    def create_user_profile(
-        self, user_id: str, email: str, data: dict[str, Any]
-    ) -> bool:
+    def create_user_profile(self, user_id: str, email: str, data: dict[str, Any]) -> bool:
         """Create user profile in Firestore using centralized firestore_service."""
         from services.firestore_service import save_user
 
@@ -268,9 +249,7 @@ class UserProfileService:
 
     def promote_to_admin(self, user_id: str) -> bool:
         """Promote user to admin."""
-        return self.update_user_profile(
-            user_id, {"role": "admin", "updated_at": _server_timestamp()}
-        )
+        return self.update_user_profile(user_id, {"role": "admin", "updated_at": _server_timestamp()})
 
 
 firebase_auth_service: FirebaseAuthService = FirebaseAuthService()

@@ -52,27 +52,19 @@ class GoogleServicesHub:
         """Find nearest polling booth."""
         return self.maps.find_polling_booth(lat, lng)
 
-    def find_multiple_booths(
-        self, lat: float, lng: float, max_results: int = 5
-    ) -> list:
+    def find_multiple_booths(self, lat: float, lng: float, max_results: int = 5) -> list:
         """Find multiple polling booths."""
         return self.maps.find_multiple_booths(lat, lng, max_results=max_results)
 
-    def create_calendar_reminder(
-        self, title: str, date: str, reminder_type: str = "polling"
-    ) -> dict[str, Any]:
+    def create_calendar_reminder(self, title: str, date: str, reminder_type: str = "polling") -> dict[str, Any]:
         """Create calendar reminder."""
-        return self.calendar.create_election_reminder(
-            title, date, reminder_type=reminder_type
-        )
+        return self.calendar.create_election_reminder(title, date, reminder_type=reminder_type)
 
     def generate_ics(self, title: str, date: str) -> str:
         """Generate ICS file."""
         return self.calendar_local.generate_voting_calendar(title, date)
 
-    def translate_content(
-        self, text: str, target_language: str = "hi"
-    ) -> dict[str, Any]:
+    def translate_content(self, text: str, target_language: str = "hi") -> dict[str, Any]:
         """Translate content."""
         return self.translate.translate(text, target_language)
 

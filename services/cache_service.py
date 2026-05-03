@@ -87,9 +87,7 @@ class CacheService:
                 logger.warning("Redis cache clear failed: %s", e)
 
         # In-memory fallback
-        keys_to_delete: list[str] = [
-            k for k in self._memory_cache if k.startswith(f"cache:{pattern}:")
-        ]
+        keys_to_delete: list[str] = [k for k in self._memory_cache if k.startswith(f"cache:{pattern}:")]
         for key in keys_to_delete:
             del self._memory_cache[key]
         return len(keys_to_delete)
@@ -127,9 +125,7 @@ def cached(ttl: int = 300, key_func: Optional[Callable] = None):
     def decorator(f: Callable) -> Callable:
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            cache_key = (
-                key_func(*args, **kwargs) if key_func else f"cache:{f.__name__}:{args}"
-            )
+            cache_key = key_func(*args, **kwargs) if key_func else f"cache:{f.__name__}:{args}"
 
             cached_value = cache_get(cache_key)
             if cached_value is not None:

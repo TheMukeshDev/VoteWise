@@ -8,9 +8,7 @@ import pytest
 def mock_jwt():
     """Mock JWT for all protected routes."""
     with (
-        patch(
-            "flask_jwt_extended.view_decorators.verify_jwt_in_request"
-        ) as mock_verify,
+        patch("flask_jwt_extended.view_decorators.verify_jwt_in_request") as mock_verify,
         patch("middleware.auth_middleware.verify_jwt_in_request") as mock_mw_verify,
         patch("middleware.auth_middleware.get_jwt_identity") as mock_mw_identity,
         patch("middleware.auth_middleware.user_profile_service") as mock_profile,
@@ -38,9 +36,7 @@ def auth_headers():
 class TestBookmarkRoutes:
     @patch("routes.bookmark.get_bookmarks")
     @patch("routes.bookmark.get_jwt_identity")
-    def test_get_bookmarks(
-        self, mock_identity, mock_get_bookmarks, client, auth_headers
-    ):
+    def test_get_bookmarks(self, mock_identity, mock_get_bookmarks, client, auth_headers):
         mock_identity.return_value = {"user_id": "u1"}
         mock_get_bookmarks.return_value = []
         res = client.get("/api/user/bookmarks/", headers=auth_headers)
@@ -49,9 +45,7 @@ class TestBookmarkRoutes:
     @patch("routes.bookmark.get_bookmark_by_resource")
     @patch("routes.bookmark.save_bookmark")
     @patch("routes.bookmark.get_jwt_identity")
-    def test_add_bookmark(
-        self, mock_identity, mock_save_bookmark, mock_get_bookmark, client, auth_headers
-    ):
+    def test_add_bookmark(self, mock_identity, mock_save_bookmark, mock_get_bookmark, client, auth_headers):
         mock_identity.return_value = {"user_id": "u1"}
         mock_get_bookmark.return_value = None
         mock_save_bookmark.return_value = "b1"
@@ -69,9 +63,7 @@ class TestAnnouncementAdminRoutes:
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
             patch("services.announcement_service.announcement_service") as mock_svc,
-            patch(
-                "middleware.auth_middleware.user_profile_service.get_user_profile"
-            ) as mock_profile,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
             patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
@@ -84,12 +76,8 @@ class TestAnnouncementAdminRoutes:
         with (
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
-            patch(
-                "services.announcement_service.AnnouncementService.create"
-            ) as mock_create,
-            patch(
-                "middleware.auth_middleware.user_profile_service.get_user_profile"
-            ) as mock_profile,
+            patch("services.announcement_service.AnnouncementService.create") as mock_create,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
             patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
@@ -108,12 +96,8 @@ class TestElectionProcessAdminRoutes:
         with (
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
-            patch(
-                "services.election_process_service.election_process_service"
-            ) as mock_ep_svc,
-            patch(
-                "middleware.auth_middleware.user_profile_service.get_user_profile"
-            ) as mock_profile,
+            patch("services.election_process_service.election_process_service") as mock_ep_svc,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
             patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
@@ -128,12 +112,8 @@ class TestPollingGuidanceAdminRoutes:
         with (
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
-            patch(
-                "services.polling_guidance_service.polling_guidance_service"
-            ) as mock_pg_svc,
-            patch(
-                "middleware.auth_middleware.user_profile_service.get_user_profile"
-            ) as mock_profile,
+            patch("services.polling_guidance_service.polling_guidance_service") as mock_pg_svc,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
             patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
@@ -157,9 +137,7 @@ class TestTimelineAdminRoutes:
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
             patch("services.timeline_service.timeline_service") as mock_timeline_svc,
-            patch(
-                "middleware.auth_middleware.user_profile_service.get_user_profile"
-            ) as mock_profile,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
             patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
@@ -203,9 +181,7 @@ class TestUserProfileRoutes:
     @patch("routes.user.get_user")
     @patch("routes.user.save_user")
     @patch("routes.user.get_jwt_identity")
-    def test_update_profile(
-        self, mock_identity, mock_save_user, mock_get_user, client, auth_headers
-    ):
+    def test_update_profile(self, mock_identity, mock_save_user, mock_get_user, client, auth_headers):
         mock_identity.return_value = {"user_id": "u1"}
         mock_save_user.return_value = "u1"
         mock_get_user.return_value = {"id": "u1"}

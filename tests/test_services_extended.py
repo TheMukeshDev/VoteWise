@@ -13,9 +13,7 @@ class TestTimelineServiceExtended:
         return TimelineService()
 
     def test_get_all_empty(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             assert service.get_all() == []
 
     def test_get_all_with_filters(self, service):
@@ -84,9 +82,7 @@ class TestTimelineServiceExtended:
             assert result["id"] == "new_id"
 
     def test_create_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             with pytest.raises(Exception, match="Database not available"):
                 service.create("general", "Test", "2026-01-01")
 
@@ -194,9 +190,7 @@ class TestFAQServiceExtended:
                     assert len(result) == 1
 
     def test_get_all_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             with patch("services.faq_service.get_cached", return_value=None):
                 assert service.get_all() == []
 
@@ -230,9 +224,7 @@ class TestFAQServiceExtended:
             assert service.get_by_id("missing") is None
 
     def test_get_by_id_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             assert service.get_by_id("f1") is None
 
     def test_create_success(self, service):
@@ -246,9 +238,7 @@ class TestFAQServiceExtended:
                 assert result["id"] == "new_id"
 
     def test_create_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             result = service.create("Q", "A", "general")
             assert result is None
 
@@ -264,9 +254,7 @@ class TestFAQServiceExtended:
                 assert result is not None
 
     def test_update_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             assert service.update("f1", {"question": "New"}) is None
 
     def test_delete_soft(self, service):
@@ -284,9 +272,7 @@ class TestFAQServiceExtended:
                 assert service.delete("f1", soft=False) is True
 
     def test_delete_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             assert service.delete("missing") is False
 
     def test_get_all_no_cache_with_filters(self, service):

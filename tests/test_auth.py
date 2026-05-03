@@ -19,9 +19,7 @@ class TestAuthRoutes:
 
     def test_login_missing_token(self, client):
         """Test login with missing token returns error."""
-        response = client.post(
-            "/api/auth/login", data=json.dumps({}), content_type="application/json"
-        )
+        response = client.post("/api/auth/login", data=json.dumps({}), content_type="application/json")
         assert response.status_code == 400
         data = json.loads(response.data)
         assert data["success"] is False
@@ -54,15 +52,11 @@ class TestAuthRoutes:
             )
 
             # Either success or 500 (if user_profile_service is not mocked) is acceptable
-            assert (
-                response.status_code == 200
-            )  # Fixed: 500 is not a valid success status
+            assert response.status_code == 200  # Fixed: 500 is not a valid success status
 
     def test_register_missing_token(self, client):
         """Test registration with missing token."""
-        response = client.post(
-            "/api/auth/register", data=json.dumps({}), content_type="application/json"
-        )
+        response = client.post("/api/auth/register", data=json.dumps({}), content_type="application/json")
         assert response.status_code == 400
 
     def test_register_invalid_token(self, client):
@@ -179,9 +173,7 @@ class TestTokenVerification:
             with patch("config.Config.ADMIN_PASSWORD", "adminpassword"):
                 response = client.post(
                     "/api/auth/admin/login",
-                    data=json.dumps(
-                        {"email": "admin@example.com", "password": "adminpassword"}
-                    ),
+                    data=json.dumps({"email": "admin@example.com", "password": "adminpassword"}),
                     content_type="application/json",
                 )
                 assert response.status_code == 200
@@ -192,9 +184,7 @@ class TestTokenVerification:
             with patch("config.Config.ADMIN_PASSWORD", "adminpassword"):
                 response = client.post(
                     "/api/auth/admin/login",
-                    data=json.dumps(
-                        {"email": "admin@example.com", "password": "wrongpassword"}
-                    ),
+                    data=json.dumps({"email": "admin@example.com", "password": "wrongpassword"}),
                     content_type="application/json",
                 )
                 assert response.status_code == 401

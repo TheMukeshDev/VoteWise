@@ -46,9 +46,7 @@ class TextToSpeechService:
 
             from google.cloud import texttospeech
 
-            if Config.FIREBASE_ADMIN_JSON and os.path.exists(
-                os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")
-            ):
+            if Config.FIREBASE_ADMIN_JSON and os.path.exists(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS")):
                 self.client = texttospeech.TextToSpeechClient()
                 self._initialized = True
             else:
@@ -85,15 +83,11 @@ class TextToSpeechService:
                 from google.cloud import texttospeech
 
                 voice = self._get_voice_config(language, voice_gender)
-                audio_config = self._get_audio_config(
-                    audio_format, speaking_rate, pitch
-                )
+                audio_config = self._get_audio_config(audio_format, speaking_rate, pitch)
 
                 synthesis_input = texttospeech.SynthesisInput(text=text)
 
-                response = self.client.synthesize_speech(
-                    input=synthesis_input, voice=voice, audio_config=audio_config
-                )
+                response = self.client.synthesize_speech(input=synthesis_input, voice=voice, audio_config=audio_config)
 
                 audio_content = response.audio_content
                 return {
@@ -107,9 +101,7 @@ class TextToSpeechService:
 
         return self._mock_synthesize(text, language, audio_format)
 
-    def synthesize_ssml(
-        self, ssml: str, language: str = "en", audio_format: str = "mp3"
-    ) -> Optional[dict[str, Any]]:
+    def synthesize_ssml(self, ssml: str, language: str = "en", audio_format: str = "mp3") -> Optional[dict[str, Any]]:
         """
         Synthesize SSML for advanced control.
 
@@ -130,9 +122,7 @@ class TextToSpeechService:
 
                 synthesis_input = texttospeech.SynthesisInput(ssml=ssml)
 
-                response = self.client.synthesize_speech(
-                    input=synthesis_input, voice=voice, audio_config=audio_config
-                )
+                response = self.client.synthesize_speech(input=synthesis_input, voice=voice, audio_config=audio_config)
 
                 audio_content = response.audio_content
                 return {
@@ -145,9 +135,7 @@ class TextToSpeechService:
 
         return None
 
-    def speak_election_steps(
-        self, steps: list[dict[str, Any]], language: str = "en"
-    ) -> Optional[dict[str, Any]]:
+    def speak_election_steps(self, steps: list[dict[str, Any]], language: str = "en") -> Optional[dict[str, Any]]:
         """
         Convert election steps to speech.
 
@@ -161,9 +149,7 @@ class TextToSpeechService:
         text = self._format_steps_for_speech(steps)
         return self.synthesize(text, language)
 
-    def speak_faq_answer(
-        self, question: str, answer: str, language: str = "en"
-    ) -> Optional[dict[str, Any]]:
+    def speak_faq_answer(self, question: str, answer: str, language: str = "en") -> Optional[dict[str, Any]]:
         """
         Speak FAQ question and answer.
 
@@ -178,9 +164,7 @@ class TextToSpeechService:
         text = f"Question: {question}. Answer: {answer}"
         return self.synthesize(text, language)
 
-    def speak_timeline_event(
-        self, event: dict[str, Any], language: str = "en"
-    ) -> Optional[dict[str, Any]]:
+    def speak_timeline_event(self, event: dict[str, Any], language: str = "en") -> Optional[dict[str, Any]]:
         """
         Speak election timeline event.
 
@@ -214,14 +198,10 @@ class TextToSpeechService:
         return texttospeech.VoiceSelectionParams(
             language_code=voice_profile["language_code"],
             name=voice_profile["name"],
-            ssml_gender=gender_map.get(
-                gender, texttospeech.VoiceSelectionParams.NEUTRAL
-            ),
+            ssml_gender=gender_map.get(gender, texttospeech.VoiceSelectionParams.NEUTRAL),
         )
 
-    def _get_audio_config(
-        self, audio_format: str, speaking_rate: float = 1.0, pitch: float = 0.0
-    ) -> Any:
+    def _get_audio_config(self, audio_format: str, speaking_rate: float = 1.0, pitch: float = 0.0) -> Any:
         """Get audio configuration."""
         from google.cloud import texttospeech
 
@@ -251,9 +231,7 @@ class TextToSpeechService:
 
         return ". ".join(text_parts)
 
-    def _mock_synthesize(
-        self, text: str, language: str, audio_format: str
-    ) -> dict[str, Any]:
+    def _mock_synthesize(self, text: str, language: str, audio_format: str) -> dict[str, Any]:
         """Mock synthesis when API unavailable."""
         return {
             "audio_content": ", ",
@@ -278,9 +256,7 @@ class TextToSpeechService:
                             {
                                 "name": voice.name,
                                 "language_codes": voice.language_codes,
-                                "ssml_gender": texttospeech.VoiceSelectionParams.SsmlGender(
-                                    voice.ssml_gender
-                                ).name,
+                                "ssml_gender": texttospeech.VoiceSelectionParams.SsmlGender(voice.ssml_gender).name,
                                 "natural_sample_rate_hertz": voice.natural_sample_rate_hertz,
                             }
                         )
@@ -298,9 +274,7 @@ class AudioGuidancePlayer:
     def __init__(self):
         self.service = TextToSpeechService()
 
-    def play_election_info(
-        self, info_type: str, data: Any, language: str = "en"
-    ) -> Optional[dict[str, Any]]:
+    def play_election_info(self, info_type: str, data: Any, language: str = "en") -> Optional[dict[str, Any]]:
         """
         Generate audio for election information.
 
@@ -313,9 +287,7 @@ class AudioGuidancePlayer:
             Audio playback data
         """
         if info_type == "faq":
-            return self.service.speak_faq_answer(
-                data.get("question"), data.get("answer"), language
-            )
+            return self.service.speak_faq_answer(data.get("question"), data.get("answer"), language)
         elif info_type == "steps":
             return self.service.speak_election_steps(data, language)
         elif info_type == "timeline":

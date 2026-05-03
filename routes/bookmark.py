@@ -12,10 +12,8 @@ from typing import Any, Optional
 from flask import Blueprint, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
-from services.firestore_service import \
-    delete_bookmark as delete_bookmark_from_db
-from services.firestore_service import (get_bookmark_by_resource,
-                                        get_bookmarks, save_bookmark)
+from services.firestore_service import delete_bookmark as delete_bookmark_from_db
+from services.firestore_service import get_bookmark_by_resource, get_bookmarks, save_bookmark
 from utils.response import error_response, success_response
 from utils.validators import validate_required_fields
 
@@ -78,9 +76,7 @@ def create_user_bookmark() -> tuple:
     is_valid, missing = validate_required_fields(data, ["resource_type", "resource_id"])
     if not is_valid:
         return (
-            jsonify(
-                error_response("Missing required fields: %s" % ", ".join(missing), 400)
-            ),
+            jsonify(error_response("Missing required fields: %s" % ", ".join(missing), 400)),
             400,
         )
 
@@ -89,17 +85,14 @@ def create_user_bookmark() -> tuple:
         return (
             jsonify(
                 error_response(
-                    "Invalid resource_type. Allowed: %s"
-                    % ", ".join(ALLOWED_RESOURCE_TYPES),
+                    "Invalid resource_type. Allowed: %s" % ", ".join(ALLOWED_RESOURCE_TYPES),
                     400,
                 )
             ),
             400,
         )
 
-    existing: Optional[dict[str, Any]] = get_bookmark_by_resource(
-        user_id, resource_type, data.get("resource_id")
-    )
+    existing: Optional[dict[str, Any]] = get_bookmark_by_resource(user_id, resource_type, data.get("resource_id"))
     if existing:
         return jsonify(error_response("Bookmark already exists", 400)), 400
 
@@ -112,11 +105,7 @@ def create_user_bookmark() -> tuple:
     bookmark_id: Optional[str] = save_bookmark(user_id, bookmark_data)
 
     return (
-        jsonify(
-            success_response(
-                message="Bookmark saved successfully", data={"id": bookmark_id}
-            )
-        ),
+        jsonify(success_response(message="Bookmark saved successfully", data={"id": bookmark_id})),
         201,
     )
 

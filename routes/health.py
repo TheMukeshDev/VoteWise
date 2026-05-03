@@ -57,9 +57,7 @@ def readiness_check() -> tuple:
         db = get_firestore_client()
         if db is None:
             return (
-                jsonify(
-                    error_response("Service not ready - Firestore unavailable", 503)
-                ),
+                jsonify(error_response("Service not ready - Firestore unavailable", 503)),
                 503,
             )
 

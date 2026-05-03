@@ -32,9 +32,7 @@ class AnalyticsService:
         except (ImportError, RuntimeError):
             self.client = None
 
-    def log_event(
-        self, event_name: str, params: Optional[dict[str, Any]] = None
-    ) -> bool:
+    def log_event(self, event_name: str, params: Optional[dict[str, Any]] = None) -> bool:
         """
         Log custom event.
 
@@ -56,27 +54,19 @@ class AnalyticsService:
 
     def log_page_view(self, page_name: str, user_id: Optional[str] = None) -> bool:
         """Log page view."""
-        return self.log_event(
-            "page_view", {"page_name": page_name, "user_id": user_id or "anonymous"}
-        )
+        return self.log_event("page_view", {"page_name": page_name, "user_id": user_id or "anonymous"})
 
     def log_feature_use(self, feature_name: str, user_id: str) -> bool:
         """Log feature usage."""
-        return self.log_event(
-            "feature_use", {"feature_name": feature_name, "user_id": user_id}
-        )
+        return self.log_event("feature_use", {"feature_name": feature_name, "user_id": user_id})
 
     def log_language_change(self, language: str, user_id: str) -> bool:
         """Log language preference change."""
-        return self.log_event(
-            "language_change", {"language": language, "user_id": user_id}
-        )
+        return self.log_event("language_change", {"language": language, "user_id": user_id})
 
     def log_reminder_create(self, reminder_type: str, user_id: str) -> bool:
         """Log reminder creation."""
-        return self.log_event(
-            "reminder_create", {"reminder_type": reminder_type, "user_id": user_id}
-        )
+        return self.log_event("reminder_create", {"reminder_type": reminder_type, "user_id": user_id})
 
     def log_calendar_sync(self, success: bool, user_id: str) -> bool:
         """Log calendar sync attempt."""
@@ -92,15 +82,11 @@ class AnalyticsService:
 
     def log_audio_playback(self, content_type: str, user_id: str) -> bool:
         """Log audio playback."""
-        return self.log_event(
-            "audio_playback", {"content_type": content_type, "user_id": user_id}
-        )
+        return self.log_event("audio_playback", {"content_type": content_type, "user_id": user_id})
 
     def log_ai_chat(self, query: str, user_id: str) -> bool:
         """Log AI chat interaction."""
-        return self.log_event(
-            "ai_chat", {"query_preview": query[:50], "user_id": user_id}
-        )
+        return self.log_event("ai_chat", {"query_preview": query[:50], "user_id": user_id})
 
     def log_signup(self, method: str, user_id: str) -> bool:
         """Log user signup."""
@@ -191,9 +177,7 @@ class LoggingService:
                 pass
         logger.error(message)
 
-    def log_http_request(
-        self, method: str, path: str, status: int, latency: float
-    ) -> None:
+    def log_http_request(self, method: str, path: str, status: int, latency: float) -> None:
         """Log HTTP request."""
         if self.logger:
             try:

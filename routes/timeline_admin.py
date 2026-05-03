@@ -67,14 +67,10 @@ def create_timeline() -> tuple:
     """Create a new timeline (admin only)."""
     data: dict[str, Any] = request.get_json() or {}
 
-    is_valid, missing = validate_required_fields(
-        data, ["election_type", "region", "polling_date"]
-    )
+    is_valid, missing = validate_required_fields(data, ["election_type", "region", "polling_date"])
     if not is_valid:
         return (
-            jsonify(
-                error_response(f"Missing required fields: {', '.join(missing)}", 400)
-            ),
+            jsonify(error_response(f"Missing required fields: {', '.join(missing)}", 400)),
             400,
         )
 
@@ -93,11 +89,7 @@ def create_timeline() -> tuple:
     status: str = data.get("status", "upcoming")
     if status not in ALLOWED_STATUSES:
         return (
-            jsonify(
-                error_response(
-                    f"Invalid status. Allowed: {', '.join(ALLOWED_STATUSES)}", 400
-                )
-            ),
+            jsonify(error_response(f"Invalid status. Allowed: {', '.join(ALLOWED_STATUSES)}", 400)),
             400,
         )
 
@@ -111,9 +103,7 @@ def create_timeline() -> tuple:
     )
 
     return (
-        jsonify(
-            success_response(message="Timeline created successfully", data=timeline)
-        ),
+        jsonify(success_response(message="Timeline created successfully", data=timeline)),
         201,
     )
 
@@ -137,11 +127,7 @@ def update_timeline(timeline_id: str) -> tuple:
 
     if "status" in data and data["status"] not in ALLOWED_STATUSES:
         return (
-            jsonify(
-                error_response(
-                    f"Invalid status. Allowed: {', '.join(ALLOWED_STATUSES)}", 400
-                )
-            ),
+            jsonify(error_response(f"Invalid status. Allowed: {', '.join(ALLOWED_STATUSES)}", 400)),
             400,
         )
 
@@ -151,9 +137,7 @@ def update_timeline(timeline_id: str) -> tuple:
         return jsonify(error_response("Timeline not found", 404)), 404
 
     return (
-        jsonify(
-            success_response(message="Timeline updated successfully", data=timeline)
-        ),
+        jsonify(success_response(message="Timeline updated successfully", data=timeline)),
         200,
     )
 

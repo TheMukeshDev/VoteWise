@@ -1061,9 +1061,7 @@ class TestCalendarServiceExtended:
         service = CalendarService()
         service.access_token = "token"
         mock_get.return_value.json.return_value = {
-            "items": [
-                {"summary": "Event 1", "start": {"dateTime": "2026-01-01T00:00:00"}}
-            ]
+            "items": [{"summary": "Event 1", "start": {"dateTime": "2026-01-01T00:00:00"}}]
         }
         mock_get.return_value.status_code = 200
         result = service.get_upcoming_events()
@@ -1121,17 +1119,14 @@ class TestCalendarServiceExtended:
         assert "Election Day" in ics
 
     def test_local_generate_ics_registration(self):
-        from services.calendar_service import (CalendarService,
-                                               LocalCalendarService)
+        from services.calendar_service import CalendarService, LocalCalendarService
 
         with patch.object(
             CalendarService,
             "generate_ics_file",
             return_value="BEGIN:VCALENDAR\nRegistration",
         ):
-            ics = LocalCalendarService.generate_voting_calendar(
-                "Registration", "2026-03-01"
-            )
+            ics = LocalCalendarService.generate_voting_calendar("Registration", "2026-03-01")
             assert "BEGIN:VCALENDAR" in ics
 
     @patch("services.calendar_service.requests.post")
@@ -1152,18 +1147,14 @@ class TestFirestoreServiceExtended:
 
         mock_db = MagicMock()
         mock_db.collection().document().get.return_value = MagicMock()
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=mock_db
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=mock_db):
             result = verify_firestore_connection()
             assert result["connected"] is True
 
     def test_verify_connection_failure(self):
         from services.firestore_service import verify_firestore_connection
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = verify_firestore_connection()
             assert result["connected"] is False
 
@@ -1171,39 +1162,29 @@ class TestFirestoreServiceExtended:
         from services.firestore_service import verify_firestore_connection
 
         mock_db = MagicMock()
-        mock_db.collection().document().set.side_effect = RuntimeError(
-            "Connection failed"
-        )
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=mock_db
-        ):
+        mock_db.collection().document().set.side_effect = RuntimeError("Connection failed")
+        with patch("services.firestore_service.get_firestore_client", return_value=mock_db):
             result = verify_firestore_connection()
             assert result["connected"] is False
 
     def test_get_election_process_data_no_db(self):
         from services.firestore_service import get_election_process_data
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = get_election_process_data()
             assert result == []
 
     def test_get_faqs_data_no_db(self):
         from services.firestore_service import get_faqs_data
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = get_faqs_data()
             assert result == []
 
     def test_get_timeline_data_no_db(self):
         from services.firestore_service import get_timeline_data
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = get_timeline_data()
             assert result == []
 
@@ -1211,18 +1192,14 @@ class TestFirestoreServiceExtended:
         from services.firestore_service import save_user
 
         mock_db = MagicMock()
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=mock_db
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=mock_db):
             result = save_user("u1", {"name": "Test"})
             assert result == "u1"
 
     def test_save_user_no_db(self):
         from services.firestore_service import save_user
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = save_user("u1", {"name": "Test"})
             assert result is None
 
@@ -1235,80 +1212,62 @@ class TestFirestoreServiceExtended:
         doc_mock.id = "u1"
         doc_mock.to_dict.return_value = {"name": "Test"}
         mock_db.collection().document().get.return_value = doc_mock
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=mock_db
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=mock_db):
             result = get_user("u1")
             assert result is not None
 
     def test_get_user_no_db(self):
         from services.firestore_service import get_user
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = get_user("u1")
             assert result is None
 
     def test_get_reminders_no_db(self):
         from services.firestore_service import get_reminders
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = get_reminders("u1")
             assert result == []
 
     def test_save_reminder_no_db(self):
         from services.firestore_service import save_reminder
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = save_reminder("u1", {"title": "Test"})
             assert result is None
 
     def test_update_reminder_no_db(self):
         from services.firestore_service import update_reminder
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = update_reminder("u1", "r1", {"title": "Updated"})
             assert result is None
 
     def test_delete_reminder_no_db(self):
         from services.firestore_service import delete_reminder
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = delete_reminder("u1", "r1")
             assert result is False
 
     def test_save_bookmark_no_db(self):
         from services.firestore_service import save_bookmark
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = save_bookmark("u1", {"title": "Test"})
             assert result is None
 
     def test_get_bookmarks_no_db(self):
         from services.firestore_service import get_bookmarks
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = get_bookmarks("u1")
             assert result == []
 
     def test_get_bookmark_by_resource_no_db(self):
         from services.firestore_service import get_bookmark_by_resource
 
-        with patch(
-            "services.firestore_service.get_firestore_client", return_value=None
-        ):
+        with patch("services.firestore_service.get_firestore_client", return_value=None):
             result = get_bookmark_by_resource("u1", "faq", "f1")
             assert result is None

@@ -2,17 +2,21 @@ from unittest.mock import MagicMock, patch
 
 # Auth Service
 from services.auth_service import FirebaseAuthService, UserProfileService
+
 # Cache Service
 from services.cache_service import CacheService
+
 # Calendar Service
 from services.calendar_service import CalendarService, LocalCalendarService
+
 # Maps Service
 from services.maps_service import MapsService
+
 # Speech & TTS
 from services.speech_service import SpeechToTextService
+
 # Translate Service
-from services.translate_service import (ElectionContentTranslator,
-                                        TranslateService)
+from services.translate_service import ElectionContentTranslator, TranslateService
 from services.tts_service import AudioGuidancePlayer, TextToSpeechService
 
 

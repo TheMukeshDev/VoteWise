@@ -12,8 +12,7 @@ import uuid
 from datetime import UTC, datetime
 
 from dotenv import load_dotenv
-from flask import (Blueprint, Flask, g, jsonify, redirect, render_template,
-                   request)
+from flask import Blueprint, Flask, g, jsonify, redirect, render_template, request
 from flask_cors import CORS
 
 from config import get_config
@@ -166,9 +165,7 @@ def _register_frontend_routes(app: Flask) -> None:
         def _render_with_config(t=template, c=firebase_config):
             return render_template(t, firebase_config=c)
 
-        _render_with_config.__name__ = (
-            f"render_with_config_{template.replace('.html', '')}"
-        )
+        _render_with_config.__name__ = f"render_with_config_{template.replace('.html', '')}"
         app.route(path)(_render_with_config)
 
 
@@ -190,8 +187,7 @@ def _register_health_endpoint(app: Flask) -> None:
 
 def _register_test_firestore_endpoint(app: Flask) -> None:
     """Register test Firestore endpoint (development only)."""
-    from services.firestore_service import (get_user, save_user,
-                                            verify_firestore_connection)
+    from services.firestore_service import get_user, save_user, verify_firestore_connection
 
     @app.route("/api/test-firestore", methods=["GET", "POST"])
     def test_firestore():

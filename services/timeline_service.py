@@ -57,9 +57,7 @@ class TimelineService(BaseService):
         }
         return super().create(data)
 
-    def update(
-        self, timeline_id: str, data: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+    def update(self, timeline_id: str, data: Dict[str, Any]) -> Optional[Dict[str, Any]]:
         """Update timeline."""
         return super().update(timeline_id, data)
 

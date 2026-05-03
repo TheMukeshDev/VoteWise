@@ -23,7 +23,7 @@ announcement_bp = Blueprint("announcement", __name__)
 ALLOWED_PRIORITIES: list[str] = ["low", "normal", "high", "urgent"]
 
 
-@announcement_bp.route(", ", methods=["GET"])
+@announcement_bp.route("/",, methods=["GET"])
 @announcement_bp.route("/", methods=["GET"])
 @require_admin
 def get_announcements() -> tuple:
@@ -55,7 +55,7 @@ def get_announcement(announcement_id: str) -> tuple:
     return jsonify(success_response(data=announcement)), 200
 
 
-@announcement_bp.route(", ", methods=["POST"])
+@announcement_bp.route("/",, methods=["POST"])
 @announcement_bp.route("/", methods=["POST"])
 @require_admin
 def create_announcement() -> tuple:

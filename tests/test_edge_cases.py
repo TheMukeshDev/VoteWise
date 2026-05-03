@@ -46,9 +46,7 @@ class TestEdgeCases:
     def test_login_with_invalid_token(self, client):
         """Test login fails with invalid token."""
         with patch("routes.auth.verify_firebase_token", return_value=None):
-            response = client.post(
-                "/api/auth/login", json={"id_token": "invalid-token"}
-            )
+            response = client.post("/api/auth/login", json={"id_token": "invalid-token"})
             assert response.status_code == 401
 
     def test_chat_with_empty_message(self, client):
@@ -107,16 +105,12 @@ class TestSecurityEdgeCases:
 
     def test_jwt_token_tampering(self, client):
         """Test behavior with tampered JWT."""
-        response = client.get(
-            "/api/user/profile", headers={"Authorization": "Bearer tampered.token.here"}
-        )
+        response = client.get("/api/user/profile", headers={"Authorization": "Bearer tampered.token.here"})
         assert response.status_code == 401
 
     def test_unicode_in_input(self, client):
         """Test unicode handling."""
-        response = client.post(
-            "/api/chat/chat", json={"message": "test with émojis 🎉"}
-        )
+        response = client.post("/api/chat/chat", json={"message": "test with émojis 🎉"})
         assert response.status_code in [200, 400]
 
     def test_faq_not_found(self, client):
@@ -155,9 +149,7 @@ class TestSecurityEdgeCases:
         with (
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
-            patch(
-                "middleware.auth_middleware.user_profile_service.get_user_profile"
-            ) as mock_profile,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
             patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin", "role": "admin"}

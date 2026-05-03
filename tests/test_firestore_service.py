@@ -2,18 +2,26 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from services.firestore_service import (create_or_update_user_profile,
-                                        delete_bookmark, delete_reminder,
-                                        get_bookmark_by_resource,
-                                        get_bookmarks,
-                                        get_election_process_data,
-                                        get_faqs_data, get_firestore_client,
-                                        get_reminder, get_reminders,
-                                        get_timeline_data, get_user,
-                                        init_firebase, save_bookmark,
-                                        save_reminder, save_user,
-                                        update_reminder,
-                                        verify_firestore_connection)
+from services.firestore_service import (
+    create_or_update_user_profile,
+    delete_bookmark,
+    delete_reminder,
+    get_bookmark_by_resource,
+    get_bookmarks,
+    get_election_process_data,
+    get_faqs_data,
+    get_firestore_client,
+    get_reminder,
+    get_reminders,
+    get_timeline_data,
+    get_user,
+    init_firebase,
+    save_bookmark,
+    save_reminder,
+    save_user,
+    update_reminder,
+    verify_firestore_connection,
+)
 
 
 @pytest.fixture(autouse=True)
@@ -89,9 +97,7 @@ class TestFirestoreService:
         db_mock = MagicMock()
         doc_mock = MagicMock()
         doc_mock.to_dict.return_value = {"step": 1}
-        db_mock.collection().document().collection().order_by().stream.return_value = [
-            doc_mock
-        ]
+        db_mock.collection().document().collection().order_by().stream.return_value = [doc_mock]
         mock_get_client.return_value = db_mock
 
         result = get_election_process_data()
@@ -140,9 +146,7 @@ class TestFirestoreService:
         doc_mock.exists = True
         doc_mock.id = "rem1"
         doc_mock.to_dict.return_value = {"msg": "Hi"}
-        db_mock.collection().document().collection().document().get.return_value = (
-            doc_mock
-        )
+        db_mock.collection().document().collection().document().get.return_value = doc_mock
         mock_get_client.return_value = db_mock
         result = get_reminder("u1", "rem1")
         assert result["id"] == "rem1"
@@ -179,9 +183,7 @@ class TestFirestoreService:
         doc_mock = MagicMock()
         doc_mock.id = "bm1"
         doc_mock.to_dict.return_value = {"item": "A"}
-        db_mock.collection().document().collection().where().where().stream.return_value = [
-            doc_mock
-        ]
+        db_mock.collection().document().collection().where().where().stream.return_value = [doc_mock]
         mock_get_client.return_value = db_mock
         result = get_bookmark_by_resource("u1", "faq", "faq1")
         assert result["id"] == "bm1"

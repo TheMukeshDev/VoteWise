@@ -4,8 +4,7 @@ from typing import Any, Optional
 
 from flask import Blueprint, jsonify
 
-from services.election_service import (get_election_process, get_faqs,
-                                       get_timeline)
+from services.election_service import get_election_process, get_faqs, get_timeline
 from utils.response import success_response
 
 election_bp = Blueprint("election", __name__)

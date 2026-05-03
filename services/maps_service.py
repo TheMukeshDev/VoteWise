@@ -36,9 +36,7 @@ class MapsService:
         self.api_key = Config.GOOGLE_MAPS_API_KEY
         self.base_url = "https://maps.googleapis.com/maps/api"
 
-    def find_polling_booth(
-        self, lat: float, lng: float, radius: int = 5000
-    ) -> Optional[dict[str, Any]]:
+    def find_polling_booth(self, lat: float, lng: float, radius: int = 5000) -> Optional[dict[str, Any]]:
         """
         Find nearest polling booth location.
 
@@ -227,9 +225,7 @@ class MapsService:
 
         return self._mock_directions(origin_lat, origin_lng, dest_lat, dest_lng)
 
-    def get_static_map_url(
-        self, lat: float, lng: float, zoom: int = 15, size: str = "400x300"
-    ) -> str:
+    def get_static_map_url(self, lat: float, lng: float, zoom: int = 15, size: str = "400x300") -> str:
         """
         Generate static map image URL.
 
@@ -278,9 +274,7 @@ class MapsService:
             f"</iframe>"
         )
 
-    def _format_booth_data(
-        self, place: dict, user_lat: float, user_lng: float
-    ) -> dict[str, Any]:
+    def _format_booth_data(self, place: dict, user_lat: float, user_lng: float) -> dict[str, Any]:
         """Format place data to booth format."""
         location = place.get("geometry", {}).get("location", {})
         place_lat = location.get("lat", 0)
@@ -296,10 +290,7 @@ class MapsService:
                 f"https://www.google.com/maps/search/?api=1&query={place_lat},{place_lng}"
                 f"&query_place_id={place.get('place_id')}"
             ),
-            "directions_link": (
-                f"https://www.google.com/maps/dir/?api=1"
-                f"&destination={place_lat},{place_lng}"
-            ),
+            "directions_link": (f"https://www.google.com/maps/dir/?api=1" f"&destination={place_lat},{place_lng}"),
             "rating": place.get("rating"),
             "user_ratings_total": place.get("user_ratings_total"),
             "opening_hours": place.get("opening_hours", {}).get("weekday_text", []),
@@ -322,9 +313,7 @@ class MapsService:
             "types": ["local_government_office"],
         }
 
-    def _mock_directions(
-        self, o_lat: float, o_lng: float, d_lat: float, d_lng: float
-    ) -> dict[str, Any]:
+    def _mock_directions(self, o_lat: float, o_lng: float, d_lat: float, d_lng: float) -> dict[str, Any]:
         """Mock directions when API unavailable."""
         return {
             "distance": "1.2 km",

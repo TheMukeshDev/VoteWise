@@ -18,9 +18,7 @@ def validate_password(password: str) -> bool:
     return len(password) >= 8
 
 
-def validate_required_fields(
-    data: dict, required_fields: list[str]
-) -> tuple[bool, list[str]]:
+def validate_required_fields(data: dict, required_fields: list[str]) -> tuple[bool, list[str]]:
     """
     Validate that all required fields are present in data.
 
@@ -31,9 +29,7 @@ def validate_required_fields(
     Returns:
         Tuple of (is_valid, missing_fields)
     """
-    missing = [
-        field for field in required_fields if field not in data or not data[field]
-    ]
+    missing = [field for field in required_fields if field not in data or not data[field]]
     return len(missing) == 0, missing
 
 

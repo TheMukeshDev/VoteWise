@@ -86,9 +86,7 @@ class SpeechToTextService:
 
         return None
 
-    def recognize_from_base64(
-        self, base64_audio: str, language_code: str = "en-US"
-    ) -> Optional[str]:
+    def recognize_from_base64(self, base64_audio: str, language_code: str = "en-US") -> Optional[str]:
         """
         Convert base64 encoded audio to text.
 
@@ -106,9 +104,7 @@ class SpeechToTextService:
             logger.warning("Base64 decode error: %s", e)
             return self._mock_recognize()
 
-    def transcribe_streaming(
-        self, audio_iterator, language_code: str = "en-US"
-    ) -> Optional[str]:
+    def transcribe_streaming(self, audio_iterator, language_code: str = "en-US") -> Optional[str]:
         """
         Stream recognition for long audio.
 
@@ -131,14 +127,9 @@ class SpeechToTextService:
 
                 streaming_config = speech.StreamingRecognitionConfig(config=config)
 
-                requests_generator = (
-                    speech.StreamingRecognizeRequest(audio_content=chunk)
-                    for chunk in audio_iterator
-                )
+                requests_generator = (speech.StreamingRecognizeRequest(audio_content=chunk) for chunk in audio_iterator)
 
-                responses = self.client.streaming_recognize(
-                    streaming_config, requests_generator
-                )
+                responses = self.client.streaming_recognize(streaming_config, requests_generator)
 
                 for response in responses:
                     if response.results:
@@ -184,9 +175,7 @@ class VoiceInputHandler:
     def __init__(self):
         self.service = SpeechToTextService()
 
-    def process_voice_question(
-        self, audio_data: str, language: str = "en"
-    ) -> dict[str, Any]:
+    def process_voice_question(self, audio_data: str, language: str = "en") -> dict[str, Any]:
         """
         Process voice input from voter.
 

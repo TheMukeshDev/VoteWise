@@ -2,8 +2,7 @@
 
 from typing import Any
 
-from services.firestore_service import (get_election_process_data,
-                                        get_faqs_data, get_timeline_data)
+from services.firestore_service import get_election_process_data, get_faqs_data, get_timeline_data
 
 
 def get_election_process() -> list[dict[str, Any]]:

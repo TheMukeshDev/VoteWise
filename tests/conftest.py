@@ -188,9 +188,7 @@ def mock_google_tts():
 
 @pytest.fixture
 def mock_google_speech():
-    with patch(
-        "services.speech_service.speech_to_text_service.recognize_audio"
-    ) as mock:
+    with patch("services.speech_service.speech_to_text_service.recognize_audio") as mock:
         mock.return_value = {"transcript": "mock transcript", "confidence": 0.95}
         yield mock
 

@@ -48,9 +48,7 @@ class TranslateService:
 
             from google.cloud import translate_v2 as translate
 
-            if Config.FIREBASE_ADMIN_JSON and os.path.exists(
-                os.environ.get("GOOGLE_APPLICATION_CREDENTIALS" "")
-            ):
+            if Config.FIREBASE_ADMIN_JSON and os.path.exists(os.environ.get("GOOGLE_APPLICATION_CREDENTIALS" "")):
                 self.client = translate.Client()
                 self._initialized = True
             else:
@@ -73,11 +71,7 @@ class TranslateService:
         Returns:
             Translation result with original and translated text
         """
-        if (
-            target_language == source_language
-            or target_language == "en"
-            and source_language == "en"
-        ):
+        if target_language == source_language or target_language == "en" and source_language == "en":
             return {
                 "original_text": text,
                 "translated_text": text,
@@ -97,9 +91,7 @@ class TranslateService:
                 return {
                     "original_text": text,
                     "translated_text": result["translatedText"],
-                    "source_language": result.get(
-                        "detectedSourceLanguage", source_language
-                    ),
+                    "source_language": result.get("detectedSourceLanguage", source_language),
                     "target_language": target_language,
                 }
             except (RuntimeError, ConnectionError, ValueError) as e:
@@ -107,9 +99,7 @@ class TranslateService:
 
         return self._mock_translate(text, target_language, source_language)
 
-    def translate_batch(
-        self, texts: list[str], target_language: str = "hi"
-    ) -> list[dict[str, Any]]:
+    def translate_batch(self, texts: list[str], target_language: str = "hi") -> list[dict[str, Any]]:
         """
         Translate multiple texts at once.
 
@@ -152,14 +142,9 @@ class TranslateService:
         Returns:
             list of language codes and names
         """
-        return [
-            {"code": code, "name": name}
-            for code, name in self.SUPPORTED_LANGUAGES.items()
-        ]
+        return [{"code": code, "name": name} for code, name in self.SUPPORTED_LANGUAGES.items()]
 
-    def translate_election_content(
-        self, content: dict[str, Any], target_language: str = "hi"
-    ) -> dict[str, Any]:
+    def translate_election_content(self, content: dict[str, Any], target_language: str = "hi") -> dict[str, Any]:
         """
         Translate full election content object.
 
@@ -183,23 +168,15 @@ class TranslateService:
             translated_steps = []
             for step in content["steps"]:
                 if isinstance(step, dict):
-                    step_result = self.translate(
-                        step.get("description" ""), target_language
-                    )
+                    step_result = self.translate(step.get("description" ""), target_language)
                     translated_step = {
                         "step": step.get("step"),
-                        "description": (
-                            step_result["translated_text"]
-                            if step_result
-                            else step.get("description" "")
-                        ),
+                        "description": (step_result["translated_text"] if step_result else step.get("description" "")),
                     }
                     translated_steps.append(translated_step)
                 else:
                     result = self.translate(str(step), target_language)
-                    translated_steps.append(
-                        result["translated_text"] if result else str(step)
-                    )
+                    translated_steps.append(result["translated_text"] if result else str(step))
             translated["steps"] = translated_steps
 
         if "tips" in content and content["tips"]:
@@ -247,9 +224,7 @@ class ElectionContentTranslator:
     def __init__(self):
         self.translator = TranslateService()
 
-    def translate_faqs(
-        self, faqs: list[dict[str, Any]], language: str = "hi"
-    ) -> list[dict[str, Any]]:
+    def translate_faqs(self, faqs: list[dict[str, Any]], language: str = "hi") -> list[dict[str, Any]]:
         """Translate FAQ content."""
         translated_faqs = []
 
@@ -272,9 +247,7 @@ class ElectionContentTranslator:
 
         return translated_faqs
 
-    def translate_timeline(
-        self, timeline: dict[str, Any], language: str = "hi"
-    ) -> dict[str, Any]:
+    def translate_timeline(self, timeline: dict[str, Any], language: str = "hi") -> dict[str, Any]:
         """Translate timeline content."""
         translated = {"id": timeline.get("id")}
 
@@ -299,9 +272,7 @@ class ElectionContentTranslator:
         translated["language"] = language
         return translated
 
-    def translate_election_steps(
-        self, steps: list[dict], language: str = "hi"
-    ) -> list[dict]:
+    def translate_election_steps(self, steps: list[dict], language: str = "hi") -> list[dict]:
         """Translate election process steps."""
         translated_steps = []
 
@@ -317,9 +288,7 @@ class ElectionContentTranslator:
                     result = self.translator.translate(step["description"], language)
                     translated_step["description"] = result["translated_text"]
 
-                translated_step.update(
-                    {k: v for k, v in step.items() if k not in ["title", "description"]}
-                )
+                translated_step.update({k: v for k, v in step.items() if k not in ["title", "description"]})
             else:
                 result = self.translator.translate(str(step), language)
                 translated_step["text"] = result["translated_text"]

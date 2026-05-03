@@ -26,7 +26,7 @@ from utils.validators import validate_required_fields
 reminder_bp = Blueprint("reminder", __name__)
 
 
-@reminder_bp.route(", ", methods=["GET"])
+@reminder_bp.route("/",, methods=["GET"])
 @reminder_bp.route("/", methods=["GET"])
 @jwt_required()
 def get_user_reminders() -> tuple:
@@ -79,7 +79,7 @@ def get_user_reminder(reminder_id: str) -> tuple:
     return jsonify(error_response("Reminder not found", 404)), 404
 
 
-@reminder_bp.route(", ", methods=["POST"])
+@reminder_bp.route("/",, methods=["POST"])
 @reminder_bp.route("/", methods=["POST"])
 @jwt_required()
 def create_user_reminder() -> tuple:

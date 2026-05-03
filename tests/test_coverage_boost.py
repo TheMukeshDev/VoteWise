@@ -50,9 +50,7 @@ class TestRateLimiter:
         from middleware.rate_limiter import RateLimiter
 
         limiter = RateLimiter()
-        assert (
-            limiter.check_limit("test_key", max_requests=5, window_seconds=60) is True
-        )
+        assert limiter.check_limit("test_key", max_requests=5, window_seconds=60) is True
 
     def test_rate_limiter_exceed_limit(self):
         from middleware.rate_limiter import RateLimiter

@@ -8,8 +8,7 @@ from typing import Any, Optional
 
 from firebase_admin import firestore
 
-from services.cache_service import (CACHE_KEYS, TTL_VALUES, delete_cached,
-                                    get_cached, set_cached)
+from services.cache_service import CACHE_KEYS, TTL_VALUES, delete_cached, get_cached, set_cached
 from utils.constants import FAQ_CATEGORIES, SUPPORTED_LANGUAGES
 
 
@@ -33,9 +32,7 @@ class FAQService:
         """Get FAQs collection reference."""
         return self.db.collection("faqs") if self.db else None
 
-    def get_all(
-        self, category: Optional[str] = None, language: Optional[str] = None
-    ) -> list[dict[str, Any]]:
+    def get_all(self, category: Optional[str] = None, language: Optional[str] = None) -> list[dict[str, Any]]:
         """Get all FAQs from Firestore with caching."""
         cache_key: str = f"{CACHE_KEYS['faqs']}:{category}:{language}"
         cached = get_cached(cache_key)
@@ -61,9 +58,7 @@ class FAQService:
         end: int = start + limit
         return (all_faqs[start:end] if all_faqs else [], total)
 
-    def _get_all_no_cache(
-        self, category: Optional[str] = None, language: Optional[str] = None
-    ) -> list[dict[str, Any]]:
+    def _get_all_no_cache(self, category: Optional[str] = None, language: Optional[str] = None) -> list[dict[str, Any]]:
         """Get all FAQs without caching."""
         coll = self._get_collection()
         if not coll:

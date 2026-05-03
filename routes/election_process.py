@@ -71,9 +71,7 @@ def create_election_process() -> tuple:
     is_valid, missing = validate_required_fields(data, ["title", "intro", "steps"])
     if not is_valid:
         return (
-            jsonify(
-                error_response(f"Missing required fields: {', '.join(missing)}", 400)
-            ),
+            jsonify(error_response(f"Missing required fields: {', '.join(missing)}", 400)),
             400,
         )
 
@@ -83,11 +81,7 @@ def create_election_process() -> tuple:
     language: str = data.get("language", "en")
     if language not in ALLOWED_LANGUAGES:
         return (
-            jsonify(
-                error_response(
-                    f"Invalid language. Allowed: {', '.join(ALLOWED_LANGUAGES)}", 400
-                )
-            ),
+            jsonify(error_response(f"Invalid language. Allowed: {', '.join(ALLOWED_LANGUAGES)}", 400)),
             400,
         )
 
@@ -101,11 +95,7 @@ def create_election_process() -> tuple:
     )
 
     return (
-        jsonify(
-            success_response(
-                message="Election process created successfully", data=process
-            )
-        ),
+        jsonify(success_response(message="Election process created successfully", data=process)),
         201,
     )
 
@@ -118,27 +108,17 @@ def update_election_process(process_id: str) -> tuple:
 
     if "language" in data and data["language"] not in ALLOWED_LANGUAGES:
         return (
-            jsonify(
-                error_response(
-                    f"Invalid language. Allowed: {', '.join(ALLOWED_LANGUAGES)}", 400
-                )
-            ),
+            jsonify(error_response(f"Invalid language. Allowed: {', '.join(ALLOWED_LANGUAGES)}", 400)),
             400,
         )
 
-    process: Optional[dict[str, Any]] = election_process_service.update(
-        process_id, data
-    )
+    process: Optional[dict[str, Any]] = election_process_service.update(process_id, data)
 
     if not process:
         return jsonify(error_response("Election process not found", 404)), 404
 
     return (
-        jsonify(
-            success_response(
-                message="Election process updated successfully", data=process
-            )
-        ),
+        jsonify(success_response(message="Election process updated successfully", data=process)),
         200,
     )
 

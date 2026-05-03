@@ -56,8 +56,7 @@ def update_profile() -> tuple:
             return (
                 jsonify(
                     error_response(
-                        "Invalid language. Allowed: %s"
-                        % ", ".join(SUPPORTED_LANGUAGES),
+                        "Invalid language. Allowed: %s" % ", ".join(SUPPORTED_LANGUAGES),
                         400,
                     )
                 ),
@@ -68,9 +67,7 @@ def update_profile() -> tuple:
     if saved_id:
         updated: Optional[dict[str, Any]] = get_user(user_id)
         return (
-            jsonify(
-                success_response(message="Profile updated successfully", data=updated)
-            ),
+            jsonify(success_response(message="Profile updated successfully", data=updated)),
             200,
         )
 
@@ -119,10 +116,7 @@ def update_preferences() -> tuple:
 
     prefs: dict[str, Any] = {k: v for k, v in data.items() if k in allowed_fields}
 
-    if (
-        "language_preference" in prefs
-        and prefs["language_preference"] not in SUPPORTED_LANGUAGES
-    ):
+    if "language_preference" in prefs and prefs["language_preference"] not in SUPPORTED_LANGUAGES:
         return (
             jsonify(
                 error_response(

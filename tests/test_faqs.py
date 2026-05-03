@@ -53,9 +53,7 @@ class TestFAQRoutes:
 
             response = client.get("/api/faqs?language=hi")
             assert response.status_code == 200
-            mock_get_all.assert_called_with(
-                category=None, language="hi", page=1, limit=20
-            )
+            mock_get_all.assert_called_with(category=None, language="hi", page=1, limit=20)
 
     def test_get_single_faq(self, client):
         """Test getting a single FAQ by ID."""
@@ -101,9 +99,7 @@ class TestFAQRoutes:
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
             patch("services.faq_service.FAQService.create") as mock_create,
-            patch(
-                "middleware.auth_middleware.user_profile_service.get_user_profile"
-            ) as mock_profile,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
             patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
@@ -146,9 +142,7 @@ class TestFAQRoutes:
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
             patch("services.faq_service.FAQService.update") as mock_update,
-            patch(
-                "middleware.auth_middleware.user_profile_service.get_user_profile"
-            ) as mock_profile,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
             patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
@@ -174,9 +168,7 @@ class TestFAQRoutes:
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
             patch("services.faq_service.FAQService.delete") as mock_delete,
-            patch(
-                "middleware.auth_middleware.user_profile_service.get_user_profile"
-            ) as mock_profile,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
             patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}
@@ -193,9 +185,7 @@ class TestFAQRoutes:
             patch("middleware.auth_middleware.verify_jwt_in_request"),
             patch("middleware.auth_middleware.get_jwt_identity") as mock_identity,
             patch("services.faq_service.FAQService.delete") as mock_delete,
-            patch(
-                "middleware.auth_middleware.user_profile_service.get_user_profile"
-            ) as mock_profile,
+            patch("middleware.auth_middleware.user_profile_service.get_user_profile") as mock_profile,
             patch("middleware.auth_middleware.ALLOWED_ADMIN_EMAIL" ""),
         ):
             mock_identity.return_value = {"user_id": "admin-id", "role": "admin"}

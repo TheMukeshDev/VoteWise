@@ -53,9 +53,7 @@ def init_firebase() -> bool:
             cred = credentials.Certificate(firebase_json)
             firebase_admin.initialize_app(cred, {"projectId": project_id})
             _firebase_initialized = True
-            logger.info(
-                f"Firebase Admin SDK initialized successfully for project: {project_id}"
-            )
+            logger.info(f"Firebase Admin SDK initialized successfully for project: {project_id}")
             return True
 
         except (ValueError, RuntimeError, FileNotFoundError) as e:
@@ -84,9 +82,7 @@ def get_firestore_client() -> Optional[gcfirestore.Client]:
             import os
             import tempfile
 
-            with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".json", delete=False
-            ) as f:
+            with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
                 json.dump(firebase_json, f)
                 temp_path = f.name
             _firestore_client = gcfirestore.Client.from_service_account_json(temp_path)
@@ -178,9 +174,7 @@ def create_or_update_user_profile(
     """Create or update user profile with all required fields."""
     db = get_firestore_client()
     if not db:
-        logger.error(
-            "Failed to upsert profile for %s: Firestore not available", firebase_uid
-        )
+        logger.error("Failed to upsert profile for %s: Firestore not available", firebase_uid)
         return None
 
     try:
@@ -233,13 +227,7 @@ def get_election_process_data() -> list[dict[str, Any]]:
         logger.warning("Firestore not available for election process data")
         return []
     try:
-        docs = (
-            db.collection("elections")
-            .document("process")
-            .collection("steps")
-            .order_by("step_number")
-            .stream()
-        )
+        docs = db.collection("elections").document("process").collection("steps").order_by("step_number").stream()
         return [doc.to_dict() for doc in docs]
     except (RuntimeError, ConnectionError, ValueError) as e:
         logger.error("Failed to get election process data: %s", e)
@@ -281,9 +269,7 @@ def save_reminder(user_id: str, reminder_data: dict[str, Any]) -> Optional[str]:
     if not db:
         return None
     try:
-        doc_ref = (
-            db.collection("users").document(user_id).collection("reminders").document()
-        )
+        doc_ref = db.collection("users").document(user_id).collection("reminders").document()
         doc_ref.set(reminder_data)
         return doc_ref.id
     except (RuntimeError, ConnectionError, ValueError) as e:
@@ -310,13 +296,7 @@ def get_reminder(user_id: str, reminder_id: str) -> Optional[dict[str, Any]]:
     if not db:
         return None
     try:
-        doc = (
-            db.collection("users")
-            .document(user_id)
-            .collection("reminders")
-            .document(reminder_id)
-            .get()
-        )
+        doc = db.collection("users").document(user_id).collection("reminders").document(reminder_id).get()
         if doc.exists:
             return {"id": doc.id, **doc.to_dict()}
         return None
@@ -325,20 +305,13 @@ def get_reminder(user_id: str, reminder_id: str) -> Optional[dict[str, Any]]:
         return None
 
 
-def update_reminder(
-    user_id: str, reminder_id: str, data: dict[str, Any]
-) -> Optional[str]:
+def update_reminder(user_id: str, reminder_id: str, data: dict[str, Any]) -> Optional[str]:
     """Update reminder."""
     db = get_firestore_client()
     if not db:
         return None
     try:
-        doc_ref = (
-            db.collection("users")
-            .document(user_id)
-            .collection("reminders")
-            .document(reminder_id)
-        )
+        doc_ref = db.collection("users").document(user_id).collection("reminders").document(reminder_id)
         doc_ref.update(data)
         return reminder_id
     except (RuntimeError, ConnectionError, ValueError) as e:
@@ -352,9 +325,7 @@ def delete_reminder(user_id: str, reminder_id: str) -> bool:
     if not db:
         return False
     try:
-        db.collection("users").document(user_id).collection("reminders").document(
-            reminder_id
-        ).delete()
+        db.collection("users").document(user_id).collection("reminders").document(reminder_id).delete()
         return True
     except (RuntimeError, ConnectionError, ValueError) as e:
         logger.error("Failed to delete reminder %s: %s", reminder_id, e)
@@ -371,9 +342,7 @@ def save_bookmark(user_id: str, bookmark_data: dict[str, Any]) -> Optional[str]:
         return None
     try:
         bookmark_data["user_id"] = user_id
-        doc_ref = (
-            db.collection("users").document(user_id).collection("bookmarks").document()
-        )
+        doc_ref = db.collection("users").document(user_id).collection("bookmarks").document()
         doc_ref.set(bookmark_data)
         return doc_ref.id
     except (RuntimeError, ConnectionError, ValueError) as e:
@@ -394,9 +363,7 @@ def get_bookmarks(user_id: str) -> list[dict[str, Any]]:
         return []
 
 
-def get_bookmark_by_resource(
-    user_id: str, resource_type: str, resource_id: str
-) -> Optional[dict[str, Any]]:
+def get_bookmark_by_resource(user_id: str, resource_type: str, resource_id: str) -> Optional[dict[str, Any]]:
     """Get bookmark by resource type and ID."""
     db = get_firestore_client()
     if not db:
@@ -424,9 +391,7 @@ def delete_bookmark(user_id: str, bookmark_id: str) -> bool:
     if not db:
         return False
     try:
-        db.collection("users").document(user_id).collection("bookmarks").document(
-            bookmark_id
-        ).delete()
+        db.collection("users").document(user_id).collection("bookmarks").document(bookmark_id).delete()
         return True
     except (RuntimeError, ConnectionError, ValueError) as e:
         logger.error("Failed to delete bookmark %s: %s", bookmark_id, e)

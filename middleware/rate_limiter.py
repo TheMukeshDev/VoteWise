@@ -71,9 +71,7 @@ class RateLimiter:
             _rate_limit_store[key] = []
 
         # Clean old entries
-        _rate_limit_store[key] = [
-            ts for ts in _rate_limit_store[key] if now - ts < window_seconds
-        ]
+        _rate_limit_store[key] = [ts for ts in _rate_limit_store[key] if now - ts < window_seconds]
 
         if len(_rate_limit_store[key]) >= max_requests:
             return False

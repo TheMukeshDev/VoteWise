@@ -31,9 +31,7 @@ def get_faqs() -> tuple:
     page: int = max(1, request.args.get("page", 1, type=int))
     limit: int = max(1, min(100, request.args.get("limit", 20, type=int)))
 
-    faqs, total = faq_service.get_all_paginated(
-        category=category, language=language, page=page, limit=limit
-    )
+    faqs, total = faq_service.get_all_paginated(category=category, language=language, page=page, limit=limit)
 
     return (
         jsonify(
@@ -73,9 +71,7 @@ def create_faq() -> tuple:
     is_valid, missing = validate_required_fields(data, ["question", "answer"])
     if not is_valid:
         return (
-            jsonify(
-                error_response(f"Missing required fields: {', '.join(missing)}", 400)
-            ),
+            jsonify(error_response(f"Missing required fields: {', '.join(missing)}", 400)),
             400,
         )
 

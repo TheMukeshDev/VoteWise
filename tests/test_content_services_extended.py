@@ -13,16 +13,12 @@ class TestAnnouncementServiceExtended:
         return AnnouncementService()
 
     def test_get_collection_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             result = service._get_collection()
             assert result is None
 
     def test_get_all_empty_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             result = service.get_all()
             assert result == []
 
@@ -36,18 +32,14 @@ class TestAnnouncementServiceExtended:
             "region": "north",
             "priority": "high",
         }
-        db_mock.collection().where().where().where().where().stream.return_value = [
-            doc_mock
-        ]
+        db_mock.collection().where().where().where().where().stream.return_value = [doc_mock]
         with patch.object(type(service), "db", new=db_mock):
             result = service.get_all(region="north", priority="high")
             assert len(result) == 1
 
     def test_get_all_fallback_path(self, service):
         db_mock = MagicMock()
-        db_mock.collection().where().where().stream.side_effect = Exception(
-            "Query failed"
-        )
+        db_mock.collection().where().where().stream.side_effect = Exception("Query failed")
         doc_mock = MagicMock()
         doc_mock.id = "a1"
         doc_mock.to_dict.return_value = {
@@ -62,9 +54,7 @@ class TestAnnouncementServiceExtended:
 
     def test_get_all_fallback_filters_deleted(self, service):
         db_mock = MagicMock()
-        db_mock.collection().where().where().stream.side_effect = Exception(
-            "Query failed"
-        )
+        db_mock.collection().where().where().stream.side_effect = Exception("Query failed")
         doc1 = MagicMock()
         doc1.id = "a1"
         doc1.to_dict.return_value = {
@@ -86,9 +76,7 @@ class TestAnnouncementServiceExtended:
 
     def test_get_all_fallback_double_exception(self, service):
         db_mock = MagicMock()
-        db_mock.collection().where().where().stream.side_effect = Exception(
-            "Query failed"
-        )
+        db_mock.collection().where().where().stream.side_effect = Exception("Query failed")
         db_mock.collection().stream.side_effect = Exception("Stream failed")
         with patch.object(type(service), "db", new=db_mock):
             result = service.get_all()
@@ -125,9 +113,7 @@ class TestAnnouncementServiceExtended:
             assert result is None
 
     def test_get_by_id_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             result = service.get_by_id("a1")
             assert result is None
 
@@ -149,9 +135,7 @@ class TestAnnouncementServiceExtended:
             doc_mock.set.assert_called_once()
 
     def test_create_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             with pytest.raises(Exception, match="Database not available"):
                 service.create("Title", "Message")
 
@@ -175,9 +159,7 @@ class TestAnnouncementServiceExtended:
             assert result is None
 
     def test_update_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             result = service.update("a1", {"title": "New"})
             assert result is None
 
@@ -219,9 +201,7 @@ class TestAnnouncementServiceExtended:
             assert result is False
 
     def test_delete_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             result = service.delete("a1")
             assert result is False
 
@@ -246,9 +226,7 @@ class TestAnnouncementServiceExtended:
             assert len(result) == 1
 
     def test_get_all_for_admin_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             result = service.get_all_for_admin()
             assert result == []
 
@@ -268,9 +246,7 @@ class TestPollingGuidanceServiceExtended:
         return PollingGuidanceService()
 
     def test_get_all_empty(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             result = service.get_all()
             assert result == []
 
@@ -286,9 +262,7 @@ class TestPollingGuidanceServiceExtended:
 
     def test_get_all_fallback(self, service):
         db_mock = MagicMock()
-        db_mock.collection().where().where().stream.side_effect = Exception(
-            "Query failed"
-        )
+        db_mock.collection().where().where().stream.side_effect = Exception("Query failed")
         doc_mock = MagicMock()
         doc_mock.id = "g1"
         doc_mock.to_dict.return_value = {
@@ -328,9 +302,7 @@ class TestPollingGuidanceServiceExtended:
         doc_mock.id = "new_id"
         db_mock.collection().document.return_value = doc_mock
         with patch.object(type(service), "db", new=db_mock):
-            result = service.create(
-                "north", "Title", "Description", [{"url": "http://example.com"}], True
-            )
+            result = service.create("north", "Title", "Description", [{"url": "http://example.com"}], True)
             assert result["id"] == "new_id"
 
     def test_create_no_help_links(self, service):
@@ -390,9 +362,7 @@ class TestElectionProcessServiceExtended:
 
     def test_get_all_fallback_double_exception(self, service):
         db_mock = MagicMock()
-        db_mock.collection().where().where().stream.side_effect = Exception(
-            "Query failed"
-        )
+        db_mock.collection().where().where().stream.side_effect = Exception("Query failed")
         db_mock.collection().stream.side_effect = Exception("Stream failed")
         with patch.object(type(service), "db", new=db_mock):
             result = service.get_all()
@@ -409,9 +379,7 @@ class TestElectionProcessServiceExtended:
             assert result is None
 
     def test_create_no_db(self, service):
-        with patch.object(
-            type(service), "db", new_callable=lambda: property(lambda self: None)
-        ):
+        with patch.object(type(service), "db", new_callable=lambda: property(lambda self: None)):
             with pytest.raises(Exception, match="Database not available"):
                 service.create("Title", "Intro", [])
 
